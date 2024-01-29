@@ -5,7 +5,7 @@ mod lexer_test {
     use super::*;
     #[test]
     pub fn punctuation_recognition_test() {
-        let program = String::from("-:()").into_bytes();
+        let program = String::from("-:( \n)").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token().unwrap() {
             Token::Punctuator(PunctuationType::Dash) => {},

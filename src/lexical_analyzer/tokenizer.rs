@@ -15,10 +15,17 @@ impl LexicalAnalyzer {
         }
     }
     pub fn get_token(&self) -> Option<Token> {
-        if self.cursor.get() == self.program.len() {
+        if self.cursor.get() >= self.program.len() {
             return None
         }
-        let current = self.program[self.cursor.get()] as char;
+        let mut current = self.program[self.cursor.get()] as char;
+        while LexicalAnalyzer::is_whitespace(&current) {
+            self.cursor.set(self.cursor.get() + 1);
+            current = self.program[self.cursor.get()] as char;
+            if self.cursor.get() == self.program.len() {
+                return None
+            }       
+        }
         self.cursor.set(self.cursor.get() + 1);
         match current {
             p @ ('-' | ':' | '(' | ')') => {
@@ -35,6 +42,13 @@ impl LexicalAnalyzer {
             '(' => PunctuationType::LParentheses,
             ')' => PunctuationType::RParentheses,
             _   => panic!("char {} is not a punctuator.", p) 
+        }
+    }
+
+    fn is_whitespace(c: &char) -> bool {
+        match c {
+            ' ' | '\t' | '\n' => true,
+            _ => false
         }
     }
 }
