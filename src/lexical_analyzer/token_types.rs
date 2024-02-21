@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum Token<'a> {
-    Keyword(&'a str),
+    Keyword(KeywordName),
     Identifier(&'a str),
     Operator(OperationType),
     Punctuator(PunctuationType)
@@ -9,7 +9,6 @@ pub enum Token<'a> {
 #[derive(Debug)]
 pub enum PunctuationType {
     Dash,
-    Colon,
     LParentheses,
     RParentheses,
 }
@@ -30,4 +29,27 @@ pub enum OperationType {
     GreaterThan,
     LessThanOrEqual,
     GreaterThanOrEqual,
+}
+
+#[derive(Debug)]
+pub enum KeywordName {
+    Define,
+    Domain,
+    Problem,
+    Requirements,
+    Objects,
+    Types,
+    Constants,
+    Predicates,
+    Init,
+    HTN,
+    Action,
+    Parameters,
+    Method,
+    Precondition,
+    Effect,
+    Subtasks, // either "tasks" or "subtasks"
+    OrderedSubtasks, // either "ordered-tasks" or "ordered-subtasks"
+    Ordering,
+    Constraints,
 }
