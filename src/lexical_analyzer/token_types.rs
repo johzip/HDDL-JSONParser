@@ -1,7 +1,6 @@
 #[derive(Debug)]
 pub enum Token<'a> {
     Keyword(&'a str),
-    ObjectType(&'a str),
     Identifier(&'a str),
     Operator(OperationType),
     Punctuator(PunctuationType)
@@ -17,10 +16,15 @@ pub enum PunctuationType {
 
 #[derive(Debug)]
 pub enum OperationType {
+    // Logic
     Or,
     Not,
     And,
     Xor,
+    ForAll,
+    Exists,
+    Implication,
+    // Ordering
     Equal,
     LessThan,
     GreaterThan,

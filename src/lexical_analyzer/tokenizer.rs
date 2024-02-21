@@ -1,4 +1,4 @@
-use std::{cell::Cell, str::{from_utf8, from_utf8_unchecked}};
+use std::{cell::Cell, str::{from_utf8}};
 
 use super::token_types::*;
 
@@ -15,18 +15,21 @@ impl LexicalAnalyzer {
         }
     }
     pub fn get_token(&self) -> Option<Token> {
+        self.skip_whitespaces();
+        if self.cursor.get() == self.program.len() - 1 {
+            return None;
+        }
         if let Some(char) = self.next_char() {
             match char {
                 // Punctuations
-                p @ ('-' | ':' | '(' | ')') => {
-                    Some(Token::Punctuator(LexicalAnalyzer::punctation_type(&p)))
-                },
+                '-' => Some(Token::Punctuator(PunctuationType::Dash)),
+                ':' => Some(Token::Punctuator(PunctuationType::Colon)),
+                '(' => Some(Token::Punctuator(PunctuationType::LParentheses)),
+                ')' => Some(Token::Punctuator(PunctuationType::RParentheses)),
                 // Ordering Relations
                 p @ ('<' | '>' | '=' ) => {
                     Some(Token::Operator(self.ordering_type(&p)))
                 },
-                // TODO: Add logical operations
-
                 // Variables
                 '?' => {
                     let start = self.cursor.get().clone();
@@ -43,16 +46,35 @@ impl LexicalAnalyzer {
                         next = self.program[self.cursor.get()] as char;
                         let is_dash = next != '_' || next != '-';
                         if !next.is_alphanumeric() && !is_dash {
-                            // TODO: include line number 
+                            // TODO: include line number
                             panic!("unrecognized variable name")
                         }
                     }
                     let var_name = &self.program[start..self.cursor.get()]; 
                     let var_name = from_utf8(var_name).unwrap_or_default();
                     Some(Token::Identifier(var_name))
-                }
+                },
                 // Default
-                _ => None
+                _ => { 
+                    let init_cursor_pos = self.cursor.get() - 1;
+                    let mut next_ch = self.program[self.cursor.get()] as char;
+                    while !LexicalAnalyzer::is_whitespace(&next_ch) {
+                        if self.cursor.get() < self.program.len() - 1 {
+                            self.cursor.set(self.cursor.get() + 1);
+                            next_ch = self.program[self.cursor.get()] as char;
+                        } else {
+                            break;
+                        }
+                    }
+                    let lexeme = from_utf8(&self.program[init_cursor_pos..self.cursor.get()])
+                                        .unwrap().to_lowercase();
+                    match LexicalAnalyzer::is_logical_operator(&lexeme) {
+                        Some(x) => {return Some(Token::Operator(x))},
+                        None => {}
+                    }
+                    // TODO: make better error messages/handling
+                    panic!("{lexeme} is not a valid token")
+                 }
             }
         } else {
             None
@@ -64,25 +86,32 @@ impl LexicalAnalyzer {
         if self.cursor.get() >= self.program.len() {
             return None
         }
-        let mut current = self.program[self.cursor.get()] as char;
-        while LexicalAnalyzer::is_whitespace(&current) {
-            self.cursor.set(self.cursor.get() + 1);
-            current = self.program[self.cursor.get()] as char;
-            if self.cursor.get() == self.program.len() {
-                return None
-            }
-        }
+        let current = self.program[self.cursor.get()] as char;
         self.cursor.set(self.cursor.get() + 1);
         Some(current)
     }
 
-    fn punctation_type(p: &char) -> PunctuationType {
-        match p {
-            '-' => PunctuationType::Dash,
-            ':' => PunctuationType::Colon,
-            '(' => PunctuationType::LParentheses,
-            ')' => PunctuationType::RParentheses,
-            _   => panic!("char {} is not a punctuator.", p) 
+    fn skip_whitespaces(&self) {
+        let mut current = self.program[self.cursor.get()] as char;
+        while LexicalAnalyzer::is_whitespace(&current) {
+            if self.cursor.get() == self.program.len() - 1 {
+                return
+            }
+            self.cursor.set(self.cursor.get() + 1);
+            current = self.program[self.cursor.get()] as char;
+        }
+    }
+
+    fn is_logical_operator(word: &str) -> Option<OperationType> {
+        match word {
+            "and" => {Some(OperationType::And)},
+            "or" => {Some(OperationType::Or)},
+            "oneof" => {Some(OperationType::Xor)},
+            "not" => {Some(OperationType::Not)},
+            "forall" => {Some(OperationType::ForAll)},
+            "exists" => {Some(OperationType::Exists)},
+            "imply" => {Some(OperationType::Implication)},
+            _ => None
         }
     }
 
