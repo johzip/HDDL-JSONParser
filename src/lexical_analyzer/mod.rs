@@ -1,8 +1,8 @@
 mod tokenizer;
 mod token_types;
 mod tests;
-mod errors;
+mod lexical_errors;
 
 pub use token_types::*;
 pub use tokenizer::LexicalAnalyzer;
-pub use errors::{LexicalError, LexicalErrorType};
+pub use lexical_errors::{LexicalError, LexicalErrorType};

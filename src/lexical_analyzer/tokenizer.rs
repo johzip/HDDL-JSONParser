@@ -2,7 +2,7 @@ use core::{panic};
 use std::{cell::Cell, str::{from_utf8}};
 
 use super::token_types::*;
-use super::errors::*;
+use super::lexical_errors::*;
 
 pub struct LexicalAnalyzer {
     program: Vec<u8>,
@@ -11,6 +11,8 @@ pub struct LexicalAnalyzer {
 }
 
 // TODO: parse an actual file as an integration test
+// TODO: Add support for numerical tokens
+// TODO: impl iterator trait
 impl LexicalAnalyzer {
     pub fn new(program: Vec<u8>) -> LexicalAnalyzer {
         LexicalAnalyzer {
@@ -65,7 +67,7 @@ impl LexicalAnalyzer {
                     let var_name = from_utf8(var_name).unwrap_or_default();
                     Ok(Some(Token::Identifier(var_name)))
                 },
-                // Keywords (Note that 2 keywords, namely "domain" and "problem", do not start with ':')
+                // Keywords (Note that 2 keywords, namely "domain" and "problem", can start without ':' as well)
                 ':' => {
                     let lexeme = self.get_lexeme(self.cursor.get());
                     match lexeme {
@@ -131,7 +133,7 @@ impl LexicalAnalyzer {
     fn get_lexeme(&self, init_pos: usize) -> &str {
         let mut cursor_pos = init_pos;
         let mut next_ch = self.program[cursor_pos] as char;
-        while !LexicalAnalyzer::is_whitespace(&next_ch){
+        while !LexicalAnalyzer::is_whitespace(&next_ch) && (next_ch.is_alphanumeric() || next_ch == '_') {
             if cursor_pos < self.program.len() - 1 {
                 cursor_pos += 1;
                 next_ch = self.program[cursor_pos] as char;

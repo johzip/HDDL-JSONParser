@@ -53,3 +53,18 @@ pub enum KeywordName {
     Ordering,
     Constraints,
 }
+
+impl <'a> Token<'a> {
+    pub fn is_l_parantheses(&self) -> bool {
+        match &self {
+            Token::Punctuator(PunctuationType::LParentheses) => true,
+            _ => false
+        }
+    }
+    pub fn is_r_parantheses(&self) -> bool {
+        match &self {
+            Token::Punctuator(PunctuationType::RParentheses) => true,
+            _ => false
+        }
+    }
+}
