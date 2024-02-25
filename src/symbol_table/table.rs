@@ -5,7 +5,8 @@ pub struct SymbolTable<'a> {
     pub objects: HashSet<&'a str>,
     // TODO: convert to type hierarchy
     pub types: Option<HashSet<&'a str>>,
-    pub object_types: Option<HashMap<&'a str, &'a str>>
+    pub object_types: Option<HashMap<&'a str, &'a str>>,
+    pub requirements: HashSet<RequirementType>,
 }
 
 impl<'a> SymbolTable<'a> {
@@ -13,7 +14,8 @@ impl<'a> SymbolTable<'a> {
         SymbolTable {
             objects: HashSet::new(),
             types: None,
-            object_types: None
+            object_types: None,
+            requirements: HashSet::new()
         }
     }
     pub fn add_object(&mut self, object: &'a str) -> Result<(), SemanticError> {
@@ -47,6 +49,14 @@ impl<'a> SymbolTable<'a> {
                     Ok(())
                 }
             }
+        }
+    }
+
+    pub fn add_requirement(& mut self, req: RequirementType) -> Result<(), SemanticError>{
+        if !self.requirements.insert(req) {
+            return Err(SemanticError { error_type: SemanticErrorType::DuplicateRequirementDefinition });
+        } else {
+            Ok(())
         }
     }
 }

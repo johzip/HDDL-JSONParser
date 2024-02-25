@@ -1,5 +1,6 @@
 pub enum SemanticErrorType {
-    DuplicateObjectDefinition
+    DuplicateObjectDefinition,
+    DuplicateRequirementDefinition,
 }
 
 pub struct SemanticError{

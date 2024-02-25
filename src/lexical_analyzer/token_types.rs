@@ -3,7 +3,8 @@ pub enum Token<'a> {
     Keyword(KeywordName),
     Identifier(&'a str),
     Operator(OperationType),
-    Punctuator(PunctuationType)
+    Punctuator(PunctuationType),
+    Requirement(RequirementType)
 }
 
 #[derive(Debug)]
@@ -29,6 +30,15 @@ pub enum OperationType {
     GreaterThan,
     LessThanOrEqual,
     GreaterThanOrEqual,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub enum RequirementType {
+    MethodPreconditions,
+    Hierarchy,
+    TypedObjects,
+    NegativePreconditions,
+    UniversalPreconditions
 }
 
 #[derive(Debug)]

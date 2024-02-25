@@ -1,8 +1,8 @@
-use core::{panic};
-use std::{cell::Cell, str::{from_utf8}};
+use core::panic;
+use std::{cell::Cell, str::from_utf8};
 
-use super::token_types::*;
 use super::lexical_errors::*;
+use super::token_types::*;
 
 pub struct LexicalAnalyzer {
     program: Vec<u8>,
@@ -18,7 +18,7 @@ impl LexicalAnalyzer {
         LexicalAnalyzer {
             program,
             cursor: Cell::new(0),
-            line_number: Cell::new(1)
+            line_number: Cell::new(1),
         }
     }
     pub fn get_token(&self) -> Result<Option<Token>, LexicalError> {
@@ -33,9 +33,7 @@ impl LexicalAnalyzer {
                 '(' => Ok(Some(Token::Punctuator(PunctuationType::LParentheses))),
                 ')' => Ok(Some(Token::Punctuator(PunctuationType::RParentheses))),
                 // Ordering Relations
-                p @ ('<' | '>' | '=' ) => {
-                    Ok(Some(Token::Operator(self.ordering_type(&p))))
-                },
+                p @ ('<' | '>' | '=') => Ok(Some(Token::Operator(self.ordering_type(&p)))),
                 // Variables
                 '?' => {
                     let start = self.cursor.get().clone();
@@ -44,7 +42,7 @@ impl LexicalAnalyzer {
                         return Err(LexicalError {
                             error_type: LexicalErrorType::InvalidIdentifier,
                             line_number: self.line_number.get(),
-                            lexeme: ""
+                            lexeme: "",
                         });
                     }
                     while !LexicalAnalyzer::is_whitespace(&next) {
@@ -54,23 +52,37 @@ impl LexicalAnalyzer {
                         }
                         next = self.program[self.cursor.get()] as char;
                         let is_dash = next == '_' || next == '-';
-                        if !next.is_alphanumeric() && !is_dash && !LexicalAnalyzer::is_whitespace(&next){
+                        if !next.is_alphanumeric()
+                            && !is_dash
+                            && !LexicalAnalyzer::is_whitespace(&next)
+                        {
                             let error = LexicalError {
                                 error_type: LexicalErrorType::InvalidIdentifier,
                                 line_number: self.line_number.get(),
-                                lexeme: self.get_lexeme(start)
+                                lexeme: self.get_lexeme(start),
                             };
-                            return Err(error)
+                            return Err(error);
                         }
                     }
-                    let var_name = &self.program[start..self.cursor.get()]; 
+                    let var_name = &self.program[start..self.cursor.get()];
                     let var_name = from_utf8(var_name).unwrap_or_default();
                     Ok(Some(Token::Identifier(var_name)))
-                },
+                }
                 // Keywords (Note that 2 keywords, namely "domain" and "problem", can start without ':' as well)
                 ':' => {
                     let lexeme = self.get_lexeme(self.cursor.get());
                     match lexeme {
+                        // Requirements
+                        "negative-preconditions" => Ok(Some(Token::Requirement(
+                            RequirementType::NegativePreconditions,
+                        ))),
+                        "hierarchy" => Ok(Some(Token::Requirement(RequirementType::Hierarchy))),
+                        "method-preconditions" => Ok(Some(Token::Requirement(
+                            RequirementType::MethodPreconditions,
+                        ))),
+                        "typing" => Ok(Some(Token::Requirement(RequirementType::TypedObjects))),
+                        "universal-preconditions" => Ok(Some(Token::Requirement(RequirementType::UniversalPreconditions))),
+                        // Keywords
                         "define" => Ok(Some(Token::Keyword(KeywordName::Define))),
                         "domain" => Ok(Some(Token::Keyword(KeywordName::Domain))),
                         "problem" => Ok(Some(Token::Keyword(KeywordName::Problem))),
@@ -87,18 +99,21 @@ impl LexicalAnalyzer {
                         "precondition" => Ok(Some(Token::Keyword(KeywordName::Precondition))),
                         "effect" => Ok(Some(Token::Keyword(KeywordName::Effect))),
                         "subtasks" | "tasks" => Ok(Some(Token::Keyword(KeywordName::Subtasks))),
-                        "ordered-subtasks" | "ordered-tasks" => Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks))),
+                        "ordered-subtasks" | "ordered-tasks" => {
+                            Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks)))
+                        }
                         "ordering" | "order" => Ok(Some(Token::Keyword(KeywordName::Ordering))),
                         "constraints" => Ok(Some(Token::Keyword(KeywordName::Constraints))),
+
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,
                             line_number: self.line_number.get(),
-                            lexeme: lexeme
-                        })
+                            lexeme: lexeme,
+                        }),
                     }
-                },
+                }
                 // Other
-                _ => { 
+                _ => {
                     let lexeme = self.get_lexeme(self.cursor.get() - 1);
                     match lexeme {
                         // Remaining Keywords
@@ -116,14 +131,14 @@ impl LexicalAnalyzer {
                                         Err(LexicalError {
                                             error_type: LexicalErrorType::InvalidIdentifier,
                                             line_number: self.line_number.get(),
-                                            lexeme: lexeme
+                                            lexeme: lexeme,
                                         })
                                     }
                                 }
                             }
                         }
                     }
-                 }
+                }
             }
         } else {
             Ok(None)
@@ -133,7 +148,18 @@ impl LexicalAnalyzer {
     fn get_lexeme(&self, init_pos: usize) -> &str {
         let mut cursor_pos = init_pos;
         let mut next_ch = self.program[cursor_pos] as char;
-        while !LexicalAnalyzer::is_whitespace(&next_ch) && (next_ch.is_alphanumeric() || next_ch == '_') {
+        let is_valid_character = |c| match c {
+            '_' | '-' => true,
+            ')' | '(' => false,
+            _ => {
+                if LexicalAnalyzer::is_whitespace(&c) {
+                    false
+                } else {
+                    c.is_alphanumeric()
+                }
+            }
+        };
+        while is_valid_character(next_ch) {
             if cursor_pos < self.program.len() - 1 {
                 cursor_pos += 1;
                 next_ch = self.program[cursor_pos] as char;
@@ -147,7 +173,7 @@ impl LexicalAnalyzer {
 
     fn next_char(&self) -> Option<char> {
         if self.cursor.get() >= self.program.len() {
-            return None
+            return None;
         }
         let current = self.program[self.cursor.get()] as char;
         self.cursor.set(self.cursor.get() + 1);
@@ -158,7 +184,7 @@ impl LexicalAnalyzer {
         let mut current = self.program[self.cursor.get()] as char;
         while LexicalAnalyzer::is_whitespace(&current) {
             if self.cursor.get() == self.program.len() - 1 {
-                return
+                return;
             }
             if current == '\n' {
                 self.line_number.set(self.line_number.get() + 1);
@@ -170,14 +196,14 @@ impl LexicalAnalyzer {
 
     fn is_logical_operator(word: &str) -> Option<OperationType> {
         match word {
-            "and" => {Some(OperationType::And)},
-            "or" => {Some(OperationType::Or)},
-            "oneof" => {Some(OperationType::Xor)},
-            "not" => {Some(OperationType::Not)},
-            "forall" => {Some(OperationType::ForAll)},
-            "exists" => {Some(OperationType::Exists)},
-            "imply" => {Some(OperationType::Implication)},
-            _ => None
+            "and" => Some(OperationType::And),
+            "or" => Some(OperationType::Or),
+            "oneof" => Some(OperationType::Xor),
+            "not" => Some(OperationType::Not),
+            "forall" => Some(OperationType::ForAll),
+            "exists" => Some(OperationType::Exists),
+            "imply" => Some(OperationType::Implication),
+            _ => None,
         }
     }
 
@@ -192,31 +218,25 @@ impl LexicalAnalyzer {
                     '=' => {
                         self.cursor.set(self.cursor.get() + 1);
                         OperationType::LessThanOrEqual
-                    },
-                    _ => {
-                        OperationType::LessThan
                     }
+                    _ => OperationType::LessThan,
                 }
             }
             '>' => {
                 if self.cursor.get() >= self.program.len() {
-                    return OperationType::GreaterThan
+                    return OperationType::GreaterThan;
                 }
                 let next = self.program[self.cursor.get()] as char;
                 match next {
                     '=' => {
                         self.cursor.set(self.cursor.get() + 1);
                         OperationType::GreaterThanOrEqual
-                    },
-                    _ => {
-                        OperationType::GreaterThan
                     }
+                    _ => OperationType::GreaterThan,
                 }
-            },
-            '=' => {
-                OperationType::Equal
-            },
-            _   => {
+            }
+            '=' => OperationType::Equal,
+            _ => {
                 panic!("not an ordering relation");
             }
         }
@@ -225,14 +245,14 @@ impl LexicalAnalyzer {
     fn is_whitespace(c: &char) -> bool {
         match c {
             ' ' | '\t' | '\n' => true,
-            _ => false
+            _ => false,
         }
     }
 
     fn is_punctuator(c: &char) -> bool {
         match c {
             '-' | ')' | '(' => true,
-            _ => false
+            _ => false,
         }
     }
 }
