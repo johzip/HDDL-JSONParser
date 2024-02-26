@@ -1,6 +1,3 @@
-use std::collections::{HashMap, HashSet};
-
-
 use super::*;
 
 impl <'a> Parser <'a> {
@@ -8,7 +5,7 @@ impl <'a> Parser <'a> {
         match self.tokenizer.get_token() {
             Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
                 let predicate = self.parse_predicate_definition();
-                self.symbol_table.add_predicate(predicate.name, predicate.args);
+                self.syntax_tree.add_predicate(predicate.name, predicate.args);
                 self.parse_predicates();
             },
             Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {

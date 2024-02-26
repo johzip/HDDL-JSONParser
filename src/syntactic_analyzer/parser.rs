@@ -6,17 +6,17 @@ use super::*;
 
 pub struct Parser<'a> {
     pub tokenizer: &'a LexicalAnalyzer,
-    pub symbol_table: SymbolTable<'a>,
+    pub syntax_tree: SyntaxTree<'a>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(tokenizer: &'a LexicalAnalyzer) -> Parser<'a> {
         Parser {
             tokenizer,
-            symbol_table: SymbolTable::new(),
+            syntax_tree: SyntaxTree::new(),
         }
     }
-    pub fn parse(mut self) -> Result<SymbolTable<'a>, SyntacticError> {
+    pub fn parse(mut self) -> Result<SyntaxTree<'a>, SyntacticError> {
         // match opening '('
         if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
             self.tokenizer.get_token()
@@ -24,16 +24,19 @@ impl<'a> Parser<'a> {
             // Determine file type
             match self.parse_document_type() {
                 // Domain Definition
-                Ok(DefinitionTypes::Domain(_)) => {
+                Ok(DefinitionType::Domain(_)) => {
                     if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
                         self.tokenizer.get_token()
                     {
-                        // predicate definitions
                         match self.tokenizer.get_token() {
+                            // predicate definitions
                             Ok(Some(Token::Keyword(KeywordName::Predicates))) => {
                                 self.parse_predicates();
                             },
-
+                            // compund task definitions
+                            Ok(Some(Token::Keyword(KeywordName::Task))) => {
+                                self.parse_compound_task();
+                            },
                             _ => {
                                 // TODO: better error handling
                                 panic!("expected a keyword")
@@ -44,10 +47,10 @@ impl<'a> Parser<'a> {
                         // TODO: better error handling
                         panic!("expected '('")
                     }
-                    Ok(self.symbol_table)
+                    Ok(self.syntax_tree)
                 },
                 // Problem Definition
-                Ok(DefinitionTypes::Problem(_)) => {
+                Ok(DefinitionType::Problem(_)) => {
                     if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
                         self.tokenizer.get_token()
                     {
@@ -74,7 +77,7 @@ impl<'a> Parser<'a> {
                         // TODO: better error handling
                         panic!("expected '('")
                     }
-                    Ok(self.symbol_table)
+                    Ok(self.syntax_tree)
                 },
                 Err(x) => {
                     return Err(x);
@@ -86,7 +89,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_document_type(&self) -> Result<DefinitionTypes, SyntacticError> {
+    fn parse_document_type(&self) -> Result<DefinitionType, SyntacticError> {
         // match keyword 'define'
         if let Ok(Some(Token::Keyword(KeywordName::Define))) = self.tokenizer.get_token() {
             // match '(' after keyword 'define
@@ -104,7 +107,7 @@ impl<'a> Parser<'a> {
                             if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) =
                                 self.tokenizer.get_token()
                             {
-                                return Ok(DefinitionTypes::Domain(domain_name));
+                                return Ok(DefinitionType::Domain(domain_name));
                             } else {
                                 // TODO: better error handling
                                 panic!("expected ')' found ...")
@@ -137,7 +140,7 @@ impl<'a> Parser<'a> {
                                                 PunctuationType::RParentheses,
                                             ))) = self.tokenizer.get_token()
                                             {
-                                                return Ok(DefinitionTypes::Problem(
+                                                return Ok(DefinitionType::Problem(
                                                     ProblemDefinition {
                                                         domain_name: domain_name,
                                                         problem_name: problem_name,
@@ -186,19 +189,19 @@ impl<'a> Parser<'a> {
         let token = self.tokenizer.get_token();
         match token {
             Ok(Some(Token::Requirement(RequirementType::TypedObjects))) => {
-                self.symbol_table.requirements.insert(RequirementType::TypedObjects);
+                self.syntax_tree.add_requirement(RequirementType::TypedObjects);
                 self.parse_requirements()
             }
             Ok(Some(Token::Requirement(RequirementType::Hierarchy))) => {
-                self.symbol_table.requirements.insert(RequirementType::Hierarchy);
+                self.syntax_tree.add_requirement(RequirementType::Hierarchy);
                 self.parse_requirements()
             }
             Ok(Some(Token::Requirement(RequirementType::MethodPreconditions))) => {
-                self.symbol_table.requirements.insert(RequirementType::MethodPreconditions);
+                self.syntax_tree.add_requirement(RequirementType::MethodPreconditions);
                 self.parse_requirements()
             }
             Ok(Some(Token::Requirement(RequirementType::NegativePreconditions))) => {
-                self.symbol_table.requirements.insert(RequirementType::NegativePreconditions);
+                self.syntax_tree.add_requirement(RequirementType::NegativePreconditions);
                 self.parse_requirements()
             }
             Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
@@ -213,14 +216,14 @@ impl<'a> Parser<'a> {
 
     // parse a list of objects (may or may not contain typed objects)
     pub fn parse_list(&self) -> TypedList<'a> {
-        let mut variables = HashSet::new();
+        let mut variables = vec![];
         let mut type_scope = HashSet::new();
         let mut variable_types = HashMap::new();
         loop {
             let token = self.tokenizer.get_token();
             match token {
                 Ok(Some(Token::Identifier(variable_name))) => {
-                    variables.insert(variable_name);
+                    variables.push(variable_name);
                     type_scope.insert(variable_name);
                 },
                 Ok(Some(Token::Punctuator(PunctuationType::Dash))) => {

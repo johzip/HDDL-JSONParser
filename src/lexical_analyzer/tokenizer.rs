@@ -94,6 +94,7 @@ impl LexicalAnalyzer {
                         "predicates" => Ok(Some(Token::Keyword(KeywordName::Predicates))),
                         "init" => Ok(Some(Token::Keyword(KeywordName::Init))),
                         "htn" => Ok(Some(Token::Keyword(KeywordName::HTN))),
+                        "task" => Ok(Some(Token::Keyword(KeywordName::Task))),
                         "action" => Ok(Some(Token::Keyword(KeywordName::Action))),
                         "parameters" => Ok(Some(Token::Keyword(KeywordName::Parameters))),
                         "method" => Ok(Some(Token::Keyword(KeywordName::Method))),

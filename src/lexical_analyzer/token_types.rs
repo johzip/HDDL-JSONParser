@@ -49,6 +49,7 @@ pub enum KeywordName {
     Requirements,
     Objects,
     Types,
+    Task,
     Constants,
     Predicates,
     Init,

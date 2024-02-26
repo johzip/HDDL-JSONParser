@@ -20,13 +20,7 @@ impl <'a> Parser<'a> {
                             Ok(Some(Token::Identifier(x))) => {
                                 // TODO: add objects to symbol table with their type
                                 for o in objects {
-                                    match self.symbol_table.add_typed_object(o, x) {
-                                        Ok(()) => {},
-                                        Err(_) => {
-                                            // TODO: invoke error
-
-                                        }
-                                    }
+                                    self.syntax_tree.add_typed_object(o, x);
                                 }
                                 self.parse_objects_list(vec![])
                             },
@@ -46,13 +40,7 @@ impl <'a> Parser<'a> {
                     }
                     Token::Punctuator(PunctuationType::RParentheses) => {
                         for o in objects {
-                            match self.symbol_table.add_object(o) {
-                                Ok(_) => {},
-                                Err(_) => {
-                                    // TODO: better error handling
-                                    panic!("error")
-                                }
-                            }
+                            self.syntax_tree.add_object(o);
                         }
                         return Ok(());
                     }
