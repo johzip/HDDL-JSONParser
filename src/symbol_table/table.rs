@@ -7,6 +7,8 @@ pub struct SymbolTable<'a> {
     pub types: Option<HashSet<&'a str>>,
     pub object_types: Option<HashMap<&'a str, &'a str>>,
     pub requirements: HashSet<RequirementType>,
+    // mapping for predicate name to its arguments
+    pub predicates: HashMap<&'a str, TypedList<'a>>
 }
 
 impl<'a> SymbolTable<'a> {
@@ -15,7 +17,8 @@ impl<'a> SymbolTable<'a> {
             objects: HashSet::new(),
             types: None,
             object_types: None,
-            requirements: HashSet::new()
+            requirements: HashSet::new(),
+            predicates: HashMap::new()
         }
     }
     pub fn add_object(&mut self, object: &'a str) -> Result<(), SemanticError> {
@@ -52,10 +55,19 @@ impl<'a> SymbolTable<'a> {
         }
     }
 
-    pub fn add_requirement(& mut self, req: RequirementType) -> Result<(), SemanticError>{
+    pub fn add_requirement(& mut self, req: RequirementType) -> Result<(), SemanticError> {
         if !self.requirements.insert(req) {
             return Err(SemanticError { error_type: SemanticErrorType::DuplicateRequirementDefinition });
         } else {
+            Ok(())
+        }
+    }
+
+    pub fn add_predicate(&mut self, name: &'a str, args: TypedList<'a>) -> Result<(), SemanticError> {
+        if self.predicates.contains_key(name) {
+            Err(SemanticError { error_type: SemanticErrorType::DuplicatePredicateDefinition })
+        } else {
+            self.predicates.insert(name, args);
             Ok(())
         }
     }

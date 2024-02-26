@@ -1,8 +1,8 @@
 use crate::syntactic_analyzer::SyntacticError;
 use super::*;
 
-impl <'a> Parser<'a>{
-    // TODO: Remove the recursion and use the symbol table instead
+impl <'a> Parser<'a> {
+    // TODO: refactor to typed list
     pub fn parse_objects_list(&mut self, objects: Vec<&'a str>) -> Result<(), SyntacticError> {
         let token = self.tokenizer.get_token();
         match token {

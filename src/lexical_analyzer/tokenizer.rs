@@ -36,6 +36,7 @@ impl LexicalAnalyzer {
                 p @ ('<' | '>' | '=') => Ok(Some(Token::Operator(self.ordering_type(&p)))),
                 // Variables
                 '?' => {
+                    // TODO: refactor this and get_lexeme into one function
                     let start = self.cursor.get().clone();
                     let mut next = self.program[start] as char;
                     if LexicalAnalyzer::is_whitespace(&next) {

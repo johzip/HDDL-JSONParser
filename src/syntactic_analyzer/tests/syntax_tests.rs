@@ -2,6 +2,8 @@ use super::*;
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use super::*;
 
     #[test]
@@ -54,6 +56,62 @@ mod tests {
                 assert_eq!(symbols.requirements.contains(&RequirementType::MethodPreconditions), true);
                 assert_eq!(symbols.requirements.contains(&RequirementType::NegativePreconditions), true);
                 assert_eq!(symbols.requirements.contains(&RequirementType::TypedObjects), true);
+            },
+            Err(_) => panic!("parsing errors")
+        }
+    }
+
+    #[test]
+    pub fn predicate_parsing_test() {
+        let program = String::from(
+            "(:define (:domain bal)
+                (:predicates 
+                    (pred_1 ?a_1 ?a_2 - t_1 ?a_3 - t_2)
+                    (pred_2)
+                    (pred_3 a_1 a_2)
+                )
+             ) "
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(symbols) => {
+                assert_eq!(symbols.predicates.len(), 3);
+                assert_eq!(symbols.predicates.contains_key("pred_1"), true);
+                assert_eq!(
+                    symbols.predicates.get("pred_1").unwrap().variables,
+                    HashSet::from(["a_1", "a_2", "a_3"])
+                );
+                assert_eq!(
+                    symbols.predicates.get("pred_1").unwrap().variable_types.as_ref().unwrap().len(),
+                    3
+                );
+                assert_eq!(
+                    symbols.predicates.get("pred_1").unwrap().variable_types.as_ref().unwrap().get("a_1").unwrap(),
+                    &"t_1"
+                );
+                assert_eq!(
+                    symbols.predicates.get("pred_1").unwrap().variable_types.as_ref().unwrap().get("a_2").unwrap(),
+                    &"t_1"
+                );
+                assert_eq!(
+                    symbols.predicates.get("pred_1").unwrap().variable_types.as_ref().unwrap().get("a_3").unwrap(),
+                    &"t_2"
+                );
+
+                assert_eq!(symbols.predicates.contains_key("pred_2"), true);
+                assert_eq!(
+                    symbols.predicates.get("pred_2").unwrap().variables.len(), 0
+                );
+
+                assert_eq!(symbols.predicates.contains_key("pred_3"), true);
+                assert_eq!(
+                    symbols.predicates.get("pred_3").unwrap().variables,
+                    HashSet::from(["a_1", "a_2"])
+                );
+                assert_eq!(
+                    symbols.predicates.get("pred_3").unwrap().variable_types,
+                    None
+                );
             },
             Err(_) => panic!("parsing errors")
         }

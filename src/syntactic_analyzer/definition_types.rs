@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 pub enum DefinitionTypes <'a> {
     Domain(&'a str),
     Problem(ProblemDefinition<'a>)

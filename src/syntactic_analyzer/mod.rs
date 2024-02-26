@@ -8,8 +8,9 @@ mod problem_parser;
 
 
 use parser::Parser;
-use definition_types::DefinitionTypes;
+use definition_types::*;
 use syntactical_errors::*;
 use crate::lexical_analyzer::*;
 use domain_parser::*;
 use crate::symbol_table::*;
+use crate::auxiliary_structs::*;
