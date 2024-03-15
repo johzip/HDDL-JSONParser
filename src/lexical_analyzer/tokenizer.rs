@@ -1,8 +1,7 @@
-use core::panic;
+
 use std::{cell::Cell, str::from_utf8};
 
-use super::lexical_errors::*;
-use super::token_types::*;
+use super::*;
 
 pub struct LexicalAnalyzer {
     program: Vec<u8>,
