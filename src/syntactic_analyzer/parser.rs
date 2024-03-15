@@ -6,51 +6,51 @@ use super::*;
 
 pub struct Parser<'a> {
     pub tokenizer: &'a LexicalAnalyzer,
-    pub syntax_tree: SyntaxTree<'a>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(tokenizer: &'a LexicalAnalyzer) -> Parser<'a> {
-        Parser {
-            tokenizer,
-            syntax_tree: SyntaxTree::new(),
-        }
+        Parser { tokenizer }
     }
-    pub fn parse(mut self) -> Result<SyntaxTree<'a>, SyntacticError> {
+    pub fn parse(&'a self) -> Result<SyntaxTree<'a>, SyntacticError<'a>> {
+        let mut syntax_tree = SyntaxTree::new();
         // match opening '('
         if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
             self.tokenizer.get_token()
         {
             // Determine file type
-            match self.parse_document_type() {
+            match self.parse_document_type()? {
                 // Domain Definition
-                Ok(DefinitionType::Domain(_)) => {
+                DefinitionType::Domain(_) => {
                     if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
                         self.tokenizer.get_token()
                     {
                         match self.tokenizer.get_token() {
                             // predicate definitions
                             Ok(Some(Token::Keyword(KeywordName::Predicates))) => {
-                                self.parse_predicates();
-                            },
+                                let predicates = self.parse_predicates()?;
+                                for predicate in predicates {
+                                    syntax_tree.add_predicate(predicate);
+                                }
+                            }
                             // compund task definitions
                             Ok(Some(Token::Keyword(KeywordName::Task))) => {
-                                self.parse_compound_task();
-                            },
+                                let task = self.parse_compound_task()?;
+                                syntax_tree.add_compound_task(task);
+                            }
                             _ => {
                                 // TODO: better error handling
                                 panic!("expected a keyword")
                             }
-
                         }
                     } else {
                         // TODO: better error handling
                         panic!("expected '('")
                     }
-                    Ok(self.syntax_tree)
-                },
+                    Ok(syntax_tree)
+                }
                 // Problem Definition
-                Ok(DefinitionType::Problem(_)) => {
+                DefinitionType::Problem(_) => {
                     if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
                         self.tokenizer.get_token()
                     {
@@ -59,17 +59,29 @@ impl<'a> Parser<'a> {
                             // requirement declaration
                             Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
                                 // TODO: handle errors
-                                self.parse_requirements();
-                            },
+                                let requirements = self.parse_requirements()?;
+                                for requirement in requirements {
+                                    syntax_tree.add_requirement(requirement);
+                                }
+                            }
                             // objects declaration
                             Ok(Some(Token::Keyword(KeywordName::Objects))) => {
-                                // TODO: handle errors
-                                self.parse_objects_list(vec![]);
-                            },
+                                let objects = self.parse_list()?;
+                                for object in objects.arguments {
+                                    match object.var_type {
+                                        Some(t) => {
+                                            syntax_tree.add_typed_object(object.name, t);
+                                        }
+                                        None => {
+                                            syntax_tree.add_object(object.name);
+                                        }
+                                    }
+                                }
+                            }
                             // initial task network declaration
                             Ok(Some(Token::Keyword(KeywordName::HTN))) => {
                                 // TODO:
-                            },
+                            }
 
                             _ => todo!(),
                         }
@@ -77,11 +89,8 @@ impl<'a> Parser<'a> {
                         // TODO: better error handling
                         panic!("expected '('")
                     }
-                    Ok(self.syntax_tree)
+                    Ok(syntax_tree)
                 },
-                Err(x) => {
-                    return Err(x);
-                }
             }
         } else {
             // TODO: improve error handling
@@ -101,8 +110,7 @@ impl<'a> Parser<'a> {
                     Ok(Some(Token::Keyword(KeywordName::Domain))) => {
                         // match domain name
                         let next_token = self.tokenizer.get_token();
-                        if let Ok(Some(Token::Identifier(domain_name))) = next_token
-                        {
+                        if let Ok(Some(Token::Identifier(domain_name))) = next_token {
                             // match closing paranthesis
                             if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) =
                                 self.tokenizer.get_token()
@@ -185,74 +193,23 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_requirements(&mut self) -> Result<(), SyntacticError> {
-        let token = self.tokenizer.get_token();
-        match token {
-            Ok(Some(Token::Requirement(RequirementType::TypedObjects))) => {
-                self.syntax_tree.add_requirement(RequirementType::TypedObjects);
-                self.parse_requirements()
-            }
-            Ok(Some(Token::Requirement(RequirementType::Hierarchy))) => {
-                self.syntax_tree.add_requirement(RequirementType::Hierarchy);
-                self.parse_requirements()
-            }
-            Ok(Some(Token::Requirement(RequirementType::MethodPreconditions))) => {
-                self.syntax_tree.add_requirement(RequirementType::MethodPreconditions);
-                self.parse_requirements()
-            }
-            Ok(Some(Token::Requirement(RequirementType::NegativePreconditions))) => {
-                self.syntax_tree.add_requirement(RequirementType::NegativePreconditions);
-                self.parse_requirements()
-            }
-            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
-                Ok(())
-            }
-            _ => {
-                // TODO: better error handling
-                panic!("not a valid requirement")
-            }
-        }
-    }
-
-    // parse a list of objects (may or may not contain typed objects)
-    pub fn parse_list(&self) -> TypedList<'a> {
-        let mut variables = vec![];
-        let mut type_scope = HashSet::new();
-        let mut variable_types = HashMap::new();
-        loop {
-            let token = self.tokenizer.get_token();
-            match token {
-                Ok(Some(Token::Identifier(variable_name))) => {
-                    variables.push(variable_name);
-                    type_scope.insert(variable_name);
-                },
-                Ok(Some(Token::Punctuator(PunctuationType::Dash))) => {
-                    let type_token = self.tokenizer.get_token();
-                    if let Ok(Some(Token::Identifier(type_name))) = type_token {
-                        for var in type_scope {
-                            variable_types.insert(var, type_name);
-                        }
-                        type_scope = HashSet::new();
-                    } else {
-                        // TODO: better error handling
-                        panic!("expected type")
-                    }
-                },
+    fn parse_requirements(&self) -> Result<Vec<RequirementType>, SyntacticError> {
+        let mut requirements = vec![];
+        let mut finished = false;
+        while !finished {
+            match self.tokenizer.get_token() {
+                Ok(Some(Token::Requirement(req))) => {
+                    requirements.push(req);
+                }
                 Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
-                    break;
-                },
+                    finished = true;
+                }
                 _ => {
                     // TODO: better error handling
-                    panic!("invalid token in the list")
+                    panic!("not a valid requirement")
                 }
             }
         }
-        TypedList {
-            variables: variables,
-            variable_types: match variable_types.len() {
-                0 => None,
-                _ => Some(variable_types)
-            }
-        }
+        Ok(requirements)
     }
 }

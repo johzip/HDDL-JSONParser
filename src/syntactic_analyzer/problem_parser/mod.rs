@@ -1,4 +1,4 @@
-mod objects_parser;
+mod list_parser;
 mod init_tn_parser;
 
 use super::*;

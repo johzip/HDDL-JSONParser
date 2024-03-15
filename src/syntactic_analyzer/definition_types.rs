@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 
 pub enum DefinitionType <'a> {
     Domain(&'a str),

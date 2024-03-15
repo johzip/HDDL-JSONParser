@@ -48,11 +48,11 @@ impl<'a> SyntaxTree<'a> {
         self.requirements.push(req);
     }
 
-    pub fn add_predicate(&mut self, name: &'a str, args: TypedList<'a>) {
-        self.predicates.push(Predicate::new(name, args));
+    pub fn add_predicate(&mut self, predicate: Predicate<'a>) {
+        self.predicates.push(predicate);
     }
 
-    pub fn add_compound_task(&mut self, name: &'a str, parameters: TypedList<'a>) {
-        self.compound_tasks.push(Task::new(name, parameters));
+    pub fn add_compound_task(&mut self, task: Task<'a>) {
+        self.compound_tasks.push(task);
     }
 }
