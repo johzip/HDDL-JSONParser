@@ -36,7 +36,7 @@ impl <'a> Parser<'a> {
                             panic!("x is not a valid type identifier for ...")
                         }
                     }
-                }
+                },
                 Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
                     for o in objects {
                         result.arguments.push(Variable::new(o, None));

@@ -37,6 +37,28 @@ mod tests {
                 assert_eq!(symbols.objects.contains(&"c"), true);
                 assert_eq!(symbols.objects.contains(&"s"), true);
                 assert_eq!(symbols.objects.contains(&"t"), true);
+                // type checking
+                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"a").unwrap(), &"d");
+                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"b").unwrap(), &"d");
+                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"c").unwrap(), &"d");
+                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"s").unwrap(), &"f");
+                assert_eq!(symbols.object_types.as_ref().unwrap().contains_key(&"t"), false);
+            },
+            Err(_) => panic!("parsing errors")
+        }
+    }
+
+    #[test]
+    pub fn untyped_objects_list_test() {
+        let program = String::from(
+            "(:define (problem p1) (:domain bal) (:objects a b c))"
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(symbols) => {
+                assert_eq!(symbols.objects.contains(&"a"), true);
+                assert_eq!(symbols.objects.contains(&"b"), true);
+                assert_eq!(symbols.objects.contains(&"c"), true);
             },
             Err(_) => panic!("parsing errors")
         }
@@ -112,6 +134,106 @@ mod tests {
         }
     }
 
+    // TODO: test constraints
+    #[test]
+    pub fn init_tn_parsing_test() {
+        let program = String::from(
+            "(:define (problem p1) (:domain bal)
+             (:htn
+                :parameters ()
+                :subtasks (and
+                    (task0 (deliver package_0 city_loc_0))
+                    (task1 (retrieve package_1 city_loc_2 truck3))
+                )
+                :ordering (and
+                    (< task0 task1)
+                )
+            ) "
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                match ast.init_tn {
+                    Some(tn) => {
+                        assert_eq!(tn.parameters.is_none(), true);
+                        match tn.tn.orderings {
+                            TaskOrdering::Partial(o) => {
+                                assert_eq!(o.contains(&("task0", "task1")), true);
+                                assert_eq!(o.len(), 1);
+                            },
+                            _ => {
+                                panic!("ordering is not total")
+                            }
+                        }
+                        assert_eq!(tn.tn.subtasks.len(), 2);
+                        assert_eq!(tn.tn.subtasks[0].id, Some("task0"));
+                        assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
+                        assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
+                        assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
+                        assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
+                        assert_eq!(tn.tn.subtasks[1].id, Some("task1"));
+                        assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
+                        assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
+                        assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
+                        assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
+                        assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
+                    },
+                    None => {
+                        panic!("init tn not parsed")
+                    }
+                }
+            },
+            _ => {
+                panic!("failed to create AST")
+            }
+        }
+    }
+
+    #[test]
+    pub fn init_total_order_tn_parsing_test() {
+        let program = String::from(
+            "(:define (problem p1) (:domain bal)
+             (:htn
+                :parameters ()
+                :ordered-tasks (and
+                    (deliver package_0 city_loc_0)
+                    (retrieve package_1 city_loc_2 truck3)
+                )
+            ) "
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                match ast.init_tn {
+                    Some(tn) => {
+                        assert_eq!(tn.parameters.is_none(), true);
+                        match tn.tn.orderings {
+                            TaskOrdering::Total => { },
+                            _ => {
+                                panic!("ordering is not partial")
+                            }
+                        }
+                        assert_eq!(tn.tn.subtasks.len(), 2);
+                        assert_eq!(tn.tn.subtasks[0].id, None);
+                        assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
+                        assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
+                        assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
+                        assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
+                        assert_eq!(tn.tn.subtasks[1].id, None);
+                        assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
+                        assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
+                        assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
+                        assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
+                        assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
+                    },
+                    None => panic!("tn not found")
+                }
+            },
+            _ => panic!("false parsing")
+        }
+    }
+
+    //TODO: fix
     #[test]
     pub fn compound_task_parsing_test() {
         let program = String::from(

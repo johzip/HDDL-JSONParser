@@ -1,5 +1,5 @@
 use super::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 pub struct SyntaxTree<'a> {
     pub objects: Vec<&'a str>,
@@ -11,6 +11,7 @@ pub struct SyntaxTree<'a> {
     pub predicates: Vec<Predicate<'a>>,
     // mapping from compound task name to its parameters
     pub compound_tasks: Vec<Task<'a>>,
+    pub init_tn: Option<InitialTaskNetwork<'a>>,
 }
 
 impl<'a> SyntaxTree<'a> {
@@ -22,6 +23,7 @@ impl<'a> SyntaxTree<'a> {
             requirements: vec![],
             predicates: vec![],
             compound_tasks: vec![],
+            init_tn: None,
         }
     }
     pub fn add_object(&mut self, object: &'a str) {
@@ -54,5 +56,9 @@ impl<'a> SyntaxTree<'a> {
 
     pub fn add_compound_task(&mut self, task: Task<'a>) {
         self.compound_tasks.push(task);
+    }
+
+    pub fn add_init_tn(&mut self, tn: InitialTaskNetwork<'a>) {
+        self.init_tn = Some(tn);
     }
 }

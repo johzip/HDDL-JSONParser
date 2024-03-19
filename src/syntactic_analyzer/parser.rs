@@ -63,7 +63,7 @@ impl<'a> Parser<'a> {
                                 for requirement in requirements {
                                     syntax_tree.add_requirement(requirement);
                                 }
-                            }
+                            },
                             // objects declaration
                             Ok(Some(Token::Keyword(KeywordName::Objects))) => {
                                 let objects = self.parse_list()?;
@@ -77,12 +77,12 @@ impl<'a> Parser<'a> {
                                         }
                                     }
                                 }
-                            }
+                            },
                             // initial task network declaration
                             Ok(Some(Token::Keyword(KeywordName::HTN))) => {
-                                // TODO:
+                                let init_tn = self.parse_initial_tn()?;
+                                syntax_tree.add_init_tn(init_tn);
                             }
-
                             _ => todo!(),
                         }
                     } else {
