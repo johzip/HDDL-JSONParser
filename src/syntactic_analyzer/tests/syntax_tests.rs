@@ -134,6 +134,43 @@ mod tests {
         }
     }
 
+    #[test]
+    pub fn method_parsing_test() {
+        let program = String::from(
+            "(:define (:domain bal)
+                (:method m_1
+                    :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
+                    :task (deliver_abs ?p1 ?l1 ?l2)
+                    :subtasks (and
+                        (pickup ?p1 ?l1)
+                        (deliver_abs ?p1 ?l2 ?l3)
+                    )
+                )
+             ) "
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.methods.len(),1);
+                let method = &ast.methods[0];
+                assert_eq!(method.name, "m_1");
+                assert_eq!(method.task_name, "deliver_abs");
+                assert_eq!(method.task_terms.arguments.len(), 3);
+                assert_eq!(method.task_terms.arguments[0].name, "p1");
+                assert_eq!(method.task_terms.arguments[1].name, "l1");
+                assert_eq!(method.task_terms.arguments[2].name, "l2");
+                assert_eq!(method.tn.subtasks[0].task_symbol, "pickup");
+                assert_eq!(method.tn.subtasks[0].terms[0], "p1");
+                assert_eq!(method.tn.subtasks[0].terms[1], "l1");
+                assert_eq!(method.tn.subtasks[1].task_symbol, "deliver_abs");
+                assert_eq!(method.tn.subtasks[1].terms[0], "p1");
+                assert_eq!(method.tn.subtasks[1].terms[1], "l2");
+                assert_eq!(method.tn.subtasks[1].terms[2], "l3");
+            },
+            _ => panic!("AST not created")
+        }
+    }
+
     // TODO: test constraints
     #[test]
     pub fn init_tn_parsing_test() {

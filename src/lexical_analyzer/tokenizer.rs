@@ -52,6 +52,9 @@ impl LexicalAnalyzer {
                         }
                         next = self.program[self.cursor.get()] as char;
                         let is_dash = next == '_' || next == '-';
+                        if next == ')' {
+                            break;
+                        }
                         if !next.is_alphanumeric()
                             && !is_dash
                             && !LexicalAnalyzer::is_whitespace(&next)

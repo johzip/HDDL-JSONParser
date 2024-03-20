@@ -32,11 +32,15 @@ impl<'a> Parser<'a> {
                                 for predicate in predicates {
                                     syntax_tree.add_predicate(predicate);
                                 }
-                            }
+                            },
                             // compund task definitions
                             Ok(Some(Token::Keyword(KeywordName::Task))) => {
                                 let task = self.parse_compound_task()?;
                                 syntax_tree.add_compound_task(task);
+                            },
+                            Ok(Some(Token::Keyword(KeywordName::Method))) => {
+                                let method = self.parse_method()?;
+                                syntax_tree.add_method(method);
                             }
                             _ => {
                                 // TODO: better error handling
