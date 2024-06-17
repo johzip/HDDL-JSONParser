@@ -1,6 +1,4 @@
-use std::collections::{HashMap, HashSet};
-
-pub struct TypedList <'a> {
+pub struct Arguements <'a> {
     pub arguments: Vec<Variable<'a>>,
 }
 

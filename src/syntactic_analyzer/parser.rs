@@ -70,7 +70,7 @@ impl<'a> Parser<'a> {
                             },
                             // objects declaration
                             Ok(Some(Token::Keyword(KeywordName::Objects))) => {
-                                let objects = self.parse_list()?;
+                                let objects = self.parse_args()?;
                                 for object in objects.arguments {
                                     match object.var_type {
                                         Some(t) => {

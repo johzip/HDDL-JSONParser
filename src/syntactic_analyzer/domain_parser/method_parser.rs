@@ -7,7 +7,7 @@ impl<'a> Parser<'a> {
                 if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
                     self.tokenizer.get_token()
                 {
-                    let params = self.parse_list()?;
+                    let params = self.parse_args()?;
                     if let Ok(Some(Token::Keyword(KeywordName::Task))) = self.tokenizer.get_token()
                     {
                         if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
@@ -16,7 +16,7 @@ impl<'a> Parser<'a> {
                             if let Ok(Some(Token::Identifier(task_name))) =
                                 self.tokenizer.get_token()
                             {
-                                let terms = self.parse_list()?;
+                                let terms = self.parse_args()?;
                                 let tn = self.parse_htn()?;
                                 Ok(Method {
                                     name: method_name,

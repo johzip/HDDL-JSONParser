@@ -2,9 +2,9 @@ use crate::syntactic_analyzer::SyntacticError;
 use super::*;
 
 impl <'a> Parser<'a> {
-    pub fn parse_list(&self) -> Result<TypedList<'a>, SyntacticError> {
+    pub fn parse_args(&self) -> Result<Arguements<'a>, SyntacticError> {
         let mut objects = vec![];
-        let mut result = TypedList {arguments: vec![]};
+        let mut result = Arguements {arguments: vec![]};
         let mut token = self.tokenizer.get_token();
         loop {
             while let Ok(Some(Token::Identifier(symbol))) = token {

@@ -8,7 +8,7 @@ impl<'a> Parser<'a> {
                 Ok(Some(Token::Keyword(KeywordName::Parameters))) => {
                     // TODO: there may not be any parrameters
                     if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) = self.tokenizer.get_token() {
-                        let params = self.parse_list()?;
+                        let params = self.parse_args()?;
                         let init_tn = self.parse_htn()?;
                         return Ok(InitialTaskNetwork {
                             parameters: if params.arguments.len() == 0 {None} else {Some(params)},

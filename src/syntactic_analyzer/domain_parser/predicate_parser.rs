@@ -25,7 +25,7 @@ impl<'a> Parser<'a> {
     // parses a SINGLE predicate definition
     fn parse_predicate_definition(&'a self) -> Result<Predicate<'a>, SyntacticError<'a>> {
         if let Ok(Some(Token::Identifier(predicate_name))) = self.tokenizer.get_token() {
-            let predicate_arguments = self.parse_list()?;
+            let predicate_arguments = self.parse_args()?;
             Ok(Predicate {
                 name: predicate_name,
                 variables: predicate_arguments,
