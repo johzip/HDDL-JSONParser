@@ -35,13 +35,17 @@ impl<'a> Parser<'a> {
                             },
                             // compund task definitions
                             Ok(Some(Token::Keyword(KeywordName::Task))) => {
-                                let task = self.parse_compound_task()?;
+                                let task = self.parse_task()?;
                                 syntax_tree.add_compound_task(task);
                             },
                             Ok(Some(Token::Keyword(KeywordName::Method))) => {
                                 let method = self.parse_method()?;
                                 syntax_tree.add_method(method);
-                            }
+                            },
+                            Ok(Some(Token::Keyword(KeywordName::Action))) => {
+                                let action = self.parse_action()?;
+                                syntax_tree.add_action(action);
+                            },
                             _ => {
                                 // TODO: better error handling
                                 panic!("expected a keyword")

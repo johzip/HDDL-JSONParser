@@ -303,4 +303,49 @@ mod tests {
             Err(_) => panic!("parsing errors")
         }
     }
+
+    // TODO: add preconditions and effects test
+    #[test]
+    pub fn action_parsing_test() {
+        let program = String::from(
+            "(:define (:domain bal)
+                (:action a_1
+                 :parameters (p_1 p_2 - t1 p_3 - t2)
+                 :precondition ()
+                 :effect ()
+                )
+             ) "
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.actions.len(), 1);
+                let action = &ast.actions[0];
+                assert_eq!(action.name, "a_1");
+                let a1_vars: Vec<&str> = action.parameters.arguments.iter().map(|x| {
+                    x.name
+                }).collect();
+                let a1_var_types: Vec<&str> = action.parameters.arguments.iter().map(|x| {
+                    x.var_type.unwrap()
+                }).collect();
+                assert_eq!(
+                    a1_vars,
+                    vec!["p_1", "p_2", "p_3"]
+                );
+                assert_eq!(
+                    a1_var_types,
+                    vec!["t1", "t1", "t2"]
+                );
+                match action.preconditions {
+                    Formula::Empty => {},
+                    _ => panic!("wrong formula")
+                }
+                match action.effects {
+                    Formula::Empty => {},
+                    _ => panic!("wrong formula")
+                }
+            },
+            Err(_) => panic!("parsing errors")
+        }
+    }
 }

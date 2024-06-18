@@ -13,6 +13,7 @@ pub struct SyntaxTree<'a> {
     pub compound_tasks: Vec<Task<'a>>,
     pub init_tn: Option<InitialTaskNetwork<'a>>,
     pub methods: Vec<Method<'a>>,
+    pub actions: Vec<Action<'a>>,
 }
 
 impl<'a> SyntaxTree<'a> {
@@ -25,7 +26,8 @@ impl<'a> SyntaxTree<'a> {
             predicates: vec![],
             compound_tasks: vec![],
             init_tn: None,
-            methods: vec![]
+            methods: vec![],
+            actions: vec![]
         }
     }
     pub fn add_object(&mut self, object: &'a str) {
@@ -66,5 +68,9 @@ impl<'a> SyntaxTree<'a> {
 
     pub fn add_method(&mut self, method: Method<'a>) {
         self.methods.push(method)
+    }
+
+    pub fn add_action(&mut self, action: Action<'a>) {
+        self.actions.push(action);
     }
 }
