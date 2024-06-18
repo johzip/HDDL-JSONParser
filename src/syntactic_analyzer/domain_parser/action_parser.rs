@@ -1,7 +1,7 @@
 use super::*;
 
 impl <'a> Parser <'a> {
-    pub fn parse_action(&self) -> Result<Action, SyntacticError<'a>> {
+    pub fn parse_action(&'a self) -> Result<Action, SyntacticError<'a>> {
         let task = self.parse_task()?;
         let mut preconditions = None;
         let mut effects = None;
@@ -20,6 +20,11 @@ impl <'a> Parser <'a> {
             _ => {
                 panic!("expected keyword ':precondition'")
             }            
+        }
+        // Skip closing ')' for precondition
+        if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {}
+        else {
+            panic!("expected ')'")
         }
         // Parse Effects
         match self.tokenizer.get_token() {

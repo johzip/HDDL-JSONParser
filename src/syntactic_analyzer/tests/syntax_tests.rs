@@ -12,23 +12,23 @@ mod tests {
         let lexer = LexicalAnalyzer::new(program);
         let parser = Parser::new(&lexer);
         match parser.parse() {
-            Ok(_) => {},
-            _ => panic!("parsing error")
+            Ok(_) => {}
+            _ => panic!("parsing error"),
         }
         let program = String::from("(:define (problem jajaja2) (:domain blahblah)) ").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         let parser = Parser::new(&lexer);
         match parser.parse() {
-            Ok(_) => {},
-            _ => panic!("parsing error")
+            Ok(_) => {}
+            _ => panic!("parsing error"),
         }
     }
 
     #[test]
     pub fn objects_list_test() {
-        let program = String::from(
-            "(:define (problem p1) (:domain bal) (:objects a b c - d s - f t))"
-        ).into_bytes();
+        let program =
+            String::from("(:define (problem p1) (:domain bal) (:objects a b c - d s - f t))")
+                .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
@@ -38,29 +38,43 @@ mod tests {
                 assert_eq!(symbols.objects.contains(&"s"), true);
                 assert_eq!(symbols.objects.contains(&"t"), true);
                 // type checking
-                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"a").unwrap(), &"d");
-                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"b").unwrap(), &"d");
-                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"c").unwrap(), &"d");
-                assert_eq!(symbols.object_types.as_ref().unwrap().get(&"s").unwrap(), &"f");
-                assert_eq!(symbols.object_types.as_ref().unwrap().contains_key(&"t"), false);
-            },
-            Err(_) => panic!("parsing errors")
+                assert_eq!(
+                    symbols.object_types.as_ref().unwrap().get(&"a").unwrap(),
+                    &"d"
+                );
+                assert_eq!(
+                    symbols.object_types.as_ref().unwrap().get(&"b").unwrap(),
+                    &"d"
+                );
+                assert_eq!(
+                    symbols.object_types.as_ref().unwrap().get(&"c").unwrap(),
+                    &"d"
+                );
+                assert_eq!(
+                    symbols.object_types.as_ref().unwrap().get(&"s").unwrap(),
+                    &"f"
+                );
+                assert_eq!(
+                    symbols.object_types.as_ref().unwrap().contains_key(&"t"),
+                    false
+                );
+            }
+            Err(_) => panic!("parsing errors"),
         }
     }
 
     #[test]
     pub fn untyped_objects_list_test() {
-        let program = String::from(
-            "(:define (problem p1) (:domain bal) (:objects a b c))"
-        ).into_bytes();
+        let program =
+            String::from("(:define (problem p1) (:domain bal) (:objects a b c))").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.objects.contains(&"a"), true);
                 assert_eq!(symbols.objects.contains(&"b"), true);
                 assert_eq!(symbols.objects.contains(&"c"), true);
-            },
-            Err(_) => panic!("parsing errors")
+            }
+            Err(_) => panic!("parsing errors"),
         }
     }
 
@@ -68,18 +82,37 @@ mod tests {
     pub fn requirement_parsing_test() {
         let program = String::from(
             "(:define (problem p1) (:domain bal)
-             (:requirements :hierarchy :method-preconditions :typing :negative-preconditions)) "
-        ).into_bytes();
+             (:requirements :hierarchy :method-preconditions :typing :negative-preconditions)) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.requirements.len(), 4);
-                assert_eq!(symbols.requirements.contains(&RequirementType::Hierarchy), true);
-                assert_eq!(symbols.requirements.contains(&RequirementType::MethodPreconditions), true);
-                assert_eq!(symbols.requirements.contains(&RequirementType::NegativePreconditions), true);
-                assert_eq!(symbols.requirements.contains(&RequirementType::TypedObjects), true);
-            },
-            Err(_) => panic!("parsing errors")
+                assert_eq!(
+                    symbols.requirements.contains(&RequirementType::Hierarchy),
+                    true
+                );
+                assert_eq!(
+                    symbols
+                        .requirements
+                        .contains(&RequirementType::MethodPreconditions),
+                    true
+                );
+                assert_eq!(
+                    symbols
+                        .requirements
+                        .contains(&RequirementType::NegativePreconditions),
+                    true
+                );
+                assert_eq!(
+                    symbols
+                        .requirements
+                        .contains(&RequirementType::TypedObjects),
+                    true
+                );
+            }
+            Err(_) => panic!("parsing errors"),
         }
     }
 
@@ -92,23 +125,25 @@ mod tests {
                     (pred_2)
                     (pred_3 a_1 a_2)
                 )
-             ) "
-        ).into_bytes();
+             ) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.predicates.len(), 3);
                 for predicate in symbols.predicates {
-                    let items: Vec<(&str, Option<&str>)> = predicate.variables.arguments
+                    let items: Vec<(&str, Option<&str>)> = predicate
+                        .variables
+                        .arguments
                         .iter()
-                        .map(|x| {
-                            (x.name, x.var_type)
-                        }).collect();
+                        .map(|x| (x.name, x.var_type))
+                        .collect();
                     if predicate.name == "pred_1" {
                         assert_eq!(
                             items,
                             vec![
-                                ("a_1", Some("t_1")), 
+                                ("a_1", Some("t_1")),
                                 ("a_2", Some("t_1")),
                                 ("a_3", Some("t_2"))
                             ]
@@ -116,21 +151,19 @@ mod tests {
                     } else if predicate.name == "pred_2" {
                         assert_eq!(predicate.variables.arguments.len(), 0);
                     } else if predicate.name == "pred_3" {
-                        let items: Vec<(&str, Option<&str>)> = predicate.variables.arguments
+                        let items: Vec<(&str, Option<&str>)> = predicate
+                            .variables
+                            .arguments
                             .iter()
-                            .map(|x| {
-                                (x.name, x.var_type)
-                            }).collect();
-                        assert_eq!(
-                            items,
-                            vec![("a_1", None), ("a_2", None)]
-                        );
+                            .map(|x| (x.name, x.var_type))
+                            .collect();
+                        assert_eq!(items, vec![("a_1", None), ("a_2", None)]);
                     } else {
                         panic!("parsing error")
                     }
-                }                
-            },
-            Err(_) => panic!("parsing errors")
+                }
+            }
+            Err(_) => panic!("parsing errors"),
         }
     }
 
@@ -146,12 +179,13 @@ mod tests {
                         (deliver_abs ?p1 ?l2 ?l3)
                     )
                 )
-             ) "
-        ).into_bytes();
+             ) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(ast) => {
-                assert_eq!(ast.methods.len(),1);
+                assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
                 assert_eq!(method.task_name, "deliver_abs");
@@ -166,8 +200,8 @@ mod tests {
                 assert_eq!(method.tn.subtasks[1].terms[0], "p1");
                 assert_eq!(method.tn.subtasks[1].terms[1], "l2");
                 assert_eq!(method.tn.subtasks[1].terms[2], "l3");
-            },
-            _ => panic!("AST not created")
+            }
+            _ => panic!("AST not created"),
         }
     }
 
@@ -185,39 +219,38 @@ mod tests {
                 :ordering (and
                     (< task0 task1)
                 )
-            ) "
-        ).into_bytes();
+            ) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
-            Ok(ast) => {
-                match ast.init_tn {
-                    Some(tn) => {
-                        assert_eq!(tn.parameters.is_none(), true);
-                        match tn.tn.orderings {
-                            TaskOrdering::Partial(o) => {
-                                assert_eq!(o.contains(&("task0", "task1")), true);
-                                assert_eq!(o.len(), 1);
-                            },
-                            _ => {
-                                panic!("ordering is not total")
-                            }
+            Ok(ast) => match ast.init_tn {
+                Some(tn) => {
+                    assert_eq!(tn.parameters.is_none(), true);
+                    match tn.tn.orderings {
+                        TaskOrdering::Partial(o) => {
+                            assert_eq!(o.contains(&("task0", "task1")), true);
+                            assert_eq!(o.len(), 1);
                         }
-                        assert_eq!(tn.tn.subtasks.len(), 2);
-                        assert_eq!(tn.tn.subtasks[0].id, Some("task0"));
-                        assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
-                        assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
-                        assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
-                        assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
-                        assert_eq!(tn.tn.subtasks[1].id, Some("task1"));
-                        assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
-                        assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
-                        assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
-                        assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
-                        assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
-                    },
-                    None => {
-                        panic!("init tn not parsed")
+                        _ => {
+                            panic!("ordering is not total")
+                        }
                     }
+                    assert_eq!(tn.tn.subtasks.len(), 2);
+                    assert_eq!(tn.tn.subtasks[0].id, Some("task0"));
+                    assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
+                    assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
+                    assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
+                    assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
+                    assert_eq!(tn.tn.subtasks[1].id, Some("task1"));
+                    assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
+                    assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
+                    assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
+                    assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
+                    assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
+                }
+                None => {
+                    panic!("init tn not parsed")
                 }
             },
             _ => {
@@ -236,37 +269,36 @@ mod tests {
                     (deliver package_0 city_loc_0)
                     (retrieve package_1 city_loc_2 truck3)
                 )
-            ) "
-        ).into_bytes();
+            ) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
-            Ok(ast) => {
-                match ast.init_tn {
-                    Some(tn) => {
-                        assert_eq!(tn.parameters.is_none(), true);
-                        match tn.tn.orderings {
-                            TaskOrdering::Total => { },
-                            _ => {
-                                panic!("ordering is not partial")
-                            }
+            Ok(ast) => match ast.init_tn {
+                Some(tn) => {
+                    assert_eq!(tn.parameters.is_none(), true);
+                    match tn.tn.orderings {
+                        TaskOrdering::Total => {}
+                        _ => {
+                            panic!("ordering is not partial")
                         }
-                        assert_eq!(tn.tn.subtasks.len(), 2);
-                        assert_eq!(tn.tn.subtasks[0].id, None);
-                        assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
-                        assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
-                        assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
-                        assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
-                        assert_eq!(tn.tn.subtasks[1].id, None);
-                        assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
-                        assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
-                        assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
-                        assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
-                        assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
-                    },
-                    None => panic!("tn not found")
+                    }
+                    assert_eq!(tn.tn.subtasks.len(), 2);
+                    assert_eq!(tn.tn.subtasks[0].id, None);
+                    assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
+                    assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
+                    assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
+                    assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
+                    assert_eq!(tn.tn.subtasks[1].id, None);
+                    assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
+                    assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
+                    assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
+                    assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
+                    assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
                 }
+                None => panic!("tn not found"),
             },
-            _ => panic!("false parsing")
+            _ => panic!("false parsing"),
         }
     }
 
@@ -277,75 +309,168 @@ mod tests {
                 (:task c_1
                     :parameters (p_1 p_2 - t1 p_3 - t2)
                 )
-             ) "
-        ).into_bytes();
+             ) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.compound_tasks.len(), 1);
                 let c_1 = &ast.compound_tasks[0];
                 assert_eq!(c_1.name, "c_1");
-                let c1_term_names: Vec<&str> = c_1.parameters.arguments.iter().map(|x| {
-                    x.name
-                }).collect();
-                let c1_term_types: Vec<&str> = c_1.parameters.arguments.iter().map(|x| {
-                    x.var_type.unwrap()
-                }).collect();
-                assert_eq!(
-                    c1_term_names,
-                    vec!["p_1", "p_2", "p_3"]
-                );
-                assert_eq!(
-                    c1_term_types,
-                    vec!["t1", "t1", "t2"]
-                );
-            },
-            Err(_) => panic!("parsing errors")
+                let c1_term_names: Vec<&str> =
+                    c_1.parameters.arguments.iter().map(|x| x.name).collect();
+                let c1_term_types: Vec<&str> = c_1
+                    .parameters
+                    .arguments
+                    .iter()
+                    .map(|x| x.var_type.unwrap())
+                    .collect();
+                assert_eq!(c1_term_names, vec!["p_1", "p_2", "p_3"]);
+                assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
+            }
+            Err(_) => panic!("parsing errors"),
         }
     }
 
-    // TODO: add preconditions and effects test
     #[test]
     pub fn action_parsing_test() {
         let program = String::from(
             "(:define (:domain bal)
                 (:action a_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
-                 :precondition ()
-                 :effect ()
+                 :precondition (
+                    (not (at p_1))
+                  )
+                 :effect (
+                    (and
+                        (not (hold p_2 p_3))
+                        (at p_2)
+                    )
+                  )
                 )
-             ) "
-        ).into_bytes();
+             ) ",
+        )
+        .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.actions.len(), 1);
                 let action = &ast.actions[0];
                 assert_eq!(action.name, "a_1");
-                let a1_vars: Vec<&str> = action.parameters.arguments.iter().map(|x| {
-                    x.name
-                }).collect();
-                let a1_var_types: Vec<&str> = action.parameters.arguments.iter().map(|x| {
-                    x.var_type.unwrap()
-                }).collect();
-                assert_eq!(
-                    a1_vars,
-                    vec!["p_1", "p_2", "p_3"]
-                );
-                assert_eq!(
-                    a1_var_types,
-                    vec!["t1", "t1", "t2"]
-                );
-                match action.preconditions {
-                    Formula::Empty => {},
-                    _ => panic!("wrong formula")
+                let a1_vars: Vec<&str> =
+                    action.parameters.arguments.iter().map(|x| x.name).collect();
+                let a1_var_types: Vec<&str> = action
+                    .parameters
+                    .arguments
+                    .iter()
+                    .map(|x| x.var_type.unwrap())
+                    .collect();
+                assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
+                assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
+                match &action.preconditions {
+                    Formula::Not(formula) => match &**formula {
+                        Formula::Atom(predicate) => {
+                            assert_eq!(predicate.name, "at");
+                            assert_eq!(predicate.variables.arguments.len(), 1);
+                            assert_eq!(predicate.variables.arguments[0].name, "p_1");
+                        }
+                        _ => {
+                            panic!("wrong formula")
+                        }
+                    },
+                    _ => panic!("wrong formula"),
                 }
-                match action.effects {
-                    Formula::Empty => {},
-                    _ => panic!("wrong formula")
+                match &action.effects {
+                    Formula::And(formula) => {
+                        assert_eq!(formula.len(), 2);
+                        if let Formula::Not(exp) = formula[0].as_ref() {
+                            if let Formula::Atom(pred) = exp.as_ref() {
+                                assert_eq!(pred.name, "hold");
+                                assert_eq!(pred.variables.arguments.len(), 2);
+                                assert_eq!(pred.variables.arguments[0].name, "p_2");
+                                assert_eq!(pred.variables.arguments[1].name, "p_3");
+                            } else {
+                                panic!("wrong formula")
+                            }
+                        } else {
+                            panic!("wrong formula")
+                        };
+                        if let Formula::Atom(pred) = formula[1].as_ref() {
+                            assert_eq!(pred.name, "at");
+                            assert_eq!(pred.variables.arguments.len(), 1);
+                            assert_eq!(pred.variables.arguments[0].name, "p_2");
+                        } else {
+                            panic!("wrong formula")
+                        }
+                    }
+                    _ => panic!("wrong formula"),
                 }
-            },
-            Err(_) => panic!("parsing errors")
+            }
+            Err(_) => panic!("parsing errors"),
+        }
+    }
+
+    #[test]
+    pub fn non_deterministic_action_parsing_test() {
+        let program = String::from(
+            "(:define (:domain bal)
+                (:action a_1
+                 :parameters (p_1 p_2 - t1 p_3 - t2)
+                 :precondition ( (at p1) )
+                 :effect (
+                    (oneof
+                        (not (hold p_2 p_3))
+                        (at p_2)
+                    )
+                  )
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.actions.len(), 1);
+                let action = &ast.actions[0];
+                assert_eq!(action.name, "a_1");
+                let a1_vars: Vec<&str> =
+                    action.parameters.arguments.iter().map(|x| x.name).collect();
+                let a1_var_types: Vec<&str> = action
+                    .parameters
+                    .arguments
+                    .iter()
+                    .map(|x| x.var_type.unwrap())
+                    .collect();
+                assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
+                assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
+                match &action.effects {
+                    Formula::Xor(formula) => {
+                        assert_eq!(formula.len(), 2);
+                        if let Formula::Not(exp) = formula[0].as_ref() {
+                            if let Formula::Atom(pred) = exp.as_ref() {
+                                assert_eq!(pred.name, "hold");
+                                assert_eq!(pred.variables.arguments.len(), 2);
+                                assert_eq!(pred.variables.arguments[0].name, "p_2");
+                                assert_eq!(pred.variables.arguments[1].name, "p_3");
+                            } else {
+                                panic!("wrong formula")
+                            }
+                        } else {
+                            panic!("wrong formula")
+                        };
+                        if let Formula::Atom(pred) = formula[1].as_ref() {
+                            assert_eq!(pred.name, "at");
+                            assert_eq!(pred.variables.arguments.len(), 1);
+                            assert_eq!(pred.variables.arguments[0].name, "p_2");
+                        } else {
+                            panic!("wrong formula")
+                        }
+                    }
+                    _ => panic!("wrong formula"),
+                }
+            }
+            Err(_) => panic!("parsing errors"),
         }
     }
 }
