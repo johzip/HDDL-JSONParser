@@ -8,14 +8,14 @@ mod tests {
     #[test]
     #[ignore = "stupid test, rewrite from scratch"]
     pub fn file_type_test() {
-        let program = String::from("(:define (domain jajaja) (:predicates ()) ) ").into_bytes();
+        let program = String::from("(define (domain jajaja) (:predicates ()) ) ").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         let parser = Parser::new(&lexer);
         match parser.parse() {
             Ok(_) => {}
             _ => panic!("parsing error"),
         }
-        let program = String::from("(:define (problem jajaja2) (:domain blahblah)) ").into_bytes();
+        let program = String::from("(define (problem jajaja2) (domain blahblah)) ").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         let parser = Parser::new(&lexer);
         match parser.parse() {
@@ -27,7 +27,7 @@ mod tests {
     #[test]
     pub fn objects_list_test() {
         let program =
-            String::from("(:define (problem p1) (:domain bal) (:objects a b c - d s - f t))")
+            String::from("(define (problem p1) (domain bal) (:objects a b c - d s - f t))")
                 .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     pub fn untyped_objects_list_test() {
         let program =
-            String::from("(:define (problem p1) (:domain bal) (:objects a b c))").into_bytes();
+            String::from("(define (problem p1) (domain bal) (:objects a b c))").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
@@ -81,7 +81,7 @@ mod tests {
     #[test]
     pub fn requirement_parsing_test() {
         let program = String::from(
-            "(:define (problem p1) (:domain bal)
+            "(define (problem p1) (domain bal)
              (:requirements :hierarchy :method-preconditions :typing :negative-preconditions)) ",
         )
         .into_bytes();
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     pub fn predicate_parsing_test() {
         let program = String::from(
-            "(:define (:domain bal)
+            "(define (domain bal)
                 (:predicates 
                     (pred_1 ?a_1 ?a_2 - t_1 ?a_3 - t_2)
                     (pred_2)
@@ -170,7 +170,7 @@ mod tests {
     #[test]
     pub fn method_parsing_test() {
         let program = String::from(
-            "(:define (:domain bal)
+            "(define (domain bal)
                 (:method m_1
                     :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
                     :task (deliver_abs ?p1 ?l1 ?l2)
@@ -209,7 +209,7 @@ mod tests {
     #[test]
     pub fn init_tn_parsing_test() {
         let program = String::from(
-            "(:define (problem p1) (:domain bal)
+            "(define (problem p1) (domain bal)
              (:htn
                 :parameters ()
                 :subtasks (and
@@ -262,7 +262,7 @@ mod tests {
     #[test]
     pub fn init_total_order_tn_parsing_test() {
         let program = String::from(
-            "(:define (problem p1) (:domain bal)
+            "(define (problem p1) (domain bal)
              (:htn
                 :parameters ()
                 :ordered-tasks (and
@@ -305,7 +305,7 @@ mod tests {
     #[test]
     pub fn compound_task_parsing_test() {
         let program = String::from(
-            "(:define (:domain bal)
+            "(define (domain bal)
                 (:task c_1
                     :parameters (p_1 p_2 - t1 p_3 - t2)
                 )
@@ -336,7 +336,7 @@ mod tests {
     #[test]
     pub fn action_parsing_test() {
         let program = String::from(
-            "(:define (:domain bal)
+            "(define (domain bal)
                 (:action a_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
                  :precondition (
@@ -414,7 +414,7 @@ mod tests {
     #[test]
     pub fn non_deterministic_action_parsing_test() {
         let program = String::from(
-            "(:define (:domain bal)
+            "(define (domain bal)
                 (:action a_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
                  :precondition ( (at p1) )

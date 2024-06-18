@@ -110,7 +110,7 @@ mod lexer_test {
     #[test]
     pub fn keyword_recognition_test() {
         let program = String::from(
-            ":define domain problem :requirements :objects :types :constants\n
+            "define domain problem :requirements :objects :types :constants\n
             :predicates :init :htn :action :parameters :method :precondition\n
             :effect :subtasks :tasks :ordered-tasks :ordered-subtasks :order\n
             :ordering :constraints\n"

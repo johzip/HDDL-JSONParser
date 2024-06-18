@@ -86,9 +86,6 @@ impl LexicalAnalyzer {
                         "typing" => Ok(Some(Token::Requirement(RequirementType::TypedObjects))),
                         "universal-preconditions" => Ok(Some(Token::Requirement(RequirementType::UniversalPreconditions))),
                         // Keywords
-                        "define" => Ok(Some(Token::Keyword(KeywordName::Define))),
-                        "domain" => Ok(Some(Token::Keyword(KeywordName::Domain))),
-                        "problem" => Ok(Some(Token::Keyword(KeywordName::Problem))),
                         "requirements" => Ok(Some(Token::Keyword(KeywordName::Requirements))),
                         "objects" => Ok(Some(Token::Keyword(KeywordName::Objects))),
                         "types" => Ok(Some(Token::Keyword(KeywordName::Types))),
@@ -121,6 +118,7 @@ impl LexicalAnalyzer {
                     let lexeme = self.get_lexeme(self.cursor.get() - 1);
                     match lexeme {
                         // Remaining Keywords
+                        "define" => return Ok(Some(Token::Keyword(KeywordName::Define))),
                         "domain" => return Ok(Some(Token::Keyword(KeywordName::Domain))),
                         "problem" => return Ok(Some(Token::Keyword(KeywordName::Problem))),
                         _ => {

@@ -26,25 +26,35 @@ impl<'a> Parser<'a> {
                         self.tokenizer.get_token()
                     {
                         match self.tokenizer.get_token() {
-                            // predicate definitions
+                            // predicate definition
                             Ok(Some(Token::Keyword(KeywordName::Predicates))) => {
                                 let predicates = self.parse_predicates()?;
                                 for predicate in predicates {
                                     syntax_tree.add_predicate(predicate);
                                 }
                             },
-                            // compund task definitions
+                            // compund task definition
                             Ok(Some(Token::Keyword(KeywordName::Task))) => {
                                 let task = self.parse_task()?;
                                 syntax_tree.add_compound_task(task);
                             },
+                            // method definition
                             Ok(Some(Token::Keyword(KeywordName::Method))) => {
                                 let method = self.parse_method()?;
                                 syntax_tree.add_method(method);
                             },
+                            // action definition
                             Ok(Some(Token::Keyword(KeywordName::Action))) => {
                                 let action = self.parse_action()?;
                                 syntax_tree.add_action(action);
+                            },
+                            // requirement declaration
+                            Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
+                                // TODO: handle errors
+                                let requirements = self.parse_requirements()?;
+                                for requirement in requirements {
+                                    syntax_tree.add_requirement(requirement);
+                                }
                             },
                             _ => {
                                 // TODO: better error handling
