@@ -1,7 +1,7 @@
-extern crate hddl_parser;
+extern crate hddl_analyzer;
 
 use std::fs;
-use hddl_parser::analyze;
+use hddl_analyzer::analyze;
 
 #[test]
 pub fn succesful_parsing_test() {
