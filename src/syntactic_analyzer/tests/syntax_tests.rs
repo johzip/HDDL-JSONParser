@@ -66,7 +66,7 @@ mod tests {
     #[test]
     pub fn untyped_objects_list_test() {
         let program =
-            String::from("(define (problem p1) (domain bal) (:objects a b c))").into_bytes();
+            String::from("(define (problem p1) (domain bal) (:objects a b c) )").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
@@ -82,7 +82,9 @@ mod tests {
     pub fn requirement_parsing_test() {
         let program = String::from(
             "(define (problem p1) (domain bal)
-             (:requirements :hierarchy :method-preconditions :typing :negative-preconditions)) ",
+                (:requirements :hierarchy :method-preconditions :typing :negative-preconditions)
+
+             ) ",
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
@@ -307,7 +309,7 @@ mod tests {
         let program = String::from(
             "(define (domain bal)
                 (:task c_1
-                    :parameters (p_1 p_2 - t1 p_3 - t2)
+                 :parameters (p_1 p_2 - t1 p_3 - t2)
                 )
              ) ",
         )
@@ -339,15 +341,8 @@ mod tests {
             "(define (domain bal)
                 (:action a_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
-                 :precondition (
-                    (not (at p_1))
-                  )
-                 :effect (
-                    (and
-                        (not (hold p_2 p_3))
-                        (at p_2)
-                    )
-                  )
+                 :precondition (not (at p_1))
+                 :effect (and (not (hold p_2 p_3)) (at p_2))
                 )
              ) ",
         )
@@ -417,13 +412,8 @@ mod tests {
             "(define (domain bal)
                 (:action a_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
-                 :precondition ( (at p1) )
-                 :effect (
-                    (oneof
-                        (not (hold p_2 p_3))
-                        (at p_2)
-                    )
-                  )
+                 :precondition (at p1)
+                 :effect (oneof (not (hold p_2 p_3)) (at p_2))
                 )
              ) ",
         )

@@ -8,40 +8,23 @@ impl <'a> Parser <'a> {
         // Parse Preconditions
         match self.tokenizer.get_token() {
             Ok(Some(Token::Keyword(KeywordName::Precondition))) => {
-                match self.tokenizer.get_token() {
-                    Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
-                        preconditions = Some(self.parse_formula()?);
-                    },
-                    _ => {
-                        panic!("expected '('")
-                    }  
-                }
+                preconditions = Some(self.parse_formula()?);
             },
             _ => {
                 panic!("expected keyword ':precondition'")
             }            
         }
-        // Skip closing ')' for precondition
-        if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {}
-        else {
-            panic!("expected ')'")
-        }
         // Parse Effects
         match self.tokenizer.get_token() {
             Ok(Some(Token::Keyword(KeywordName::Effect))) => {
-                match self.tokenizer.get_token() {
-                    Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
-                        effects = Some(self.parse_formula()?);
-                    },
-                    _ => {
-                        panic!("expected '('")
-                    }  
-                }
+                effects = Some(self.parse_formula()?);
             },
             _ => {
                 panic!("expected keyword ':effects'")
             }            
         }
+        // skip action block's closing parantheses
+        if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {}
         Ok(Action {
             name: task.name,
             parameters: task.parameters,

@@ -22,50 +22,68 @@ impl<'a> Parser<'a> {
             match self.parse_document_type()? {
                 // Domain Definition
                 DefinitionType::Domain(_) => {
-                    if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
-                        self.tokenizer.get_token()
-                    {
+                    loop {
                         match self.tokenizer.get_token() {
-                            // predicate definition
-                            Ok(Some(Token::Keyword(KeywordName::Predicates))) => {
-                                let predicates = self.parse_predicates()?;
-                                for predicate in predicates {
-                                    syntax_tree.add_predicate(predicate);
+                            Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                                match self.tokenizer.get_token() {
+                                    // predicate definition
+                                    Ok(Some(Token::Keyword(KeywordName::Predicates))) => {
+                                        let predicates = self.parse_predicates()?;
+                                        for predicate in predicates {
+                                            syntax_tree.add_predicate(predicate);
+                                        }
+                                    }
+                                    // compund task definition
+                                    Ok(Some(Token::Keyword(KeywordName::Task))) => {
+                                        let task: Task = self.parse_task()?;
+                                        if let Ok(Some(Token::Punctuator(
+                                            PunctuationType::RParentheses,
+                                        ))) = self.tokenizer.get_token()
+                                        {
+                                            syntax_tree.add_compound_task(task);
+                                        } else {
+                                            panic!("task block not closed");
+                                        }
+                                    }
+                                    // method definition
+                                    Ok(Some(Token::Keyword(KeywordName::Method))) => {
+                                        let method = self.parse_method()?;
+                                        syntax_tree.add_method(method);
+                                    }
+                                    // action definition
+                                    Ok(Some(Token::Keyword(KeywordName::Action))) => {
+                                        let action = self.parse_action()?;
+                                        syntax_tree.add_action(action);
+                                    }
+                                    // requirement declaration
+                                    Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
+                                        // TODO: handle errors
+                                        let requirements = self.parse_requirements()?;
+                                        for requirement in requirements {
+                                            syntax_tree.add_requirement(requirement);
+                                        }
+                                    }
+                                    _ => {
+                                        // TODO: better error handling
+                                        panic!("expected a keyword")
+                                    }
                                 }
-                            },
-                            // compund task definition
-                            Ok(Some(Token::Keyword(KeywordName::Task))) => {
-                                let task = self.parse_task()?;
-                                syntax_tree.add_compound_task(task);
-                            },
-                            // method definition
-                            Ok(Some(Token::Keyword(KeywordName::Method))) => {
-                                let method = self.parse_method()?;
-                                syntax_tree.add_method(method);
-                            },
-                            // action definition
-                            Ok(Some(Token::Keyword(KeywordName::Action))) => {
-                                let action = self.parse_action()?;
-                                syntax_tree.add_action(action);
-                            },
-                            // requirement declaration
-                            Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
-                                // TODO: handle errors
-                                let requirements = self.parse_requirements()?;
-                                for requirement in requirements {
-                                    syntax_tree.add_requirement(requirement);
+                                if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) =
+                                    self.tokenizer.get_token()
+                                {
+                                } else {
+                                    panic!("block not closed")
                                 }
-                            },
+                            }
+                            Ok(None) => {
+                                break;
+                            }
                             _ => {
-                                // TODO: better error handling
-                                panic!("expected a keyword")
+                                panic!("undefined");
                             }
                         }
-                    } else {
-                        // TODO: better error handling
-                        panic!("expected '('")
                     }
-                    Ok(syntax_tree)
+                    return Ok(syntax_tree);
                 }
                 // Problem Definition
                 DefinitionType::Problem(_) => {
@@ -108,7 +126,7 @@ impl<'a> Parser<'a> {
                         panic!("expected '('")
                     }
                     Ok(syntax_tree)
-                },
+                }
             }
         } else {
             // TODO: improve error handling
