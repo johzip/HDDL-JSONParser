@@ -68,14 +68,8 @@ impl<'a> Parser<'a> {
                                         panic!("expected a keyword")
                                     }
                                 }
-                                if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) =
-                                    self.tokenizer.get_token()
-                                {
-                                } else {
-                                    panic!("block not closed")
-                                }
                             }
-                            Ok(None) => {
+                            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
                                 break;
                             }
                             _ => {
@@ -122,11 +116,11 @@ impl<'a> Parser<'a> {
                                     _ => todo!(),
                                 }
                             }
-                            Ok(None) => {
+                            Ok(None) | Ok(Some(Token::Punctuator(PunctuationType::RParentheses)))=> {
                                 break;
                             }
-                            _ => {
-                                panic!("unexpected token")
+                            err => {
+                                panic!("unexpected token {:?}", err)
                             }
                         }
                     }
@@ -252,12 +246,7 @@ impl<'a> Parser<'a> {
                 }
             }
         }
-        // closing ')'
-        if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {
-            return Ok(requirements);
-        } else {
-            panic!("requirement block not closed")
-        }
+        return Ok(requirements);
         
     }
 }

@@ -27,7 +27,9 @@ mod tests {
     #[test]
     pub fn objects_list_test() {
         let program =
-            String::from("(define (problem p1) (domain bal) (:objects a b c - d s - f t))")
+            String::from("(define (problem p1) (domain bal)
+                            (:objects a b c - d s - f t)
+                          )")
                 .into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
