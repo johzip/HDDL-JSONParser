@@ -9,8 +9,6 @@ pub struct LexicalAnalyzer {
     line_number: Cell<u32>,
 }
 
-// TODO: parse an actual file as an integration test
-// TODO: Add support for numerical tokens
 // TODO: impl iterator trait
 impl LexicalAnalyzer {
     pub fn new(program: Vec<u8>) -> LexicalAnalyzer {
@@ -35,40 +33,7 @@ impl LexicalAnalyzer {
                 p @ ('<' | '>' | '=') => Ok(Some(Token::Operator(self.ordering_type(&p)))),
                 // Variables
                 '?' => {
-                    // TODO: refactor this and get_lexeme into one function
-                    let start = self.cursor.get().clone();
-                    let mut next = self.program[start] as char;
-                    if LexicalAnalyzer::is_whitespace(&next) {
-                        return Err(LexicalError {
-                            error_type: LexicalErrorType::InvalidIdentifier,
-                            line_number: self.line_number.get(),
-                            lexeme: "",
-                        });
-                    }
-                    while !LexicalAnalyzer::is_whitespace(&next) {
-                        self.cursor.set(self.cursor.get() + 1);
-                        if self.cursor.get() == self.program.len() {
-                            break;
-                        }
-                        next = self.program[self.cursor.get()] as char;
-                        let is_dash = next == '_' || next == '-';
-                        if next == ')' {
-                            break;
-                        }
-                        if !next.is_alphanumeric()
-                            && !is_dash
-                            && !LexicalAnalyzer::is_whitespace(&next)
-                        {
-                            let error = LexicalError {
-                                error_type: LexicalErrorType::InvalidIdentifier,
-                                line_number: self.line_number.get(),
-                                lexeme: self.get_lexeme(start),
-                            };
-                            return Err(error);
-                        }
-                    }
-                    let var_name = &self.program[start..self.cursor.get()];
-                    let var_name = from_utf8(var_name).unwrap_or_default();
+                    let var_name = self.get_lexeme(self.cursor.get());
                     Ok(Some(Token::Identifier(var_name)))
                 }
                 // Keywords (Note that 2 keywords, namely "domain" and "problem", can start without ':' as well)
@@ -247,13 +212,6 @@ impl LexicalAnalyzer {
     fn is_whitespace(c: &char) -> bool {
         match c {
             ' ' | '\t' | '\n' => true,
-            _ => false,
-        }
-    }
-
-    fn is_punctuator(c: &char) -> bool {
-        match c {
-            '-' | ')' | '(' => true,
             _ => false,
         }
     }

@@ -17,6 +17,8 @@ impl<'a> Parser<'a> {
                                 self.tokenizer.get_token()
                             {
                                 let terms = self.parse_args()?;
+                                // TODO: parse method preconditions if available
+                                
                                 let tn = self.parse_htn()?;
                                 Ok(Method {
                                     name: method_name,

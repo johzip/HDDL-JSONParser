@@ -91,7 +91,7 @@ mod lexer_test {
 
     #[test]
     pub fn variable_recognition_test() {
-        let program = String::from("?test_id ?pred-aa").into_bytes();
+        let program = String::from("?test_id ?pred-aa ").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
             Ok(Some(Token::Identifier(x))) => {
