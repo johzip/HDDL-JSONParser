@@ -63,14 +63,9 @@ impl<'a> Parser<'a> {
                                             syntax_tree.add_requirement(requirement);
                                         }
                                     }
-                                    // parse types
-                                    Ok(Some(Token::Keyword(KeywordName::Types))) => {
-                                        let var_types = self.parse_var_types()?;
-
-                                    }
-                                    _ => {
+                                    err => {
                                         // TODO: better error handling
-                                        panic!("expected a keyword")
+                                        panic!("expected a keyword {:?}", err)
                                     }
                                 }
                             }
@@ -119,7 +114,7 @@ impl<'a> Parser<'a> {
                                         syntax_tree.add_init_tn(init_tn);
                                     }
                                     Ok(Some(Token::Keyword(KeywordName::Types))) => {
-                                        let var_types = self.parse_var_types()?;
+                                        let var_types = self.parse_args()?;
                                         for var_type in var_types {
                                             syntax_tree.add_var_type(var_type);
                                         }
