@@ -34,32 +34,16 @@ mod tests {
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
-                assert_eq!(symbols.objects.contains(&"a"), true);
-                assert_eq!(symbols.objects.contains(&"b"), true);
-                assert_eq!(symbols.objects.contains(&"c"), true);
-                assert_eq!(symbols.objects.contains(&"s"), true);
-                assert_eq!(symbols.objects.contains(&"t"), true);
-                // type checking
-                assert_eq!(
-                    symbols.object_types.as_ref().unwrap().get(&"a").unwrap(),
-                    &"d"
-                );
-                assert_eq!(
-                    symbols.object_types.as_ref().unwrap().get(&"b").unwrap(),
-                    &"d"
-                );
-                assert_eq!(
-                    symbols.object_types.as_ref().unwrap().get(&"c").unwrap(),
-                    &"d"
-                );
-                assert_eq!(
-                    symbols.object_types.as_ref().unwrap().get(&"s").unwrap(),
-                    &"f"
-                );
-                assert_eq!(
-                    symbols.object_types.as_ref().unwrap().contains_key(&"t"),
-                    false
-                );
+                assert_eq!(symbols.objects[0].name, "a");
+                assert_eq!(symbols.objects[0].var_type.unwrap(), "d");
+                assert_eq!(symbols.objects[1].name, "b");
+                assert_eq!(symbols.objects[1].var_type.unwrap(), "d");
+                assert_eq!(symbols.objects[2].name, "c");
+                assert_eq!(symbols.objects[2].var_type.unwrap(), "d");
+                assert_eq!(symbols.objects[3].name, "s");
+                assert_eq!(symbols.objects[3].var_type.unwrap(), "f");
+                assert_eq!(symbols.objects[4].name, "t");
+                assert_eq!(symbols.objects[4].var_type.is_none(), true);
             }
             Err(_) => panic!("parsing errors"),
         }
@@ -72,9 +56,9 @@ mod tests {
         let lexer = LexicalAnalyzer::new(program);
         match Parser::new(&lexer).parse() {
             Ok(symbols) => {
-                assert_eq!(symbols.objects.contains(&"a"), true);
-                assert_eq!(symbols.objects.contains(&"b"), true);
-                assert_eq!(symbols.objects.contains(&"c"), true);
+                assert_eq!(symbols.objects[0].name, "a");
+                assert_eq!(symbols.objects[1].name, "b");
+                assert_eq!(symbols.objects[2].name, "c");
             }
             Err(_) => panic!("parsing errors"),
         }
@@ -139,7 +123,6 @@ mod tests {
                 for predicate in symbols.predicates {
                     let items: Vec<(&str, Option<&str>)> = predicate
                         .variables
-                        .arguments
                         .iter()
                         .map(|x| (x.name, x.var_type))
                         .collect();
@@ -153,11 +136,10 @@ mod tests {
                             ]
                         );
                     } else if predicate.name == "pred_2" {
-                        assert_eq!(predicate.variables.arguments.len(), 0);
+                        assert_eq!(predicate.variables.len(), 0);
                     } else if predicate.name == "pred_3" {
                         let items: Vec<(&str, Option<&str>)> = predicate
                             .variables
-                            .arguments
                             .iter()
                             .map(|x| (x.name, x.var_type))
                             .collect();
@@ -193,10 +175,10 @@ mod tests {
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
                 assert_eq!(method.task_name, "deliver_abs");
-                assert_eq!(method.task_terms.arguments.len(), 3);
-                assert_eq!(method.task_terms.arguments[0].name, "p1");
-                assert_eq!(method.task_terms.arguments[1].name, "l1");
-                assert_eq!(method.task_terms.arguments[2].name, "l2");
+                assert_eq!(method.task_terms.len(), 3);
+                assert_eq!(method.task_terms[0].name, "p1");
+                assert_eq!(method.task_terms[1].name, "l1");
+                assert_eq!(method.task_terms[2].name, "l2");
                 assert_eq!(method.tn.subtasks[0].task_symbol, "pickup");
                 assert_eq!(method.tn.subtasks[0].terms[0], "p1");
                 assert_eq!(method.tn.subtasks[0].terms[1], "l1");
@@ -233,10 +215,10 @@ mod tests {
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
                 assert_eq!(method.task_name, "deliver_abs");
-                assert_eq!(method.task_terms.arguments.len(), 3);
-                assert_eq!(method.task_terms.arguments[0].name, "p1");
-                assert_eq!(method.task_terms.arguments[1].name, "l1");
-                assert_eq!(method.task_terms.arguments[2].name, "l2");
+                assert_eq!(method.task_terms.len(), 3);
+                assert_eq!(method.task_terms[0].name, "p1");
+                assert_eq!(method.task_terms[1].name, "l1");
+                assert_eq!(method.task_terms[2].name, "l2");
                 assert_eq!(method.tn.subtasks[0].task_symbol, "pickup");
                 assert_eq!(method.tn.subtasks[0].terms[0], "p1");
                 assert_eq!(method.tn.subtasks[0].terms[1], "l1");
@@ -253,7 +235,7 @@ mod tests {
                                 match pred1 {
                                     Formula::Atom(pred) => {
                                         assert_eq!(pred.name, "at");
-                                        assert_eq!(pred.variables.arguments.len(), 2);
+                                        assert_eq!(pred.variables.len(), 2);
                                     },
                                     _ => {
                                         panic!("wrong formula parsing")
@@ -263,7 +245,7 @@ mod tests {
                                 match pred2 {
                                     Formula::Atom(pred) => {
                                         assert_eq!(pred.name, "driver");
-                                        assert_eq!(pred.variables.arguments.len(), 1);
+                                        assert_eq!(pred.variables.len(), 1);
                                     },
                                     _ => {
                                         panic!("wrong formula parsing")
@@ -398,10 +380,9 @@ mod tests {
                 let c_1 = &ast.compound_tasks[0];
                 assert_eq!(c_1.name, "c_1");
                 let c1_term_names: Vec<&str> =
-                    c_1.parameters.arguments.iter().map(|x| x.name).collect();
+                    c_1.parameters.iter().map(|x| x.name).collect();
                 let c1_term_types: Vec<&str> = c_1
                     .parameters
-                    .arguments
                     .iter()
                     .map(|x| x.var_type.unwrap())
                     .collect();
@@ -431,10 +412,9 @@ mod tests {
                 let action = &ast.actions[0];
                 assert_eq!(action.name, "a_1");
                 let a1_vars: Vec<&str> =
-                    action.parameters.arguments.iter().map(|x| x.name).collect();
+                    action.parameters.iter().map(|x| x.name).collect();
                 let a1_var_types: Vec<&str> = action
-                    .parameters
-                    .arguments
+                    .parameters                    
                     .iter()
                     .map(|x| x.var_type.unwrap())
                     .collect();
@@ -444,8 +424,8 @@ mod tests {
                     Formula::Not(formula) => match &**formula {
                         Formula::Atom(predicate) => {
                             assert_eq!(predicate.name, "at");
-                            assert_eq!(predicate.variables.arguments.len(), 1);
-                            assert_eq!(predicate.variables.arguments[0].name, "p_1");
+                            assert_eq!(predicate.variables.len(), 1);
+                            assert_eq!(predicate.variables[0].name, "p_1");
                         }
                         _ => {
                             panic!("wrong formula")
@@ -459,9 +439,9 @@ mod tests {
                         if let Formula::Not(exp) = formula[0].as_ref() {
                             if let Formula::Atom(pred) = exp.as_ref() {
                                 assert_eq!(pred.name, "hold");
-                                assert_eq!(pred.variables.arguments.len(), 2);
-                                assert_eq!(pred.variables.arguments[0].name, "p_2");
-                                assert_eq!(pred.variables.arguments[1].name, "p_3");
+                                assert_eq!(pred.variables.len(), 2);
+                                assert_eq!(pred.variables[0].name, "p_2");
+                                assert_eq!(pred.variables[1].name, "p_3");
                             } else {
                                 panic!("wrong formula")
                             }
@@ -470,8 +450,8 @@ mod tests {
                         };
                         if let Formula::Atom(pred) = formula[1].as_ref() {
                             assert_eq!(pred.name, "at");
-                            assert_eq!(pred.variables.arguments.len(), 1);
-                            assert_eq!(pred.variables.arguments[0].name, "p_2");
+                            assert_eq!(pred.variables.len(), 1);
+                            assert_eq!(pred.variables[0].name, "p_2");
                         } else {
                             panic!("wrong formula")
                         }
@@ -502,10 +482,9 @@ mod tests {
                 let action = &ast.actions[0];
                 assert_eq!(action.name, "a_1");
                 let a1_vars: Vec<&str> =
-                    action.parameters.arguments.iter().map(|x| x.name).collect();
+                    action.parameters.iter().map(|x| x.name).collect();
                 let a1_var_types: Vec<&str> = action
-                    .parameters
-                    .arguments
+                    .parameters                    
                     .iter()
                     .map(|x| x.var_type.unwrap())
                     .collect();
@@ -517,9 +496,9 @@ mod tests {
                         if let Formula::Not(exp) = formula[0].as_ref() {
                             if let Formula::Atom(pred) = exp.as_ref() {
                                 assert_eq!(pred.name, "hold");
-                                assert_eq!(pred.variables.arguments.len(), 2);
-                                assert_eq!(pred.variables.arguments[0].name, "p_2");
-                                assert_eq!(pred.variables.arguments[1].name, "p_3");
+                                assert_eq!(pred.variables.len(), 2);
+                                assert_eq!(pred.variables[0].name, "p_2");
+                                assert_eq!(pred.variables[1].name, "p_3");
                             } else {
                                 panic!("wrong formula")
                             }
@@ -528,8 +507,8 @@ mod tests {
                         };
                         if let Formula::Atom(pred) = formula[1].as_ref() {
                             assert_eq!(pred.name, "at");
-                            assert_eq!(pred.variables.arguments.len(), 1);
-                            assert_eq!(pred.variables.arguments[0].name, "p_2");
+                            assert_eq!(pred.variables.len(), 1);
+                            assert_eq!(pred.variables[0].name, "p_2");
                         } else {
                             panic!("wrong formula")
                         }
@@ -538,6 +517,44 @@ mod tests {
                 }
             }
             Err(_) => panic!("parsing errors"),
+        }
+    }
+
+    #[test]
+    pub fn var_type_declaration_test() {
+        let program = String::from(
+            "(define (problem jajaja2) (domain blahblah)
+                (:types
+                    Port AbstractDevice - Object
+                    AbstractCable Device - AbstractDevice
+                    PlugType PlugFace PlugDirection SignalType - Enum
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                let types = ast.types.unwrap();
+                assert_eq!(types.len(), 8);
+                assert_eq!(types[0].name, "Port");
+                assert_eq!(types[0].var_type.unwrap(), "Object");
+                assert_eq!(types[1].name, "AbstractDevice");
+                assert_eq!(types[1].var_type.unwrap(), "Object");
+                assert_eq!(types[2].name, "AbstractCable");
+                assert_eq!(types[2].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(types[3].name, "Device");
+                assert_eq!(types[3].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(types[4].name, "PlugType");
+                assert_eq!(types[4].var_type.unwrap(), "Enum");
+                assert_eq!(types[5].name, "PlugFace");
+                assert_eq!(types[5].var_type.unwrap(), "Enum");
+                assert_eq!(types[6].name, "PlugDirection");
+                assert_eq!(types[6].var_type.unwrap(), "Enum");
+                assert_eq!(types[7].name, "SignalType");
+                assert_eq!(types[7].var_type.unwrap(), "Enum");
+            }
+            _ => panic!("parsing erro")
         }
     }
 }

@@ -1,7 +1,7 @@
 use super::*;
 
 pub struct InitialTaskNetwork<'a> {
-    pub parameters: Option<Arguements<'a>>,
+    pub parameters: Option<Vec<Variable<'a>>>,
     pub tn: HTN<'a>
 }
 

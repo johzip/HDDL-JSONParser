@@ -2,9 +2,9 @@ use crate::syntactic_analyzer::SyntacticError;
 use super::*;
 
 impl <'a> Parser<'a> {
-    pub fn parse_args(&self) -> Result<Arguements<'a>, SyntacticError> {
+    pub fn parse_args(&self) -> Result<Vec<Variable<'a>>, SyntacticError> {
         let mut objects = vec![];
-        let mut result = Arguements {arguments: vec![]};
+        let mut result = vec![];
         let mut token = self.tokenizer.get_token();
         loop {
             while let Ok(Some(Token::Identifier(symbol))) = token {
@@ -19,7 +19,7 @@ impl <'a> Parser<'a> {
                     match object_type {
                         Ok(Some(Token::Identifier(t))) => {
                             for o in objects {
-                                result.arguments.push(Variable::new(o, Some(t)));
+                                result.push(Variable::new(o, Some(t)));
                             }
                             objects = vec![];
                         },
@@ -39,7 +39,7 @@ impl <'a> Parser<'a> {
                 },
                 Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
                     for o in objects {
-                        result.arguments.push(Variable::new(o, None));
+                        result.push(Variable::new(o, None));
                     }
                     return Ok(result);
                 }

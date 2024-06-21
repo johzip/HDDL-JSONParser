@@ -2,10 +2,8 @@ use super::*;
 use std::collections::HashMap;
 
 pub struct SyntaxTree<'a> {
-    pub objects: Vec<&'a str>,
-    // TODO: convert to type hierarchy
-    pub types: Option<Vec<&'a str>>,
-    pub object_types: Option<HashMap<&'a str, &'a str>>,
+    pub objects: Vec<Variable<'a>>,
+    pub types: Option<Vec<Variable<'a>>>,
     pub requirements: Vec<RequirementType>,
     // mapping from predicate name to its arguments
     pub predicates: Vec<Predicate<'a>>,
@@ -21,7 +19,6 @@ impl<'a> SyntaxTree<'a> {
         SyntaxTree {
             objects: vec![],
             types: None,
-            object_types: None,
             requirements: vec![],
             predicates: vec![],
             compound_tasks: vec![],
@@ -30,24 +27,13 @@ impl<'a> SyntaxTree<'a> {
             actions: vec![]
         }
     }
-    pub fn add_object(&mut self, object: &'a str) {
+    pub fn add_object(&mut self, name: &'a str) {
+        let object = Variable::new(name, None);
         self.objects.push(object);
     }
-    pub fn add_typed_object(&mut self, object: &'a str, object_type: &'a str) {
+    pub fn add_typed_object(&mut self, name: &'a str, object_type: &'a str) {
+        let object = Variable::new(name, Some(object_type));
         self.objects.push(object);
-        match &mut self.types {
-            Some(types) => {
-                types.push(object_type);
-                self.object_types
-                    .as_mut()
-                    .unwrap()
-                    .insert(object, object_type);
-            }
-            None => {
-                self.types = Some(vec![object_type]);
-                self.object_types = Some(HashMap::from([(object, object_type)]));
-            }
-        }
     }
 
     pub fn add_requirement(&mut self, req: RequirementType) {
@@ -72,5 +58,17 @@ impl<'a> SyntaxTree<'a> {
 
     pub fn add_action(&mut self, action: Action<'a>) {
         self.actions.push(action);
+    }
+
+    pub fn add_var_type(&mut self, var: Variable<'a>){
+        match self.types.as_mut() {
+            Some(t) => {
+                t.push(var);
+            }
+            None => {
+                self.types = Some(vec![var])
+            }
+        } 
+        
     }
 }

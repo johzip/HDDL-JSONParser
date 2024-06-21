@@ -11,7 +11,7 @@ impl<'a> Parser<'a> {
                         let params = self.parse_args()?;
                         let init_tn = self.parse_htn()?;
                         return Ok(InitialTaskNetwork {
-                            parameters: if params.arguments.len() == 0 {None} else {Some(params)},
+                            parameters: if params.len() == 0 {None} else {Some(params)},
                             tn: init_tn
                         });
                     } else {

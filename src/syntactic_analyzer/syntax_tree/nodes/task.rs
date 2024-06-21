@@ -2,11 +2,11 @@ use super::*;
 
 pub struct Task<'a> {
     pub name: &'a str,
-    pub parameters: Arguements<'a>
+    pub parameters: Vec<Variable<'a>>
 }
 
 impl <'a> Task <'a> {
-    pub fn new(name: &'a str, parameters: Arguements<'a>) -> Task<'a> {
+    pub fn new(name: &'a str, parameters: Vec<Variable<'a>>) -> Task<'a> {
         Task {
             name,
             parameters

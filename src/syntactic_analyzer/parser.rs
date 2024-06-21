@@ -63,6 +63,11 @@ impl<'a> Parser<'a> {
                                             syntax_tree.add_requirement(requirement);
                                         }
                                     }
+                                    // parse types
+                                    Ok(Some(Token::Keyword(KeywordName::Types))) => {
+                                        let var_types = self.parse_var_types()?;
+
+                                    }
                                     _ => {
                                         // TODO: better error handling
                                         panic!("expected a keyword")
@@ -97,7 +102,7 @@ impl<'a> Parser<'a> {
                                     // objects declaration
                                     Ok(Some(Token::Keyword(KeywordName::Objects))) => {
                                         let objects = self.parse_args()?;
-                                        for object in objects.arguments {
+                                        for object in objects {
                                             match object.var_type {
                                                 Some(t) => {
                                                     syntax_tree.add_typed_object(object.name, t);
@@ -113,6 +118,12 @@ impl<'a> Parser<'a> {
                                         let init_tn = self.parse_initial_tn()?;
                                         syntax_tree.add_init_tn(init_tn);
                                     }
+                                    Ok(Some(Token::Keyword(KeywordName::Types))) => {
+                                        let var_types = self.parse_var_types()?;
+                                        for var_type in var_types {
+                                            syntax_tree.add_var_type(var_type);
+                                        }
+                                    }
                                     _ => todo!(),
                                 }
                             }
@@ -124,7 +135,6 @@ impl<'a> Parser<'a> {
                             }
                         }
                     }
-
                     Ok(syntax_tree)
                 }
             }
