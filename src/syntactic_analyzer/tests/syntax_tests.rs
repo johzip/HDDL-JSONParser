@@ -523,7 +523,7 @@ mod tests {
     #[test]
     pub fn var_type_declaration_test() {
         let program = String::from(
-            "(define (problem jajaja2) (domain blahblah)
+            "(define (domain blahblah)
                 (:types
                     Port AbstractDevice - Object
                     AbstractCable Device - AbstractDevice
@@ -553,6 +553,44 @@ mod tests {
                 assert_eq!(types[6].var_type.unwrap(), "Enum");
                 assert_eq!(types[7].name, "SignalType");
                 assert_eq!(types[7].var_type.unwrap(), "Enum");
+            }
+            _ => panic!("parsing erro")
+        }
+    }
+
+    #[test]
+    pub fn constants_declaration_test() {
+        let program = String::from(
+            "(define (domain blahblah)
+                (:constants
+                    Port AbstractDevice - Object
+                    AbstractCable Device - AbstractDevice
+                    PlugType PlugFace PlugDirection SignalType - Enum
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                let constants = ast.constants.unwrap();
+                assert_eq!(constants.len(), 8);
+                assert_eq!(constants[0].name, "Port");
+                assert_eq!(constants[0].var_type.unwrap(), "Object");
+                assert_eq!(constants[1].name, "AbstractDevice");
+                assert_eq!(constants[1].var_type.unwrap(), "Object");
+                assert_eq!(constants[2].name, "AbstractCable");
+                assert_eq!(constants[2].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(constants[3].name, "Device");
+                assert_eq!(constants[3].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(constants[4].name, "PlugType");
+                assert_eq!(constants[4].var_type.unwrap(), "Enum");
+                assert_eq!(constants[5].name, "PlugFace");
+                assert_eq!(constants[5].var_type.unwrap(), "Enum");
+                assert_eq!(constants[6].name, "PlugDirection");
+                assert_eq!(constants[6].var_type.unwrap(), "Enum");
+                assert_eq!(constants[7].name, "SignalType");
+                assert_eq!(constants[7].var_type.unwrap(), "Enum");
             }
             _ => panic!("parsing erro")
         }

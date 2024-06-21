@@ -61,9 +61,12 @@ impl<'a> Parser<'a> {
                         };
                         return Ok(Formula::Atom(predicate));
                     }
+                    Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                        return Ok(Formula::Empty);
+                    }
                     // TODO: make this better
-                    _ => {
-                        panic!("unexpected token")
+                    err => {
+                        panic!("unexpected token {:?}", err)
                     }
                 }
             },

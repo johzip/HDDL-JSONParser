@@ -4,6 +4,7 @@ use std::collections::HashMap;
 pub struct SyntaxTree<'a> {
     pub objects: Vec<Variable<'a>>,
     pub types: Option<Vec<Variable<'a>>>,
+    pub constants: Option<Vec<Variable<'a>>>,
     pub requirements: Vec<RequirementType>,
     // mapping from predicate name to its arguments
     pub predicates: Vec<Predicate<'a>>,
@@ -19,6 +20,7 @@ impl<'a> SyntaxTree<'a> {
         SyntaxTree {
             objects: vec![],
             types: None,
+            constants: None,
             requirements: vec![],
             predicates: vec![],
             compound_tasks: vec![],
@@ -68,7 +70,17 @@ impl<'a> SyntaxTree<'a> {
             None => {
                 self.types = Some(vec![var])
             }
-        } 
-        
+        }
+    }
+
+    pub fn add_constant(&mut self, constant: Variable<'a>){
+        match self.constants.as_mut() {
+            Some(c) => {
+                c.push(constant);
+            }
+            None => {
+                self.constants = Some(vec![constant])
+            }
+        }
     }
 }

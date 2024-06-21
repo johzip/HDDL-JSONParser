@@ -120,9 +120,9 @@ impl<'a> Parser<'a> {
                     }
                 }
             },
-            _ => {
+            err => {
                 // TODO: better error handling
-                panic!("expected subtask definitions")
+                panic!("expected subtask definitions, found {:?}", err)
             }
         }
     }
@@ -241,9 +241,16 @@ impl<'a> Parser<'a> {
                         }
                     }
                 }
-                _ => {
+                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                    return Ok(Subtask {
+                        id: None,
+                        task_symbol: id,
+                        terms: terms,
+                    })
+                }
+                err => {
                     // TODO: better error handling
-                    panic!("expected subtask definition")
+                    panic!("expected subtask definition, found {:?}", err)
                 }
             }
         } else {

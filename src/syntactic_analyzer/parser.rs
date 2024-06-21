@@ -63,6 +63,18 @@ impl<'a> Parser<'a> {
                                             syntax_tree.add_requirement(requirement);
                                         }
                                     }
+                                    Ok(Some(Token::Keyword(KeywordName::Types))) => {
+                                        let var_types = self.parse_args()?;
+                                        for var_type in var_types {
+                                            syntax_tree.add_var_type(var_type);
+                                        }
+                                    }
+                                    Ok(Some(Token::Keyword(KeywordName::Constants))) => {
+                                        let constants = self.parse_args()?;
+                                        for constant in constants {
+                                            syntax_tree.add_constant(constant);
+                                        }
+                                    }
                                     err => {
                                         // TODO: better error handling
                                         panic!("expected a keyword {:?}", err)
@@ -112,12 +124,6 @@ impl<'a> Parser<'a> {
                                     Ok(Some(Token::Keyword(KeywordName::HTN))) => {
                                         let init_tn = self.parse_initial_tn()?;
                                         syntax_tree.add_init_tn(init_tn);
-                                    }
-                                    Ok(Some(Token::Keyword(KeywordName::Types))) => {
-                                        let var_types = self.parse_args()?;
-                                        for var_type in var_types {
-                                            syntax_tree.add_var_type(var_type);
-                                        }
                                     }
                                     _ => todo!(),
                                 }
