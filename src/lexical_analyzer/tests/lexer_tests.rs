@@ -229,4 +229,35 @@ mod lexer_test {
             _ => panic!("wrong token")
         }
     }
+
+    #[test]
+    pub fn lookahead_test() {
+        let program = String::from(
+            "(:method vDC_to_vPC_2
+                :parameters (?d1 ?d2 - AbstractDevice ?t - SignalType ?p1 ?p2 - Port)
+                :task (ValidateDeviceConnection ?d1 ?d2 ?t)
+                :precondition (and
+                        (isPartOf ?p1 ?d1)
+                        (isPartOf ?p2 ?d2)
+                        (isPlugDirection ?p1 out)
+                        (isPlugDirection ?p2 both)
+                        (isSignalSource ?p1 ?t)
+                        (isSignalDestination ?p2 ?t)
+                )
+                :subtasks (and
+                    (ValidatePortConnection ?p1 ?p2 ?t)
+                )
+            ) "
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        loop {
+            let peek = lexer.lookahead();
+            let actual = lexer.get_token();
+            match actual {
+                Ok(None) => {break;}
+                _ => {}
+            }
+            assert_eq!(peek.unwrap().as_ref(), actual.unwrap().as_ref());
+        }
+    }
 }

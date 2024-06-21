@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Keyword(KeywordName),
     Identifier(&'a str),
@@ -7,14 +7,14 @@ pub enum Token<'a> {
     Requirement(RequirementType)
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum PunctuationType {
     Dash,
     LParentheses,
     RParentheses,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum OperationType {
     // Logic
     Or,
@@ -41,7 +41,7 @@ pub enum RequirementType {
     UniversalPreconditions
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum KeywordName {
     Define,
     Domain,

@@ -9,7 +9,6 @@ pub struct LexicalAnalyzer {
     line_number: Cell<u32>,
 }
 
-// TODO: impl iterator trait
 impl LexicalAnalyzer {
     pub fn new(program: Vec<u8>) -> LexicalAnalyzer {
         LexicalAnalyzer {
@@ -18,27 +17,53 @@ impl LexicalAnalyzer {
             line_number: Cell::new(1),
         }
     }
+    // get the next token without advancing the cursor
+    pub fn lookahead(&self) -> Result<Option<Token>, LexicalError> {
+        return self.parse(true);
+    }
+
     pub fn get_token(&self) -> Result<Option<Token>, LexicalError> {
+        return self.parse(false);
+    }
+
+    fn parse(&self, peek: bool) -> Result<Option<Token>, LexicalError> {
         self.skip_whitespaces();
         if self.cursor.get() == self.program.len() - 1 {
             return Ok(None);
         }
-        if let Some(char) = self.next_char() {
+        if let Some(char) = self.peek_next_char() {
+            if !peek {
+                self.cursor.set(self.cursor.get() + 1);
+            }
             match char {
                 // Punctuations
                 '-' => Ok(Some(Token::Punctuator(PunctuationType::Dash))),
                 '(' => Ok(Some(Token::Punctuator(PunctuationType::LParentheses))),
                 ')' => Ok(Some(Token::Punctuator(PunctuationType::RParentheses))),
                 // Ordering Relations
-                p @ ('<' | '>' | '=') => Ok(Some(Token::Operator(self.ordering_type(&p)))),
+                p @ ('<' | '>' | '=') => Ok(Some(Token::Operator(self.ordering_type(&p, peek)))),
                 // Variables
                 '?' => {
-                    let var_name = self.get_lexeme(self.cursor.get());
+                    let mut init_cur_pos = self.cursor.get();
+                    if peek {
+                        init_cur_pos += 1;
+                    }
+                    let (var_name, new_cur_pos) = self.peek_lexeme(init_cur_pos);
+                    if !peek {
+                        self.cursor.set(new_cur_pos);
+                    }
                     Ok(Some(Token::Identifier(var_name)))
                 }
                 // Keywords (Note that 2 keywords, namely "domain" and "problem", can start without ':' as well)
                 ':' => {
-                    let lexeme = self.get_lexeme(self.cursor.get());
+                    let mut init_cur_pos = self.cursor.get();
+                    if peek {
+                        init_cur_pos += 1;
+                    }
+                    let (lexeme, new_cur_pos) = self.peek_lexeme(init_cur_pos);
+                    if !peek {
+                        self.cursor.set(new_cur_pos);
+                    }
                     match lexeme {
                         // Requirements
                         "negative-preconditions" => Ok(Some(Token::Requirement(
@@ -80,7 +105,14 @@ impl LexicalAnalyzer {
                 }
                 // Other
                 _ => {
-                    let lexeme = self.get_lexeme(self.cursor.get() - 1);
+                    let mut init_cur_pos = self.cursor.get() - 1;
+                    if peek {
+                        init_cur_pos += 1;
+                    }
+                    let (lexeme, new_cur_pos) = self.peek_lexeme(init_cur_pos);
+                    if !peek {
+                        self.cursor.set(new_cur_pos);
+                    }
                     match lexeme {
                         // Remaining Keywords
                         "define" => return Ok(Some(Token::Keyword(KeywordName::Define))),
@@ -112,8 +144,9 @@ impl LexicalAnalyzer {
         }
     }
 
-    fn get_lexeme(&self, init_pos: usize) -> &str {
-        let mut cursor_pos = init_pos;
+    // get next lexeme and new cursor position (to commit peek)
+    fn peek_lexeme(&self, init_cur_pos: usize) -> (&str, usize) {
+        let mut cursor_pos = init_cur_pos;
         let mut next_ch = self.program[cursor_pos] as char;
         let is_valid_character = |c| match c {
             '_' | '-' => true,
@@ -134,16 +167,14 @@ impl LexicalAnalyzer {
                 break;
             }
         }
-        self.cursor.set(cursor_pos);
-        from_utf8(&self.program[init_pos..cursor_pos]).unwrap()
+        (from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(), cursor_pos)
     }
 
-    fn next_char(&self) -> Option<char> {
+    fn peek_next_char(&self) -> Option<char> {
         if self.cursor.get() >= self.program.len() {
             return None;
         }
         let current = self.program[self.cursor.get()] as char;
-        self.cursor.set(self.cursor.get() + 1);
         Some(current)
     }
 
@@ -174,29 +205,25 @@ impl LexicalAnalyzer {
         }
     }
 
-    fn ordering_type(&self, c: &char) -> OperationType {
+    fn ordering_type(&self, c: &char, peek: bool) -> OperationType {
         match c {
             '<' => {
-                if self.cursor.get() >= self.program.len() {
-                    return OperationType::LessThan;
-                }
-                let next = self.program[self.cursor.get()] as char;
-                match next {
-                    '=' => {
-                        self.cursor.set(self.cursor.get() + 1);
+                match self.peek_next_char() {
+                    Some('=') => {
+                        if !peek {
+                            self.cursor.set(self.cursor.get() + 1);
+                        }
                         OperationType::LessThanOrEqual
                     }
                     _ => OperationType::LessThan,
                 }
             }
             '>' => {
-                if self.cursor.get() >= self.program.len() {
-                    return OperationType::GreaterThan;
-                }
-                let next = self.program[self.cursor.get()] as char;
-                match next {
-                    '=' => {
-                        self.cursor.set(self.cursor.get() + 1);
+                match self.peek_next_char() {
+                    Some('=') => {
+                        if !peek {
+                            self.cursor.set(self.cursor.get() + 1);
+                        }
                         OperationType::GreaterThanOrEqual
                     }
                     _ => OperationType::GreaterThan,
