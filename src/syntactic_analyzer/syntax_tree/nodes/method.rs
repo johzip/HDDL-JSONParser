@@ -5,7 +5,6 @@ pub struct Method<'a> {
     pub task_name: &'a str,
     pub task_terms: Arguements<'a>,
     pub params: Arguements<'a>,
-    // TODO:
-    // pub precondition: Option<BooleanFormula<'a>>,
+    pub precondition: Option<Formula<'a>>,
     pub tn: HTN<'a>
 }

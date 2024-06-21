@@ -204,6 +204,81 @@ mod tests {
                 assert_eq!(method.tn.subtasks[1].terms[0], "p1");
                 assert_eq!(method.tn.subtasks[1].terms[1], "l2");
                 assert_eq!(method.tn.subtasks[1].terms[2], "l3");
+                assert_eq!(method.precondition.is_none(), true);
+            }
+            _ => panic!("AST not created"),
+        }
+    }
+
+    #[test]
+    pub fn method_precondition_test() {
+        let program = String::from(
+            "(define (domain bal)
+                (:method m_1
+                    :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
+                    :task (deliver_abs ?p1 ?l1 ?l2)
+                    :precondition (and (at ?p1 ?l3) (driver ?l1))
+                    :subtasks (and
+                        (pickup ?p1 ?l1)
+                        (deliver_abs ?p1 ?l2 ?l3)
+                    )
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.methods.len(), 1);
+                let method = &ast.methods[0];
+                assert_eq!(method.name, "m_1");
+                assert_eq!(method.task_name, "deliver_abs");
+                assert_eq!(method.task_terms.arguments.len(), 3);
+                assert_eq!(method.task_terms.arguments[0].name, "p1");
+                assert_eq!(method.task_terms.arguments[1].name, "l1");
+                assert_eq!(method.task_terms.arguments[2].name, "l2");
+                assert_eq!(method.tn.subtasks[0].task_symbol, "pickup");
+                assert_eq!(method.tn.subtasks[0].terms[0], "p1");
+                assert_eq!(method.tn.subtasks[0].terms[1], "l1");
+                assert_eq!(method.tn.subtasks[1].task_symbol, "deliver_abs");
+                assert_eq!(method.tn.subtasks[1].terms[0], "p1");
+                assert_eq!(method.tn.subtasks[1].terms[1], "l2");
+                assert_eq!(method.tn.subtasks[1].terms[2], "l3");
+                match &method.precondition {
+                    Some(formula) => {
+                        match formula {
+                            Formula::And(predicates) => {
+                                assert_eq!(predicates.len(), 2);
+                                let pred1 = &*predicates[0];
+                                match pred1 {
+                                    Formula::Atom(pred) => {
+                                        assert_eq!(pred.name, "at");
+                                        assert_eq!(pred.variables.arguments.len(), 2);
+                                    },
+                                    _ => {
+                                        panic!("wrong formula parsing")
+                                    }
+                                }
+                                let pred2 = &*predicates[1];
+                                match pred2 {
+                                    Formula::Atom(pred) => {
+                                        assert_eq!(pred.name, "driver");
+                                        assert_eq!(pred.variables.arguments.len(), 1);
+                                    },
+                                    _ => {
+                                        panic!("wrong formula parsing")
+                                    }
+                                }
+                            }
+                            _ => {
+                                panic!("wrong formula parsing")
+                            }
+                        }
+                    }
+                    _ => {
+                        panic!("wrong formula parsing")
+                    }
+                }
             }
             _ => panic!("AST not created"),
         }

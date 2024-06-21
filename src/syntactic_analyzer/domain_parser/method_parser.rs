@@ -18,15 +18,38 @@ impl<'a> Parser<'a> {
                             {
                                 let terms = self.parse_args()?;
                                 // TODO: parse method preconditions if available
+                                match self.tokenizer.lookahead() {
+                                    Ok(Some(Token::Keyword(KeywordName::Precondition))) => {
+                                        // skip "precondition" keyword
+                                        let _ = self.tokenizer.get_token();
+                                        let precondition = self.parse_formula()?;
+                                        let tn = self.parse_htn()?;
+                                        return Ok(Method {
+                                            name: method_name,
+                                            params,
+                                            task_name: task_name,
+                                            task_terms: terms,
+                                            precondition: Some(precondition),
+                                            tn,
+                                        });
+                                    }
+                                    Ok(Some(Token::Keyword(KeywordName::Subtasks))) |
+                                    Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks))) => {
+                                        let tn = self.parse_htn()?;
+                                        return Ok(Method {
+                                            name: method_name,
+                                            params,
+                                            task_name: task_name,
+                                            task_terms: terms,
+                                            precondition: None,
+                                            tn,
+                                        });
+                                    }
+                                    _ => {
+                                        panic!("expected either prec or htn")
+                                    }
+                                }
                                 
-                                let tn = self.parse_htn()?;
-                                Ok(Method {
-                                    name: method_name,
-                                    params,
-                                    task_name: task_name,
-                                    task_terms: terms,
-                                    tn,
-                                })
                             } else {
                                 panic!("expected task name")
                             }
