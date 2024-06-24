@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use crate::parsing_errors::ParsingError;
 
 use self::definition_types::ProblemDefinition;
 
@@ -12,7 +12,7 @@ impl<'a> Parser<'a> {
     pub fn new(tokenizer: &'a LexicalAnalyzer) -> Parser<'a> {
         Parser { tokenizer }
     }
-    pub fn parse(&'a self) -> Result<SyntaxTree<'a>, SyntacticError<'a>> {
+    pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError<'a>> {
         let mut syntax_tree = SyntaxTree::new();
         // match opening '('
         if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
@@ -100,7 +100,6 @@ impl<'a> Parser<'a> {
                                 match self.tokenizer.get_token() {
                                     // requirement declaration
                                     Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
-                                        // TODO: handle errors
                                         let requirements = self.parse_requirements()?;
                                         for requirement in requirements {
                                             syntax_tree.add_requirement(requirement);
@@ -145,7 +144,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_document_type(&self) -> Result<DefinitionType, SyntacticError> {
+    fn parse_document_type(&self) -> Result<DefinitionType, ParsingError> {
         // match keyword 'define'
         if let Ok(Some(Token::Keyword(KeywordName::Define))) = self.tokenizer.get_token() {
             // match '(' after keyword 'define
