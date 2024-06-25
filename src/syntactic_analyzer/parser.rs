@@ -15,7 +15,7 @@ impl<'a> Parser<'a> {
     pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError<'a>> {
         let mut syntax_tree = SyntaxTree::new();
         // match opening '('
-        if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
             self.tokenizer.get_token()
         {
             // Determine file type
@@ -24,21 +24,21 @@ impl<'a> Parser<'a> {
                 DefinitionType::Domain(_) => {
                     loop {
                         match self.tokenizer.get_token() {
-                            Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                            Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                                 match self.tokenizer.get_token() {
                                     // predicate definition
-                                    Ok(Some(Token::Keyword(KeywordName::Predicates))) => {
+                                    Ok(Token::Keyword(KeywordName::Predicates)) => {
                                         let predicates = self.parse_predicates()?;
                                         for predicate in predicates {
                                             syntax_tree.add_predicate(predicate);
                                         }
                                     }
                                     // compund task definition
-                                    Ok(Some(Token::Keyword(KeywordName::Task))) => {
+                                    Ok(Token::Keyword(KeywordName::Task)) => {
                                         let task: Task = self.parse_task()?;
-                                        if let Ok(Some(Token::Punctuator(
+                                        if let Ok(Token::Punctuator(
                                             PunctuationType::RParentheses,
-                                        ))) = self.tokenizer.get_token()
+                                        )) = self.tokenizer.get_token()
                                         {
                                             syntax_tree.add_compound_task(task);
                                         } else {
@@ -46,30 +46,29 @@ impl<'a> Parser<'a> {
                                         }
                                     }
                                     // method definition
-                                    Ok(Some(Token::Keyword(KeywordName::Method))) => {
+                                    Ok(Token::Keyword(KeywordName::Method)) => {
                                         let method = self.parse_method()?;
                                         syntax_tree.add_method(method);
                                     }
                                     // action definition
-                                    Ok(Some(Token::Keyword(KeywordName::Action))) => {
+                                    Ok(Token::Keyword(KeywordName::Action)) => {
                                         let action = self.parse_action()?;
                                         syntax_tree.add_action(action);
                                     }
                                     // requirement declaration
-                                    Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
-                                        // TODO: handle errors
+                                    Ok(Token::Keyword(KeywordName::Requirements)) => {
                                         let requirements = self.parse_requirements()?;
                                         for requirement in requirements {
                                             syntax_tree.add_requirement(requirement);
                                         }
                                     }
-                                    Ok(Some(Token::Keyword(KeywordName::Types))) => {
+                                    Ok(Token::Keyword(KeywordName::Types)) => {
                                         let var_types = self.parse_args()?;
                                         for var_type in var_types {
                                             syntax_tree.add_var_type(var_type);
                                         }
                                     }
-                                    Ok(Some(Token::Keyword(KeywordName::Constants))) => {
+                                    Ok(Token::Keyword(KeywordName::Constants)) => {
                                         let constants = self.parse_args()?;
                                         for constant in constants {
                                             syntax_tree.add_constant(constant);
@@ -81,7 +80,7 @@ impl<'a> Parser<'a> {
                                     }
                                 }
                             }
-                            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                            Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                                 break;
                             }
                             _ => {
@@ -95,18 +94,18 @@ impl<'a> Parser<'a> {
                 DefinitionType::Problem(_) => {
                     loop {
                         match self.tokenizer.get_token() {
-                            Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                            Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                                 // match declaration type
                                 match self.tokenizer.get_token() {
                                     // requirement declaration
-                                    Ok(Some(Token::Keyword(KeywordName::Requirements))) => {
+                                    Ok(Token::Keyword(KeywordName::Requirements)) => {
                                         let requirements = self.parse_requirements()?;
                                         for requirement in requirements {
                                             syntax_tree.add_requirement(requirement);
                                         }
                                     }
                                     // objects declaration
-                                    Ok(Some(Token::Keyword(KeywordName::Objects))) => {
+                                    Ok(Token::Keyword(KeywordName::Objects)) => {
                                         let objects = self.parse_args()?;
                                         for object in objects {
                                             match object.var_type {
@@ -120,14 +119,14 @@ impl<'a> Parser<'a> {
                                         }
                                     }
                                     // initial task network declaration
-                                    Ok(Some(Token::Keyword(KeywordName::HTN))) => {
+                                    Ok(Token::Keyword(KeywordName::HTN)) => {
                                         let init_tn = self.parse_initial_tn()?;
                                         syntax_tree.add_init_tn(init_tn);
                                     }
                                     _ => todo!(),
                                 }
                             }
-                            Ok(None) | Ok(Some(Token::Punctuator(PunctuationType::RParentheses)))=> {
+                            Ok(Token::EOF) | Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                                 break;
                             }
                             err => {
@@ -146,19 +145,19 @@ impl<'a> Parser<'a> {
 
     fn parse_document_type(&self) -> Result<DefinitionType, ParsingError> {
         // match keyword 'define'
-        if let Ok(Some(Token::Keyword(KeywordName::Define))) = self.tokenizer.get_token() {
+        if let Ok(Token::Keyword(KeywordName::Define)) = self.tokenizer.get_token() {
             // match '(' after keyword 'define
-            if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+            if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
                 self.tokenizer.get_token()
             {
                 // match either 'domain' or 'problem'
                 match self.tokenizer.get_token() {
-                    Ok(Some(Token::Keyword(KeywordName::Domain))) => {
+                    Ok(Token::Keyword(KeywordName::Domain)) => {
                         // match domain name
                         let next_token = self.tokenizer.get_token();
-                        if let Ok(Some(Token::Identifier(domain_name))) = next_token {
+                        if let Ok(Token::Identifier(domain_name)) = next_token {
                             // match closing paranthesis
-                            if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) =
+                            if let Ok(Token::Punctuator(PunctuationType::RParentheses)) =
                                 self.tokenizer.get_token()
                             {
                                 return Ok(DefinitionType::Domain(domain_name));
@@ -171,28 +170,28 @@ impl<'a> Parser<'a> {
                             panic!("expected domain name, found blah")
                         }
                     }
-                    Ok(Some(Token::Keyword(KeywordName::Problem))) => {
+                    Ok(Token::Keyword(KeywordName::Problem)) => {
                         // match problem name
-                        if let Ok(Some(Token::Identifier(problem_name))) =
+                        if let Ok(Token::Identifier(problem_name)) =
                             self.tokenizer.get_token()
                         {
                             // match closing paranthesis
-                            if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) =
+                            if let Ok(Token::Punctuator(PunctuationType::RParentheses)) =
                                 self.tokenizer.get_token()
                             {
                                 // match '(' for domain name
-                                if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+                                if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
                                     self.tokenizer.get_token()
                                 {
-                                    if let Ok(Some(Token::Keyword(KeywordName::Domain))) =
+                                    if let Ok(Token::Keyword(KeywordName::Domain)) =
                                         self.tokenizer.get_token()
                                     {
-                                        if let Ok(Some(Token::Identifier(domain_name))) =
+                                        if let Ok(Token::Identifier(domain_name)) =
                                             self.tokenizer.get_token()
                                         {
-                                            if let Ok(Some(Token::Punctuator(
+                                            if let Ok(Token::Punctuator(
                                                 PunctuationType::RParentheses,
-                                            ))) = self.tokenizer.get_token()
+                                            )) = self.tokenizer.get_token()
                                             {
                                                 return Ok(DefinitionType::Problem(
                                                     ProblemDefinition {
@@ -244,10 +243,10 @@ impl<'a> Parser<'a> {
         let mut finished = false;
         while !finished {
             match self.tokenizer.get_token() {
-                Ok(Some(Token::Requirement(req))) => {
+                Ok(Token::Requirement(req)) => {
                     requirements.push(req);
                 }
-                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                     finished = true;
                 }
                 _ => {

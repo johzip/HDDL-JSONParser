@@ -7,37 +7,38 @@ impl <'a> Parser<'a> {
         let mut result = vec![];
         let mut token = self.tokenizer.get_token();
         loop {
-            while let Ok(Some(Token::Identifier(symbol))) = token {
+            while let Ok(Token::Identifier(symbol)) = token {
                 objects.push(symbol);
                 token = self.tokenizer.get_token();
             }
             match token {
-                Ok(Some(Token::Punctuator(PunctuationType::Dash))) => {
+                Ok(Token::Punctuator(PunctuationType::Dash)) => {
                     // match type
                     let object_type = self.tokenizer.get_token();
                     token = self.tokenizer.get_token();
                     match object_type {
-                        Ok(Some(Token::Identifier(t))) => {
+                        Ok(Token::Identifier(t)) => {
                             for o in objects {
                                 result.push(Variable::new(o, Some(t)));
                             }
                             objects = vec![];
                         },
-                        Ok(Some(x)) => {
-                            // TODO: better error handling
-                            panic!("expected a type name but found {:?}", x)
+                        Ok(x) => {
+                            // TODO: test
+                            return Err(SyntacticError {
+                                expected: format!("The type of {}", objects.into_iter().clone().collect::<Vec<&'a str>>().join(", ")),
+                                found: x,
+                                line_number: self.tokenizer.get_line_number(),
+                                solution: "Use a type identifier after '-'"
+                            });
                         },
-                        Ok(None) => {
-                            // TODO: better error handling
-                            panic!("expected object type before end of the file")
-                        }
                         Err(x) => {
                             // TODO: better error handling
                             panic!("x is not a valid type identifier for ...")
                         }
                     }
                 },
-                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                     for o in objects {
                         result.push(Variable::new(o, None));
                     }

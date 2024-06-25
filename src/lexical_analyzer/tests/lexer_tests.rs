@@ -8,19 +8,19 @@ mod lexer_test {
         let program = String::from("-( \n) ").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
-            Ok(Some(Token::Punctuator(PunctuationType::Dash))) => {},
+            Ok(Token::Punctuator(PunctuationType::Dash)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {},
+            Ok(Token::Punctuator(PunctuationType::LParentheses)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {},
+            Ok(Token::Punctuator(PunctuationType::RParentheses)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(None) => {},
+            Ok(Token::EOF) => {},
             _ => panic!("wrong token")
         }
     }
@@ -30,23 +30,23 @@ mod lexer_test {
         let program = String::from("<=  \n> >= < \n").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::LessThanOrEqual))) => {},
+            Ok(Token::Operator(OperationType::LessThanOrEqual)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::GreaterThan))) => {},
+            Ok(Token::Operator(OperationType::GreaterThan)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::GreaterThanOrEqual))) => {},
+            Ok(Token::Operator(OperationType::GreaterThanOrEqual)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::LessThan))) => {},
+            Ok(Token::Operator(OperationType::LessThan)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(None) => {},
+            Ok(Token::EOF) => {},
             _ => panic!("wrong token")
         }
     }
@@ -56,35 +56,35 @@ mod lexer_test {
         let program = String::from("and or oneof not exists forall imply\n").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::And))) => {},
+            Ok(Token::Operator(OperationType::And)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::Or))) => {},
+            Ok(Token::Operator(OperationType::Or)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::Xor))) => {},
+            Ok(Token::Operator(OperationType::Xor)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::Not))) => {},
+            Ok(Token::Operator(OperationType::Not)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::Exists))) => {},
+            Ok(Token::Operator(OperationType::Exists)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::ForAll))) => {},
+            Ok(Token::Operator(OperationType::ForAll)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Operator(OperationType::Implication))) => {},
+            Ok(Token::Operator(OperationType::Implication)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(None) => {},
+            Ok(Token::EOF) => {},
             _ => panic!("wrong token")
         }
     }
@@ -94,13 +94,13 @@ mod lexer_test {
         let program = String::from("?test_id ?pred-aa ").into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
-            Ok(Some(Token::Identifier(x))) => {
+            Ok(Token::Identifier(x)) => {
                 assert_eq!(x, &String::from("test_id"))
             },
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Identifier(x))) => {
+            Ok(Token::Identifier(x)) => {
                 assert_eq!(x, &String::from("pred-aa"))
             },
             _ => panic!("wrong token")
@@ -117,91 +117,91 @@ mod lexer_test {
         ).into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Define))) => {},
+            Ok(Token::Keyword(KeywordName::Define)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Domain))) => {},
+            Ok(Token::Keyword(KeywordName::Domain)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Problem))) => {},
+            Ok(Token::Keyword(KeywordName::Problem)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Requirements))) => {},
+            Ok(Token::Keyword(KeywordName::Requirements)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Objects))) => {},
+            Ok(Token::Keyword(KeywordName::Objects)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Types))) => {},
+            Ok(Token::Keyword(KeywordName::Types)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Constants))) => {},
+            Ok(Token::Keyword(KeywordName::Constants)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Predicates))) => {},
+            Ok(Token::Keyword(KeywordName::Predicates)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Init))) => {},
+            Ok(Token::Keyword(KeywordName::Init)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::HTN))) => {},
+            Ok(Token::Keyword(KeywordName::HTN)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Action))) => {},
+            Ok(Token::Keyword(KeywordName::Action)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Parameters))) => {},
+            Ok(Token::Keyword(KeywordName::Parameters)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Method))) => {},
+            Ok(Token::Keyword(KeywordName::Method)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Precondition))) => {},
+            Ok(Token::Keyword(KeywordName::Precondition)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Effect))) => {},
+            Ok(Token::Keyword(KeywordName::Effect)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Subtasks))) => {},
+            Ok(Token::Keyword(KeywordName::Subtasks)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Subtasks))) => {},
+            Ok(Token::Keyword(KeywordName::Subtasks)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks))) => {},
+            Ok(Token::Keyword(KeywordName::OrderedSubtasks)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks))) => {},
+            Ok(Token::Keyword(KeywordName::OrderedSubtasks)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Ordering))) => {},
+            Ok(Token::Keyword(KeywordName::Ordering)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Ordering))) => {},
+            Ok(Token::Keyword(KeywordName::Ordering)) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Constraints))) => {},
+            Ok(Token::Keyword(KeywordName::Constraints)) => {},
             _ => panic!("wrong token")
         }
     }
@@ -213,19 +213,19 @@ mod lexer_test {
         ).into_bytes();
         let lexer = LexicalAnalyzer::new(program);
         match lexer.get_token() {
-            Ok(Some(Token::Identifier("var123"))) => {},
+            Ok(Token::Identifier("var123")) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Identifier("var_3123"))) => {},
+            Ok(Token::Identifier("var_3123")) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Identifier("te23"))) => {},
+            Ok(Token::Identifier("te23")) => {},
             _ => panic!("wrong token")
         }
         match lexer.get_token() {
-            Ok(Some(Token::Identifier("v"))) => {},
+            Ok(Token::Identifier("v")) => {},
             _ => panic!("wrong token")
         }
     }
@@ -254,10 +254,10 @@ mod lexer_test {
             let peek = lexer.lookahead();
             let actual = lexer.get_token();
             match actual {
-                Ok(None) => {break;}
+                Ok(Token::EOF) => {break;}
                 _ => {}
             }
-            assert_eq!(peek.unwrap().as_ref(), actual.unwrap().as_ref());
+            assert_eq!(peek.unwrap(), actual.unwrap());
         }
     }
 }

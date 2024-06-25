@@ -2,23 +2,23 @@ use super::*;
 
 impl<'a> Parser<'a> {
     pub fn parse_method(&'a self) -> Result<Method<'a>, SyntacticError> {
-        if let Ok(Some(Token::Identifier(method_name))) = self.tokenizer.get_token() {
-            if let Ok(Some(Token::Keyword(KeywordName::Parameters))) = self.tokenizer.get_token() {
-                if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+        if let Ok(Token::Identifier(method_name)) = self.tokenizer.get_token() {
+            if let Ok(Token::Keyword(KeywordName::Parameters)) = self.tokenizer.get_token() {
+                if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
                     self.tokenizer.get_token()
                 {
                     let params = self.parse_args()?;
-                    if let Ok(Some(Token::Keyword(KeywordName::Task))) = self.tokenizer.get_token()
+                    if let Ok(Token::Keyword(KeywordName::Task)) = self.tokenizer.get_token()
                     {
-                        if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+                        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
                             self.tokenizer.get_token()
                         {
-                            if let Ok(Some(Token::Identifier(task_name))) =
+                            if let Ok(Token::Identifier(task_name)) =
                                 self.tokenizer.get_token()
                             {
                                 let terms = self.parse_args()?;
                                 match self.tokenizer.lookahead() {
-                                    Ok(Some(Token::Keyword(KeywordName::Precondition))) => {
+                                    Ok(Token::Keyword(KeywordName::Precondition)) => {
                                         // skip "precondition" keyword
                                         let _ = self.tokenizer.get_token();
                                         let precondition = self.parse_formula()?;
@@ -32,8 +32,8 @@ impl<'a> Parser<'a> {
                                             tn,
                                         });
                                     }
-                                    Ok(Some(Token::Keyword(KeywordName::Subtasks))) |
-                                    Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks))) => {
+                                    Ok(Token::Keyword(KeywordName::Subtasks)) |
+                                    Ok(Token::Keyword(KeywordName::OrderedSubtasks)) => {
                                         let tn = self.parse_htn()?;
                                         return Ok(Method {
                                             name: method_name,

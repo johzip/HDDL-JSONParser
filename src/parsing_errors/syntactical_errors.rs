@@ -1,8 +1,8 @@
 use super::Token;
 
 pub struct SyntacticError<'a> {  
-    pub expected: Vec<Token<'a>>,
-    pub found: &'a str,
+    pub expected: String,
+    pub found: Token<'a>,
     pub line_number: u32,
-    pub description: &'static str,
+    pub solution: &'static str
 }

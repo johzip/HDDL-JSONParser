@@ -5,9 +5,9 @@ impl<'a> Parser<'a> {
         loop {
             let token = self.tokenizer.get_token();
             match token {
-                Ok(Some(Token::Keyword(KeywordName::Parameters))) => {
+                Ok(Token::Keyword(KeywordName::Parameters)) => {
                     // TODO: there may not be any parrameters
-                    if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) = self.tokenizer.get_token() {
+                    if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
                         let params = self.parse_args()?;
                         let init_tn = self.parse_htn()?;
                         return Ok(InitialTaskNetwork {
@@ -32,20 +32,20 @@ impl<'a> Parser<'a> {
         let mut constraints = None;
 
         match self.tokenizer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Subtasks))) => {
+            Ok(Token::Keyword(KeywordName::Subtasks)) => {
                 subtasks = self.parse_subtasks()?;
                 loop {
                     match self.tokenizer.get_token() {
-                        Ok(Some(Token::Keyword(KeywordName::Ordering))) => {
-                            if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) = self.tokenizer.get_token() {
+                        Ok(Token::Keyword(KeywordName::Ordering)) => {
+                            if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
                                 match self.tokenizer.get_token() {
-                                    Ok(Some(Token::Operator(OperationType::And))) => {
+                                    Ok(Token::Operator(OperationType::And)) => {
                                         loop {
                                             match self.tokenizer.get_token() {
-                                                Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                                                Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                                                     orderings.extend(self.parse_ordering()?.into_iter());
                                                 },
-                                                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                                                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                                                     break;
                                                 },
                                                 _ => {
@@ -54,14 +54,14 @@ impl<'a> Parser<'a> {
                                             }
                                         }
                                     },
-                                    Ok(Some(Token::Operator(OperationType::LessThan))) => {
-                                        if let Ok(Some(Token::Identifier(t1))) = self.tokenizer.get_token() {
+                                    Ok(Token::Operator(OperationType::LessThan)) => {
+                                        if let Ok(Token::Identifier(t1)) = self.tokenizer.get_token() {
                                             loop {
                                                 match self.tokenizer.get_token() {
-                                                    Ok(Some(Token::Identifier(t2))) => {
+                                                    Ok(Token::Identifier(t2)) => {
                                                         orderings.push((t1, t2));
                                                     }
-                                                    Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                                                    Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                                                         break;
                                                     }
                                                     _ => {
@@ -81,10 +81,10 @@ impl<'a> Parser<'a> {
                                 panic!("unexpected")
                             }
                         },
-                        Ok(Some(Token::Keyword(KeywordName::Constraints))) => {
+                        Ok(Token::Keyword(KeywordName::Constraints)) => {
                             constraints = Some(self.parse_constraints()?);
                         },
-                        Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                        Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                             return Ok(HTN {
                                 subtasks,
                                 orderings: TaskOrdering::Partial(orderings),
@@ -97,10 +97,10 @@ impl<'a> Parser<'a> {
                     }
                 }
             },
-            Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks))) => {
+            Ok(Token::Keyword(KeywordName::OrderedSubtasks)) => {
                 subtasks = self.parse_subtasks()?;
                 match self.tokenizer.get_token() {
-                    Ok(Some(Token::Keyword(KeywordName::Constraints))) => {
+                    Ok(Token::Keyword(KeywordName::Constraints)) => {
                         constraints = Some(self.parse_constraints()?);
                         return Ok(HTN {
                             subtasks,
@@ -108,7 +108,7 @@ impl<'a> Parser<'a> {
                             constraints,
                         });
                     },
-                    Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                    Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                         return Ok(HTN {
                             subtasks,
                             orderings: TaskOrdering::Total,
@@ -129,14 +129,14 @@ impl<'a> Parser<'a> {
 
     fn parse_ordering(&self) -> Result<Vec<(&'a str, &'a str)>, SyntacticError> {
         let mut orderings: Vec<(&str, &str)> = vec![];
-        if let Ok(Some(Token::Operator(OperationType::LessThan))) = self.tokenizer.get_token() {
-            if let Ok(Some(Token::Identifier(t1))) = self.tokenizer.get_token() {
+        if let Ok(Token::Operator(OperationType::LessThan)) = self.tokenizer.get_token() {
+            if let Ok(Token::Identifier(t1)) = self.tokenizer.get_token() {
                 loop {
                     match self.tokenizer.get_token() {
-                        Ok(Some(Token::Identifier(t2))) => {
+                        Ok(Token::Identifier(t2)) => {
                             orderings.push((t1, t2));
                         }
-                        Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                        Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                             return Ok(orderings);
                         }
                         _ => {
@@ -153,18 +153,18 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_subtasks(&self) -> Result<Vec<Subtask>, SyntacticError> {
-        if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
             self.tokenizer.get_token()
         {
             match self.tokenizer.get_token() {
-                Ok(Some(Token::Operator(OperationType::And))) => {
+                Ok(Token::Operator(OperationType::And)) => {
                     let mut subtasks = vec![];
                     loop {
                         match self.tokenizer.get_token() {
-                            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                            Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                                 return Ok(subtasks);
                             }
-                            Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                            Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                                 subtasks.push(self.parse_subtask()?);
                             }
                             _ => {
@@ -173,7 +173,7 @@ impl<'a> Parser<'a> {
                         }
                     }
                 }
-                Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                     return Ok(vec![self.parse_subtask()?]);
                 }
                 _ => {
@@ -187,18 +187,18 @@ impl<'a> Parser<'a> {
 
     // parses a single subtask
     fn parse_subtask(&self) -> Result<Subtask, SyntacticError<'a>> {
-        if let Ok(Some(Token::Identifier(id))) = self.tokenizer.get_token() {
+        if let Ok(Token::Identifier(id)) = self.tokenizer.get_token() {
             let mut terms = vec![];
             match self.tokenizer.get_token() {
-                Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
-                    if let Ok(Some(Token::Identifier(task))) = self.tokenizer.get_token() {
+                Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
+                    if let Ok(Token::Identifier(task)) = self.tokenizer.get_token() {
                         loop {
                             match self.tokenizer.get_token() {
-                                Ok(Some(Token::Identifier(term))) => {
+                                Ok(Token::Identifier(term)) => {
                                     terms.push(term);
                                 }
-                                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
-                                    if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {
+                                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
+                                    if let Ok(Token::Punctuator(PunctuationType::RParentheses)) = self.tokenizer.get_token() {
                                         return Ok(Subtask {
                                             id: Some(id),
                                             task_symbol: task,
@@ -220,14 +220,14 @@ impl<'a> Parser<'a> {
                         panic!("expected subtask name")
                     }
                 }
-                Ok(Some(Token::Identifier(term))) => {
+                Ok(Token::Identifier(term)) => {
                     terms.push(term);
                     loop {
                         match self.tokenizer.get_token() {
-                            Ok(Some(Token::Identifier(term))) => {
+                            Ok(Token::Identifier(term)) => {
                                 terms.push(term);
                             }
-                            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                            Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                                 return Ok(Subtask {
                                     id: None,
                                     task_symbol: id,
@@ -241,7 +241,7 @@ impl<'a> Parser<'a> {
                         }
                     }
                 }
-                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                     return Ok(Subtask {
                         id: None,
                         task_symbol: id,
@@ -260,20 +260,20 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_constraints(&self) -> Result<Vec<Constraint<'a>>, SyntacticError> {
-        if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
             self.tokenizer.get_token()
         {
             let mut constraints = vec![];
             match self.tokenizer.get_token() {
-                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                     return Ok(constraints);
                 }
-                Ok(Some(Token::Operator(OperationType::And))) => loop {
+                Ok(Token::Operator(OperationType::And)) => loop {
                     match self.tokenizer.get_token() {
-                        Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                        Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                             constraints.push(self.parse_constraint()?);
                         }
-                        Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                        Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                             return Ok(constraints);
                         }
                         _ => {
@@ -292,15 +292,15 @@ impl<'a> Parser<'a> {
 
     pub fn parse_constraint(&self) -> Result<Constraint<'a>, SyntacticError> {
         match self.tokenizer.get_token() {
-            Ok(Some(Token::Operator(OperationType::Not))) => {
-                if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) =
+            Ok(Token::Operator(OperationType::Not)) => {
+                if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
                     self.tokenizer.get_token()
                 {
-                    if let Ok(Some(Token::Operator(OperationType::Equal))) =
+                    if let Ok(Token::Operator(OperationType::Equal)) =
                         self.tokenizer.get_token()
                     {
-                        if let Ok(Some(Token::Identifier(t1))) = self.tokenizer.get_token() {
-                            if let Ok(Some(Token::Identifier(t2))) = self.tokenizer.get_token() {
+                        if let Ok(Token::Identifier(t1)) = self.tokenizer.get_token() {
+                            if let Ok(Token::Identifier(t2)) = self.tokenizer.get_token() {
                                 return Ok(Constraint::NotEqual(t1, t2));
                             } else {
                                 panic!("expected task id2");
@@ -315,9 +315,9 @@ impl<'a> Parser<'a> {
                     panic!("expected '('")
                 }
             }
-            Ok(Some(Token::Operator(OperationType::Equal))) => {
-                if let Ok(Some(Token::Identifier(t1))) = self.tokenizer.get_token() {
-                    if let Ok(Some(Token::Identifier(t2))) = self.tokenizer.get_token() {
+            Ok(Token::Operator(OperationType::Equal)) => {
+                if let Ok(Token::Identifier(t1)) = self.tokenizer.get_token() {
+                    if let Ok(Token::Identifier(t2)) = self.tokenizer.get_token() {
                         return Ok(Constraint::Equal(t1, t2));
                     } else {
                         panic!("expected task id2");

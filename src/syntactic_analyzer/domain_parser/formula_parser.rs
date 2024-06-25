@@ -3,22 +3,22 @@ use super::*;
 impl<'a> Parser<'a> {
     pub fn parse_formula(&'a self) -> Result<Formula, SyntacticError<'a>> {
         match self.tokenizer.get_token() {
-            Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+            Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                 return Ok(Formula::Empty);
             },
-            Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+            Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                 match self.tokenizer.get_token() {
                     // Not Operation
-                    Ok(Some(Token::Operator(OperationType::Not))) => {
+                    Ok(Token::Operator(OperationType::Not)) => {
                         let formula = self.parse_formula()?;
-                        if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {
+                        if let Ok(Token::Punctuator(PunctuationType::RParentheses)) = self.tokenizer.get_token() {
                             return Ok(Formula::Not(Box::new(formula)));
                         } else {
                             panic!("expected ')'")
                         }
                     },
                     // And Connector
-                    Ok(Some(Token::Operator(OperationType::And))) => {
+                    Ok(Token::Operator(OperationType::And)) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -30,7 +30,7 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Xor Connector
-                    Ok(Some(Token::Operator(OperationType::Xor))) => {
+                    Ok(Token::Operator(OperationType::Xor)) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -42,7 +42,7 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Or Connector
-                    Ok(Some(Token::Operator(OperationType::Or))) => {
+                    Ok(Token::Operator(OperationType::Or)) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -54,14 +54,14 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Single Atom
-                    Ok(Some(Token::Identifier(name))) => {
+                    Ok(Token::Identifier(name)) => {
                         let predicate = Predicate {
                             name: name,
                             variables: self.parse_args()?
                         };
                         return Ok(Formula::Atom(predicate));
                     }
-                    Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                    Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                         return Ok(Formula::Empty);
                     }
                     // TODO: make this better
@@ -71,7 +71,7 @@ impl<'a> Parser<'a> {
                 }
             },
             // TODO: Complete this
-            Ok(Some(_)) => {
+            Ok(x) => {
                 todo!()
             },
             _ => {

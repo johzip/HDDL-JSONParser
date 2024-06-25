@@ -6,7 +6,8 @@ pub enum Token<'a> {
     Identifier(&'a str),
     Operator(OperationType),
     Punctuator(PunctuationType),
-    Requirement(RequirementType)
+    Requirement(RequirementType),
+    EOF
 }
 
 #[derive(Debug, PartialEq, Eq)]

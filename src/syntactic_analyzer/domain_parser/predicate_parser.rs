@@ -6,11 +6,11 @@ impl<'a> Parser<'a> {
         let mut predicates = vec![];
         while !finished {
             match self.tokenizer.get_token() {
-                Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
                     let predicate = self.parse_predicate_definition()?;
                     predicates.push(predicate);
                 }
-                Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) => {
+                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
                     finished = true;
                 }
                 _ => {
@@ -24,7 +24,7 @@ impl<'a> Parser<'a> {
 
     // parses a SINGLE predicate definition
     fn parse_predicate_definition(&'a self) -> Result<Predicate<'a>, SyntacticError<'a>> {
-        if let Ok(Some(Token::Identifier(predicate_name))) = self.tokenizer.get_token() {
+        if let Ok(Token::Identifier(predicate_name)) = self.tokenizer.get_token() {
             let predicate_arguments = self.parse_args()?;
             Ok(Predicate {
                 name: predicate_name,

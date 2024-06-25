@@ -18,18 +18,23 @@ impl LexicalAnalyzer {
         }
     }
     // get the next token without advancing the cursor
-    pub fn lookahead(&self) -> Result<Option<Token>, LexicalError> {
+    pub fn lookahead(&self) -> Result<Token, LexicalError> {
         return self.parse(true);
     }
 
-    pub fn get_token(&self) -> Result<Option<Token>, LexicalError> {
+    // get current line number
+    pub fn get_line_number(&self) -> u32 {
+        return self.line_number.get();
+    }
+
+    pub fn get_token(&self) -> Result<Token, LexicalError> {
         return self.parse(false);
     }
 
-    fn parse(&self, peek: bool) -> Result<Option<Token>, LexicalError> {
+    fn parse(&self, peek: bool) -> Result<Token, LexicalError> {
         self.skip_whitespaces();
         if self.cursor.get() == self.program.len() - 1 {
-            return Ok(None);
+            return Ok(Token::EOF);
         }
         if let Some(char) = self.peek_next_char() {
             if !peek {
@@ -37,11 +42,11 @@ impl LexicalAnalyzer {
             }
             match char {
                 // Punctuations
-                '-' => Ok(Some(Token::Punctuator(PunctuationType::Dash))),
-                '(' => Ok(Some(Token::Punctuator(PunctuationType::LParentheses))),
-                ')' => Ok(Some(Token::Punctuator(PunctuationType::RParentheses))),
+                '-' => Ok(Token::Punctuator(PunctuationType::Dash)),
+                '(' => Ok(Token::Punctuator(PunctuationType::LParentheses)),
+                ')' => Ok(Token::Punctuator(PunctuationType::RParentheses)),
                 // Ordering Relations
-                p @ ('<' | '>' | '=') => Ok(Some(Token::Operator(self.ordering_type(&p, peek)))),
+                p @ ('<' | '>' | '=') => Ok(Token::Operator(self.ordering_type(&p, peek))),
                 // Variables
                 '?' => {
                     let mut init_cur_pos = self.cursor.get();
@@ -52,7 +57,7 @@ impl LexicalAnalyzer {
                     if !peek {
                         self.cursor.set(new_cur_pos);
                     }
-                    Ok(Some(Token::Identifier(var_name)))
+                    Ok(Token::Identifier(var_name))
                 }
                 // Keywords (Note that 2 keywords, namely "domain" and "problem", can start without ':' as well)
                 ':' => {
@@ -66,35 +71,35 @@ impl LexicalAnalyzer {
                     }
                     match lexeme {
                         // Requirements
-                        "negative-preconditions" => Ok(Some(Token::Requirement(
+                        "negative-preconditions" => Ok(Token::Requirement(
                             RequirementType::NegativePreconditions,
-                        ))),
-                        "hierarchy" => Ok(Some(Token::Requirement(RequirementType::Hierarchy))),
-                        "method-preconditions" => Ok(Some(Token::Requirement(
+                        )),
+                        "hierarchy" => Ok(Token::Requirement(RequirementType::Hierarchy)),
+                        "method-preconditions" => Ok(Token::Requirement(
                             RequirementType::MethodPreconditions,
-                        ))),
-                        "typing" => Ok(Some(Token::Requirement(RequirementType::TypedObjects))),
-                        "universal-preconditions" => Ok(Some(Token::Requirement(RequirementType::UniversalPreconditions))),
+                        )),
+                        "typing" => Ok(Token::Requirement(RequirementType::TypedObjects)),
+                        "universal-preconditions" => Ok(Token::Requirement(RequirementType::UniversalPreconditions)),
                         // Keywords
-                        "requirements" => Ok(Some(Token::Keyword(KeywordName::Requirements))),
-                        "objects" => Ok(Some(Token::Keyword(KeywordName::Objects))),
-                        "types" => Ok(Some(Token::Keyword(KeywordName::Types))),
-                        "constants" => Ok(Some(Token::Keyword(KeywordName::Constants))),
-                        "predicates" => Ok(Some(Token::Keyword(KeywordName::Predicates))),
-                        "init" => Ok(Some(Token::Keyword(KeywordName::Init))),
-                        "htn" => Ok(Some(Token::Keyword(KeywordName::HTN))),
-                        "task" => Ok(Some(Token::Keyword(KeywordName::Task))),
-                        "action" => Ok(Some(Token::Keyword(KeywordName::Action))),
-                        "parameters" => Ok(Some(Token::Keyword(KeywordName::Parameters))),
-                        "method" => Ok(Some(Token::Keyword(KeywordName::Method))),
-                        "precondition" => Ok(Some(Token::Keyword(KeywordName::Precondition))),
-                        "effect" => Ok(Some(Token::Keyword(KeywordName::Effect))),
-                        "subtasks" | "tasks" => Ok(Some(Token::Keyword(KeywordName::Subtasks))),
+                        "requirements" => Ok(Token::Keyword(KeywordName::Requirements)),
+                        "objects" => Ok(Token::Keyword(KeywordName::Objects)),
+                        "types" => Ok(Token::Keyword(KeywordName::Types)),
+                        "constants" => Ok(Token::Keyword(KeywordName::Constants)),
+                        "predicates" => Ok(Token::Keyword(KeywordName::Predicates)),
+                        "init" => Ok(Token::Keyword(KeywordName::Init)),
+                        "htn" => Ok(Token::Keyword(KeywordName::HTN)),
+                        "task" => Ok(Token::Keyword(KeywordName::Task)),
+                        "action" => Ok(Token::Keyword(KeywordName::Action)),
+                        "parameters" => Ok(Token::Keyword(KeywordName::Parameters)),
+                        "method" => Ok(Token::Keyword(KeywordName::Method)),
+                        "precondition" => Ok(Token::Keyword(KeywordName::Precondition)),
+                        "effect" => Ok(Token::Keyword(KeywordName::Effect)),
+                        "subtasks" | "tasks" => Ok(Token::Keyword(KeywordName::Subtasks)),
                         "ordered-subtasks" | "ordered-tasks" => {
-                            Ok(Some(Token::Keyword(KeywordName::OrderedSubtasks)))
+                            Ok(Token::Keyword(KeywordName::OrderedSubtasks))
                         }
-                        "ordering" | "order" => Ok(Some(Token::Keyword(KeywordName::Ordering))),
-                        "constraints" => Ok(Some(Token::Keyword(KeywordName::Constraints))),
+                        "ordering" | "order" => Ok(Token::Keyword(KeywordName::Ordering)),
+                        "constraints" => Ok(Token::Keyword(KeywordName::Constraints)),
 
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,
@@ -115,17 +120,17 @@ impl LexicalAnalyzer {
                     }
                     match lexeme {
                         // Remaining Keywords
-                        "define" => return Ok(Some(Token::Keyword(KeywordName::Define))),
-                        "domain" => return Ok(Some(Token::Keyword(KeywordName::Domain))),
-                        "problem" => return Ok(Some(Token::Keyword(KeywordName::Problem))),
+                        "define" => return Ok(Token::Keyword(KeywordName::Define)),
+                        "domain" => return Ok(Token::Keyword(KeywordName::Domain)),
+                        "problem" => return Ok(Token::Keyword(KeywordName::Problem)),
                         _ => {
                             // Logical Operators
                             match LexicalAnalyzer::is_logical_operator(&lexeme) {
-                                Some(x) => return Ok(Some(Token::Operator(x))),
+                                Some(x) => return Ok(Token::Operator(x)),
                                 // Identifier
                                 None => {
                                     if lexeme.chars().all(|c| c.is_alphanumeric() || c == '_') {
-                                        return Ok(Some(Token::Identifier(lexeme)));
+                                        return Ok(Token::Identifier(lexeme));
                                     } else {
                                         Err(LexicalError {
                                             error_type: LexicalErrorType::InvalidIdentifier,
@@ -140,7 +145,7 @@ impl LexicalAnalyzer {
                 }
             }
         } else {
-            Ok(None)
+            Ok(Token::EOF)
         }
     }
 

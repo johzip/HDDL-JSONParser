@@ -2,9 +2,9 @@ use super::*;
 
 impl <'a> Parser <'a> {
     pub fn parse_task(&self) -> Result<Task, SyntacticError<'a>>{
-        if let Ok(Some(Token::Identifier(task_name))) = self.tokenizer.get_token() {
-            if let Ok(Some(Token::Keyword(KeywordName::Parameters))) = self.tokenizer.get_token() {
-                if let Ok(Some(Token::Punctuator(PunctuationType::LParentheses))) = self.tokenizer.get_token() {
+        if let Ok(Token::Identifier(task_name)) = self.tokenizer.get_token() {
+            if let Ok(Token::Keyword(KeywordName::Parameters)) = self.tokenizer.get_token() {
+                if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
                     let list = self.parse_args();
                     match list {
                         Ok(parameters) => {

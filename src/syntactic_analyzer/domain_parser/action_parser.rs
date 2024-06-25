@@ -7,7 +7,7 @@ impl <'a> Parser <'a> {
         let mut effects = None;
         // Parse Preconditions
         match self.tokenizer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Precondition))) => {
+            Ok(Token::Keyword(KeywordName::Precondition)) => {
                 preconditions = Some(self.parse_formula()?);
             },
             _ => {
@@ -16,7 +16,7 @@ impl <'a> Parser <'a> {
         }
         // Parse Effects
         match self.tokenizer.get_token() {
-            Ok(Some(Token::Keyword(KeywordName::Effect))) => {
+            Ok(Token::Keyword(KeywordName::Effect)) => {
                 effects = Some(self.parse_formula()?);
             },
             _ => {
@@ -24,7 +24,7 @@ impl <'a> Parser <'a> {
             }            
         }
         // skip action block's closing parantheses
-        if let Ok(Some(Token::Punctuator(PunctuationType::RParentheses))) = self.tokenizer.get_token() {}
+        if let Ok(Token::Punctuator(PunctuationType::RParentheses)) = self.tokenizer.get_token() {}
         Ok(Action {
             name: task.name,
             parameters: task.parameters,
