@@ -1,24 +1,34 @@
+use crate::parsing_errors::ParsingError;
+
 use super::*;
 
 impl<'a> Parser<'a> {
-    pub fn parse_formula(&'a self) -> Result<Formula, SyntacticError<'a>> {
-        match self.tokenizer.get_token() {
-            Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
+    pub fn parse_formula(&'a self) -> Result<Formula, ParsingError<'a>> {
+        match self.tokenizer.get_token()? {
+            Token::Punctuator(PunctuationType::RParentheses) => {
                 return Ok(Formula::Empty);
             },
-            Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
-                match self.tokenizer.get_token() {
+            Token::Punctuator(PunctuationType::LParentheses) => {
+                match self.tokenizer.get_token()? {
                     // Not Operation
-                    Ok(Token::Operator(OperationType::Not)) => {
+                    Token::Operator(OperationType::Not) => {
                         let formula = self.parse_formula()?;
-                        if let Ok(Token::Punctuator(PunctuationType::RParentheses)) = self.tokenizer.get_token() {
-                            return Ok(Formula::Not(Box::new(formula)));
-                        } else {
-                            panic!("expected ')'")
+                        match self.tokenizer.get_token()? {
+                            Token::Punctuator(PunctuationType::RParentheses) => {
+                                return Ok(Formula::Not(Box::new(formula)));
+                            }
+                            token => {
+                                let error = SyntacticError{
+                                    expected: "closing the not operator with ')'".to_string(),
+                                    found: token,
+                                    line_number: self.tokenizer.get_line_number(),
+                                };
+                                return Err(ParsingError::Syntactic(error));
+                            }
                         }
                     },
                     // And Connector
-                    Ok(Token::Operator(OperationType::And)) => {
+                    Token::Operator(OperationType::And) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -30,7 +40,7 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Xor Connector
-                    Ok(Token::Operator(OperationType::Xor)) => {
+                    Token::Operator(OperationType::Xor) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -42,7 +52,7 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Or Connector
-                    Ok(Token::Operator(OperationType::Or)) => {
+                    Token::Operator(OperationType::Or) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -54,29 +64,30 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Single Atom
-                    Ok(Token::Identifier(name)) => {
+                    Token::Identifier(name) => {
                         let predicate = Predicate {
                             name: name,
                             variables: self.parse_args()?
                         };
                         return Ok(Formula::Atom(predicate));
                     }
-                    Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
+                    Token::Punctuator(PunctuationType::RParentheses) => {
                         return Ok(Formula::Empty);
                     }
-                    // TODO: make this better
-                    err => {
-                        panic!("unexpected token {:?}", err)
+                    token => {
+                        let error = SyntacticError{
+                            expected: "a boolean formula".to_string(),
+                            found: token,
+                            line_number: self.tokenizer.get_line_number(),
+                        };
+                        return Err(ParsingError::Syntactic(error));
                     }
                 }
             },
             // TODO: Complete this
-            Ok(x) => {
+            token => {
                 todo!()
             },
-            _ => {
-                panic!("error")
-            }
         }
     }
 }

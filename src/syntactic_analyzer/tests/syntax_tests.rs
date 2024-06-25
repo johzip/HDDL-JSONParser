@@ -272,7 +272,7 @@ mod tests {
         let program = String::from(
             "(define (problem p1) (domain bal)
              (:htn
-                :parameters ()
+                :parameters (?d)
                 :subtasks (and
                     (task0 (deliver package_0 city_loc_0))
                     (task1 (retrieve package_1 city_loc_2 truck3))
@@ -287,7 +287,14 @@ mod tests {
         match Parser::new(&lexer).parse() {
             Ok(ast) => match ast.init_tn {
                 Some(tn) => {
-                    assert_eq!(tn.parameters.is_none(), true);
+                    match tn.parameters {
+                        Some(p) => {
+                            assert_eq!(p.len(), 1);
+                            assert_eq!(p[0].name, "d");
+                            assert_eq!(p[0].var_type.is_none(), true);
+                        }
+                        _ => panic!("wrong set of params")
+                    }
                     match tn.tn.orderings {
                         TaskOrdering::Partial(o) => {
                             assert_eq!(o.contains(&("task0", "task1")), true);
@@ -325,7 +332,6 @@ mod tests {
         let program = String::from(
             "(define (problem p1) (domain bal)
              (:htn
-                :parameters ()
                 :ordered-tasks (and
                     (deliver package_0 city_loc_0)
                     (retrieve package_1 city_loc_2 truck3)

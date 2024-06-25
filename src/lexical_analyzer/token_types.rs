@@ -45,6 +45,25 @@ pub enum OperationType {
     GreaterThanOrEqual,
 }
 
+impl fmt::Display for OperationType {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            OperationType::Or => write!(fmt, "or"),
+            OperationType::Not => write!(fmt, "not"),
+            OperationType::And => write!(fmt, "and"),
+            OperationType::Xor => write!(fmt, "oneof"),
+            OperationType::ForAll => write!(fmt, "forall"),
+            OperationType::Exists => write!(fmt, "exists"),
+            OperationType::Implication => write!(fmt, "when"),
+            OperationType::Equal => write!(fmt, "="),
+            OperationType::LessThan => write!(fmt, "<"),
+            OperationType::GreaterThan => write!(fmt, ">"),
+            OperationType::LessThanOrEqual => write!(fmt, "<="),
+            OperationType::GreaterThanOrEqual => write!(fmt, ">="),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum RequirementType {
     MethodPreconditions,

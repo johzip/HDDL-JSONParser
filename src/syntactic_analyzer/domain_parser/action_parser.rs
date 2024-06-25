@@ -1,30 +1,53 @@
+use crate::parsing_errors::ParsingError;
+
 use super::*;
 
 impl <'a> Parser <'a> {
-    pub fn parse_action(&'a self) -> Result<Action, SyntacticError<'a>> {
+    pub fn parse_action(&'a self) -> Result<Action, ParsingError<'a>> {
         let task = self.parse_task()?;
         let mut preconditions = None;
         let mut effects = None;
         // Parse Preconditions
-        match self.tokenizer.get_token() {
-            Ok(Token::Keyword(KeywordName::Precondition)) => {
+        match self.tokenizer.get_token()? {
+            Token::Keyword(KeywordName::Precondition) => {
                 preconditions = Some(self.parse_formula()?);
             },
-            _ => {
-                panic!("expected keyword ':precondition'")
+            token => {
+                let error = SyntacticError{
+                    expected: format!("(potentially empty) preconditions of {}", task.name).to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error))
             }            
         }
         // Parse Effects
-        match self.tokenizer.get_token() {
-            Ok(Token::Keyword(KeywordName::Effect)) => {
+        match self.tokenizer.get_token()? {
+            Token::Keyword(KeywordName::Effect) => {
                 effects = Some(self.parse_formula()?);
             },
-            _ => {
-                panic!("expected keyword ':effects'")
+            token => {
+                let error = SyntacticError{
+                    expected: format!("(potentially empty) effects of {}", task.name).to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error))
             }            
         }
         // skip action block's closing parantheses
-        if let Ok(Token::Punctuator(PunctuationType::RParentheses)) = self.tokenizer.get_token() {}
+        match self.tokenizer.get_token()? {
+            Token::Punctuator(PunctuationType::RParentheses) => {},
+            token => {
+                let error = SyntacticError {
+                    expected: format!("closing the scope of {} using ')'", task.name).to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error));
+            }
+        }
+
         Ok(Action {
             name: task.name,
             parameters: task.parameters,

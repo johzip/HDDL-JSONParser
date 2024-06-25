@@ -1,125 +1,169 @@
+use crate::parsing_errors::ParsingError;
+
 use super::*;
 
 impl<'a> Parser<'a> {
-    pub fn parse_initial_tn(&'a self) -> Result<InitialTaskNetwork<'a>, SyntacticError> {
+    pub fn parse_initial_tn(&'a self) -> Result<InitialTaskNetwork<'a>, ParsingError> {
         loop {
-            let token = self.tokenizer.get_token();
-            match token {
-                Ok(Token::Keyword(KeywordName::Parameters)) => {
-                    // TODO: there may not be any parrameters
-                    if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
-                        let params = self.parse_args()?;
-                        let init_tn = self.parse_htn()?;
-                        return Ok(InitialTaskNetwork {
-                            parameters: if params.len() == 0 {None} else {Some(params)},
-                            tn: init_tn
-                        });
-                    } else {
-                        panic!("expected '('")
+            match self.tokenizer.lookahead()? {
+                Token::Keyword(KeywordName::Parameters) => {
+                    let _ = self.tokenizer.get_token()?;
+                    match self.tokenizer.get_token()? {
+                        Token::Punctuator(PunctuationType::LParentheses) => {
+                            return Ok(InitialTaskNetwork {
+                                parameters: Some(self.parse_args()?),
+                                tn: self.parse_htn()?,
+                            });
+                        }
+                        token => {
+                            let error = SyntacticError {
+                                expected: "'(' afer keyword :parameters".to_string(),
+                                found: token,
+                                line_number: self.tokenizer.get_line_number(),
+                            };
+                            return Err(ParsingError::Syntactic(error));
+                        }
                     }
                 }
-                _ => {
-                    // TODO: better error handling
-                    panic!("ill defined init tn");
+                Token::Keyword(KeywordName::Subtasks)
+                | Token::Keyword(KeywordName::OrderedSubtasks) => {
+                    return Ok(InitialTaskNetwork {
+                        parameters: None,
+                        tn: self.parse_htn()?,
+                    });
+                }
+                token => {
+                    let error = SyntacticError {
+                        expected: "expected the definition of the initial task network".to_string(),
+                        found: token,
+                        line_number: self.tokenizer.get_line_number(),
+                    };
+                    return Err(ParsingError::Syntactic(error));
                 }
             }
         }
     }
 
-    pub fn parse_htn(&'a self) -> Result<HTN<'a>, SyntacticError> {
+    pub fn parse_htn(&'a self) -> Result<HTN<'a>, ParsingError> {
         let mut subtasks = vec![];
         let mut orderings = vec![];
         let mut constraints = None;
 
-        match self.tokenizer.get_token() {
-            Ok(Token::Keyword(KeywordName::Subtasks)) => {
+        match self.tokenizer.get_token()? {
+            Token::Keyword(KeywordName::Subtasks) => {
                 subtasks = self.parse_subtasks()?;
                 loop {
-                    match self.tokenizer.get_token() {
-                        Ok(Token::Keyword(KeywordName::Ordering)) => {
-                            if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
-                                match self.tokenizer.get_token() {
-                                    Ok(Token::Operator(OperationType::And)) => {
-                                        loop {
-                                            match self.tokenizer.get_token() {
-                                                Ok(Token::Punctuator(PunctuationType::LParentheses)) => {
-                                                    orderings.extend(self.parse_ordering()?.into_iter());
-                                                },
-                                                Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
+                    match self.tokenizer.get_token()? {
+                        Token::Keyword(KeywordName::Ordering) => {
+                            match self.tokenizer.get_token()? {
+                                Token::Punctuator(PunctuationType::LParentheses) => {
+                                    match self.tokenizer.get_token()? {
+                                        Token::Operator(OperationType::And) => loop {
+                                            match self.tokenizer.get_token()? {
+                                                Token::Punctuator(
+                                                    PunctuationType::LParentheses,
+                                                ) => {
+                                                    orderings
+                                                        .extend(self.parse_ordering()?.into_iter());
+                                                }
+                                                Token::Punctuator(
+                                                    PunctuationType::RParentheses,
+                                                ) => {
                                                     break;
-                                                },
+                                                }
                                                 _ => {
+                                                    // TODO:
                                                     panic!("unexpected")
                                                 }
                                             }
-                                        }
-                                    },
-                                    Ok(Token::Operator(OperationType::LessThan)) => {
-                                        if let Ok(Token::Identifier(t1)) = self.tokenizer.get_token() {
-                                            loop {
-                                                match self.tokenizer.get_token() {
-                                                    Ok(Token::Identifier(t2)) => {
-                                                        orderings.push((t1, t2));
-                                                    }
-                                                    Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
-                                                        break;
-                                                    }
-                                                    _ => {
-                                                        panic!("unexpected");
+                                        },
+                                        Token::Operator(OperationType::LessThan) => {
+                                            if let Ok(Token::Identifier(t1)) =
+                                                self.tokenizer.get_token()
+                                            {
+                                                loop {
+                                                    match self.tokenizer.get_token() {
+                                                        Ok(Token::Identifier(t2)) => {
+                                                            orderings.push((t1, t2));
+                                                        }
+                                                        Ok(Token::Punctuator(
+                                                            PunctuationType::RParentheses,
+                                                        )) => {
+                                                            break;
+                                                        }
+                                                        _ => {
+                                                            panic!("unexpected");
+                                                        }
                                                     }
                                                 }
+                                            } else {
+                                                panic!("unexpected")
                                             }
-                                        } else {
+                                        }
+                                        _ => {
                                             panic!("unexpected")
                                         }
                                     }
-                                    _ => {
-                                        panic!("unexpected")
-                                    }
                                 }
-                            } else {
-                                panic!("unexpected")
+                                token => {
+                                    let error = SyntacticError {
+                                        expected: "'('".to_string(),
+                                        found: token,
+                                        line_number: self.tokenizer.get_line_number(),
+                                    };
+                                    return Err(ParsingError::Syntactic(error));
+                                }
                             }
-                        },
-                        Ok(Token::Keyword(KeywordName::Constraints)) => {
+                        }
+                        Token::Keyword(KeywordName::Constraints) => {
                             constraints = Some(self.parse_constraints()?);
-                        },
-                        Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
+                        }
+                        Token::Punctuator(PunctuationType::RParentheses) => {
                             return Ok(HTN {
                                 subtasks,
                                 orderings: TaskOrdering::Partial(orderings),
                                 constraints,
                             });
-                        },
-                        p @ _ => {
-                            panic!("unexpected {:?}", p)
+                        }
+                        token => {
+                            let error = SyntacticError {
+                                expected: "the (potentially empty) ordering constraints of the task network".to_string(),
+                                found: token,
+                                line_number: self.tokenizer.get_line_number(),
+                            };
+                            return Err(ParsingError::Syntactic(error));
                         }
                     }
                 }
-            },
-            Ok(Token::Keyword(KeywordName::OrderedSubtasks)) => {
+            }
+            Token::Keyword(KeywordName::OrderedSubtasks) => {
                 subtasks = self.parse_subtasks()?;
-                match self.tokenizer.get_token() {
-                    Ok(Token::Keyword(KeywordName::Constraints)) => {
+                match self.tokenizer.get_token()? {
+                    Token::Keyword(KeywordName::Constraints) => {
                         constraints = Some(self.parse_constraints()?);
                         return Ok(HTN {
                             subtasks,
                             orderings: TaskOrdering::Total,
                             constraints,
                         });
-                    },
-                    Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
+                    }
+                    Token::Punctuator(PunctuationType::RParentheses) => {
                         return Ok(HTN {
                             subtasks,
                             orderings: TaskOrdering::Total,
                             constraints,
                         });
                     }
-                    _ => {
-                        panic!("unexpected")
+                    token => {
+                        let error = SyntacticError {
+                            expected: "closing ')' after task network definition".to_string(),
+                            found: token,
+                            line_number: self.tokenizer.get_line_number(),
+                        };
+                        return Err(ParsingError::Syntactic(error));
                     }
                 }
-            },
+            }
             err => {
                 // TODO: better error handling
                 panic!("expected subtask definitions, found {:?}", err)
@@ -153,9 +197,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_subtasks(&self) -> Result<Vec<Subtask>, SyntacticError> {
-        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
-            self.tokenizer.get_token()
-        {
+        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
             match self.tokenizer.get_token() {
                 Ok(Token::Operator(OperationType::And)) => {
                     let mut subtasks = vec![];
@@ -198,16 +240,17 @@ impl<'a> Parser<'a> {
                                     terms.push(term);
                                 }
                                 Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
-                                    if let Ok(Token::Punctuator(PunctuationType::RParentheses)) = self.tokenizer.get_token() {
+                                    if let Ok(Token::Punctuator(PunctuationType::RParentheses)) =
+                                        self.tokenizer.get_token()
+                                    {
                                         return Ok(Subtask {
                                             id: Some(id),
                                             task_symbol: task,
                                             terms: terms,
-                                        })
+                                        });
                                     } else {
                                         panic!("expected ')'")
                                     }
-                                    
                                 }
                                 _ => {
                                     //TODO:
@@ -260,9 +303,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_constraints(&self) -> Result<Vec<Constraint<'a>>, SyntacticError> {
-        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
-            self.tokenizer.get_token()
-        {
+        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
             let mut constraints = vec![];
             match self.tokenizer.get_token() {
                 Ok(Token::Punctuator(PunctuationType::RParentheses)) => {
@@ -296,9 +337,7 @@ impl<'a> Parser<'a> {
                 if let Ok(Token::Punctuator(PunctuationType::LParentheses)) =
                     self.tokenizer.get_token()
                 {
-                    if let Ok(Token::Operator(OperationType::Equal)) =
-                        self.tokenizer.get_token()
-                    {
+                    if let Ok(Token::Operator(OperationType::Equal)) = self.tokenizer.get_token() {
                         if let Ok(Token::Identifier(t1)) = self.tokenizer.get_token() {
                             if let Ok(Token::Identifier(t2)) = self.tokenizer.get_token() {
                                 return Ok(Constraint::NotEqual(t1, t2));

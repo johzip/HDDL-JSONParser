@@ -15,9 +15,7 @@ impl<'a> Parser<'a> {
     pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError<'a>> {
         let mut syntax_tree = SyntaxTree::new();
         // match opening '('
-        if let Token::Punctuator(PunctuationType::LParentheses) =
-            self.tokenizer.get_token()?
-        {
+        if let Token::Punctuator(PunctuationType::LParentheses) = self.tokenizer.get_token()? {
             // Determine file type
             match self.parse_document_type()? {
                 // Domain Definition
@@ -147,9 +145,7 @@ impl<'a> Parser<'a> {
         // match keyword 'define'
         if let Token::Keyword(KeywordName::Define) = self.tokenizer.get_token()? {
             // match '(' after keyword 'define
-            if let Token::Punctuator(PunctuationType::LParentheses) =
-                self.tokenizer.get_token()?
-            {
+            if let Token::Punctuator(PunctuationType::LParentheses) = self.tokenizer.get_token()? {
                 // match either 'domain' or 'problem'
                 match self.tokenizer.get_token()? {
                     Token::Keyword(KeywordName::Domain) => {
@@ -171,9 +167,7 @@ impl<'a> Parser<'a> {
                     }
                     Token::Keyword(KeywordName::Problem) => {
                         // match problem name
-                        if let Token::Identifier(problem_name) =
-                            self.tokenizer.get_token()?
-                        {
+                        if let Token::Identifier(problem_name) = self.tokenizer.get_token()? {
                             // match closing paranthesis
                             if let Token::Punctuator(PunctuationType::RParentheses) =
                                 self.tokenizer.get_token()?
@@ -255,6 +249,5 @@ impl<'a> Parser<'a> {
             }
         }
         return Ok(requirements);
-        
     }
 }
