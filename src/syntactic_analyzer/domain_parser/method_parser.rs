@@ -17,7 +17,6 @@ impl<'a> Parser<'a> {
                                 self.tokenizer.get_token()
                             {
                                 let terms = self.parse_args()?;
-                                // TODO: parse method preconditions if available
                                 match self.tokenizer.lookahead() {
                                     Ok(Some(Token::Keyword(KeywordName::Precondition))) => {
                                         // skip "precondition" keyword

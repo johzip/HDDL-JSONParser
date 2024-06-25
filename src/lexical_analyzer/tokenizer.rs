@@ -48,7 +48,7 @@ impl LexicalAnalyzer {
                     if peek {
                         init_cur_pos += 1;
                     }
-                    let (var_name, new_cur_pos) = self.peek_lexeme(init_cur_pos);
+                    let (var_name, new_cur_pos) = self.peek_lexeme(init_cur_pos)?;
                     if !peek {
                         self.cursor.set(new_cur_pos);
                     }
@@ -60,7 +60,7 @@ impl LexicalAnalyzer {
                     if peek {
                         init_cur_pos += 1;
                     }
-                    let (lexeme, new_cur_pos) = self.peek_lexeme(init_cur_pos);
+                    let (lexeme, new_cur_pos) = self.peek_lexeme(init_cur_pos)?;
                     if !peek {
                         self.cursor.set(new_cur_pos);
                     }
@@ -109,7 +109,7 @@ impl LexicalAnalyzer {
                     if peek {
                         init_cur_pos += 1;
                     }
-                    let (lexeme, new_cur_pos) = self.peek_lexeme(init_cur_pos);
+                    let (lexeme, new_cur_pos) = self.peek_lexeme(init_cur_pos)?;
                     if !peek {
                         self.cursor.set(new_cur_pos);
                     }
@@ -145,17 +145,21 @@ impl LexicalAnalyzer {
     }
 
     // get next lexeme and new cursor position (to commit peek)
-    fn peek_lexeme(&self, init_cur_pos: usize) -> (&str, usize) {
+    fn peek_lexeme(&self, init_cur_pos: usize) -> Result<(&str, usize), LexicalError> {
         let mut cursor_pos = init_cur_pos;
         let mut next_ch = self.program[cursor_pos] as char;
-        let is_valid_character = |c| match c {
+        let mut is_invalid = false;
+        let mut is_valid_character = |c| match c {
             '_' | '-' => true,
             ')' | '(' => false,
             _ => {
                 if LexicalAnalyzer::is_whitespace(&c) {
                     false
                 } else {
-                    c.is_alphanumeric()
+                    if !c.is_alphanumeric() {
+                        is_invalid = true;
+                    }
+                    true
                 }
             }
         };
@@ -167,7 +171,15 @@ impl LexicalAnalyzer {
                 break;
             }
         }
-        (from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(), cursor_pos)
+        if is_invalid {
+            return Err(LexicalError {
+                error_type: LexicalErrorType::InvalidIdentifier,
+                line_number: self.line_number.get(),
+                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap()
+            })
+        } else {
+            return Ok((from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(), cursor_pos))
+        }
     }
 
     fn peek_next_char(&self) -> Option<char> {

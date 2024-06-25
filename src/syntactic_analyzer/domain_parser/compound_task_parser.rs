@@ -1,5 +1,3 @@
-use std::error;
-
 use super::*;
 
 impl <'a> Parser <'a> {

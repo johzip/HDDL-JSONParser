@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Keyword(KeywordName),
@@ -12,6 +14,16 @@ pub enum PunctuationType {
     Dash,
     LParentheses,
     RParentheses,
+}
+
+impl fmt::Display for PunctuationType {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            PunctuationType::Dash => write!(fmt, "-"),
+            PunctuationType::LParentheses => write!(fmt, "("),
+            PunctuationType::RParentheses => write!(fmt, ")"),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
