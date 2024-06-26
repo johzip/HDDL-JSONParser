@@ -100,6 +100,7 @@ impl LexicalAnalyzer {
                         }
                         "ordering" | "order" => Ok(Token::Keyword(KeywordName::Ordering)),
                         "constraints" => Ok(Token::Keyword(KeywordName::Constraints)),
+                        "goal" => Ok(Token::Keyword(KeywordName::Goal)),
 
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,

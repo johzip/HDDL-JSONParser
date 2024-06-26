@@ -143,9 +143,23 @@ impl<'a> Parser<'a> {
                                             syntax_tree.add_init_tn(init_tn);
                                         }
                                         // goal state (optional)
-                                        _ => todo!(),
+                                        Token::Keyword(KeywordName::Goal) => {
+                                            let goal = self.parse_formula()?;
+                                            syntax_tree.add_goal(goal)
+                                        },
                                         // initial state
-                                        _ => todo!(),
+                                        // TODO:
+                                        Token::Keyword(KeywordName::Init) => {
+
+                                        }
+                                        token => {
+                                            let error = SyntacticError {
+                                                expected: "a keyword for block definition".to_string(),
+                                                found: token,
+                                                line_number: self.tokenizer.get_line_number(),
+                                            };
+                                            return Err(ParsingError::Syntactic(error));
+                                        },
                                     }
                                 }
                                 Token::EOF | Token::Punctuator(PunctuationType::RParentheses) => {

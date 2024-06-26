@@ -13,6 +13,7 @@ pub struct SyntaxTree<'a> {
     pub init_tn: Option<InitialTaskNetwork<'a>>,
     pub methods: Vec<Method<'a>>,
     pub actions: Vec<Action<'a>>,
+    pub goal: Option<Formula<'a>>
 }
 
 impl<'a> SyntaxTree<'a> {
@@ -26,7 +27,8 @@ impl<'a> SyntaxTree<'a> {
             compound_tasks: vec![],
             init_tn: None,
             methods: vec![],
-            actions: vec![]
+            actions: vec![],
+            goal: None
         }
     }
     pub fn add_object(&mut self, name: &'a str) {
@@ -60,6 +62,10 @@ impl<'a> SyntaxTree<'a> {
 
     pub fn add_action(&mut self, action: Action<'a>) {
         self.actions.push(action);
+    }
+
+    pub fn add_goal(&mut self, goal: Formula<'a>) {
+        self.goal = Some(goal);
     }
 
     pub fn add_var_type(&mut self, var: Variable<'a>){

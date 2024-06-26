@@ -412,25 +412,29 @@ impl<'a> Parser<'a> {
                     Token::Operator(OperationType::And) => loop {
                         // skip lookahead
                         let _ = self.tokenizer.get_token();
-                        match self.tokenizer.get_token()? {
-                            Token::Punctuator(PunctuationType::LParentheses) => {
-                                constraints.push(self.parse_constraint()?);
-                            }
-                            Token::Punctuator(PunctuationType::RParentheses) => {
-                                return Ok(constraints);
-                            }
-                            token => {
-                                let error = SyntacticError{
-                                    expected: "constraint definition".to_string(),
-                                    found: token,
-                                    line_number: self.tokenizer.get_line_number(),
-                                };
-                                return Err(ParsingError::Syntactic(error));
+                        // parse each constraint
+                        loop {
+                            match self.tokenizer.get_token()? {
+                                Token::Punctuator(PunctuationType::LParentheses) => {
+                                    constraints.push(self.parse_constraint()?);
+                                }
+                                Token::Punctuator(PunctuationType::RParentheses) => {
+                                    return Ok(constraints);
+                                }
+                                token => {
+                                    let error = SyntacticError{
+                                        expected: "a constraint definition".to_string(),
+                                        found: token,
+                                        line_number: self.tokenizer.get_line_number(),
+                                    };
+                                    return Err(ParsingError::Syntactic(error));
+                                }
                             }
                         }
+                        
                     },
                     // single constraint declaration
-                    Token::Operator(OperationType::Not) | Token::Operator(OperationType::Equal)=> {
+                    Token::Operator(OperationType::Not) | Token::Operator(OperationType::Equal) => {
                         constraints.push(self.parse_constraint()?);
                         return Ok(constraints);
                     }

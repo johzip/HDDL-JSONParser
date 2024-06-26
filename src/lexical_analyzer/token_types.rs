@@ -95,4 +95,5 @@ pub enum KeywordName {
     OrderedSubtasks, // either "ordered-tasks" or "ordered-subtasks"
     Ordering,
     Constraints,
+    Goal
 }
