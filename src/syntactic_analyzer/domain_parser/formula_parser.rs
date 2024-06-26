@@ -84,9 +84,13 @@ impl<'a> Parser<'a> {
                     }
                 }
             },
-            // TODO: Complete this
             token => {
-                todo!()
+                let error = SyntacticError {
+                    expected: "a (potentially empty) boolean formula definition".to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error));
             },
         }
     }
