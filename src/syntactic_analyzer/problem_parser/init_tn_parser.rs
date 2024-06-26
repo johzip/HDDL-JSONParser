@@ -402,11 +402,16 @@ impl<'a> Parser<'a> {
         match self.tokenizer.get_token()? {
             Token::Punctuator(PunctuationType::LParentheses) => {
                 let mut constraints = vec![];
-                match self.tokenizer.get_token()? {
+                match self.tokenizer.lookahead()? {
                     Token::Punctuator(PunctuationType::RParentheses) => {
+                        // skip lookahead
+                        let _ = self.tokenizer.get_token();
                         return Ok(constraints);
                     }
+                    // mutiple constrait declarations
                     Token::Operator(OperationType::And) => loop {
+                        // skip lookahead
+                        let _ = self.tokenizer.get_token();
                         match self.tokenizer.get_token()? {
                             Token::Punctuator(PunctuationType::LParentheses) => {
                                 constraints.push(self.parse_constraint()?);
@@ -424,6 +429,11 @@ impl<'a> Parser<'a> {
                             }
                         }
                     },
+                    // single constraint declaration
+                    Token::Operator(OperationType::Not) | Token::Operator(OperationType::Equal)=> {
+                        constraints.push(self.parse_constraint()?);
+                        return Ok(constraints);
+                    }
                     token => {
                         let error = SyntacticError{
                             expected: "constraint declerations".to_string(),

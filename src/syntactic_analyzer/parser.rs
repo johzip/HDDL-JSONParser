@@ -15,129 +15,159 @@ impl<'a> Parser<'a> {
     pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError<'a>> {
         let mut syntax_tree = SyntaxTree::new();
         // match opening '('
-        if let Token::Punctuator(PunctuationType::LParentheses) = self.tokenizer.get_token()? {
-            // Determine file type
-            match self.parse_document_type()? {
-                // Domain Definition
-                DefinitionType::Domain(_) => {
-                    loop {
-                        match self.tokenizer.get_token()? {
-                            Token::Punctuator(PunctuationType::LParentheses) => {
-                                match self.tokenizer.get_token()? {
-                                    // predicate definition
-                                    Token::Keyword(KeywordName::Predicates) => {
-                                        let predicates = self.parse_predicates()?;
-                                        for predicate in predicates {
-                                            syntax_tree.add_predicate(predicate);
+        match self.tokenizer.get_token()? {
+            Token::Punctuator(PunctuationType::LParentheses) => {
+                // Determine file type
+                match self.parse_document_type()? {
+                    // Domain Definition
+                    DefinitionType::Domain(_) => {
+                        loop {
+                            match self.tokenizer.get_token()? {
+                                Token::Punctuator(PunctuationType::LParentheses) => {
+                                    match self.tokenizer.get_token()? {
+                                        // predicate definition
+                                        Token::Keyword(KeywordName::Predicates) => {
+                                            let predicates = self.parse_predicates()?;
+                                            for predicate in predicates {
+                                                syntax_tree.add_predicate(predicate);
+                                            }
                                         }
-                                    }
-                                    // compund task definition
-                                    Token::Keyword(KeywordName::Task) => {
-                                        let task: Task = self.parse_task()?;
-                                        if let Ok(Token::Punctuator(
-                                            PunctuationType::RParentheses,
-                                        )) = self.tokenizer.get_token()
-                                        {
-                                            syntax_tree.add_compound_task(task);
-                                        } else {
-                                            panic!("task block not closed");
-                                        }
-                                    }
-                                    // method definition
-                                    Token::Keyword(KeywordName::Method) => {
-                                        let method = self.parse_method()?;
-                                        syntax_tree.add_method(method);
-                                    }
-                                    // action definition
-                                    Token::Keyword(KeywordName::Action) => {
-                                        let action = self.parse_action()?;
-                                        syntax_tree.add_action(action);
-                                    }
-                                    // requirement declaration
-                                    Token::Keyword(KeywordName::Requirements) => {
-                                        let requirements = self.parse_requirements()?;
-                                        for requirement in requirements {
-                                            syntax_tree.add_requirement(requirement);
-                                        }
-                                    }
-                                    Token::Keyword(KeywordName::Types) => {
-                                        let var_types = self.parse_args()?;
-                                        for var_type in var_types {
-                                            syntax_tree.add_var_type(var_type);
-                                        }
-                                    }
-                                    Token::Keyword(KeywordName::Constants) => {
-                                        let constants = self.parse_args()?;
-                                        for constant in constants {
-                                            syntax_tree.add_constant(constant);
-                                        }
-                                    }
-                                    err => {
-                                        // TODO: better error handling
-                                        panic!("expected a keyword {:?}", err)
-                                    }
-                                }
-                            }
-                            Token::Punctuator(PunctuationType::RParentheses) => {
-                                break;
-                            }
-                            _ => {
-                                panic!("undefined");
-                            }
-                        }
-                    }
-                    return Ok(syntax_tree);
-                }
-                // Problem Definition
-                DefinitionType::Problem(_) => {
-                    loop {
-                        match self.tokenizer.get_token()? {
-                            Token::Punctuator(PunctuationType::LParentheses) => {
-                                // match declaration type
-                                match self.tokenizer.get_token()? {
-                                    // requirement declaration
-                                    Token::Keyword(KeywordName::Requirements) => {
-                                        let requirements = self.parse_requirements()?;
-                                        for requirement in requirements {
-                                            syntax_tree.add_requirement(requirement);
-                                        }
-                                    }
-                                    // objects declaration
-                                    Token::Keyword(KeywordName::Objects) => {
-                                        let objects = self.parse_args()?;
-                                        for object in objects {
-                                            match object.var_type {
-                                                Some(t) => {
-                                                    syntax_tree.add_typed_object(object.name, t);
+                                        // compund task definition
+                                        Token::Keyword(KeywordName::Task) => {
+                                            let task = self.parse_task()?;
+                                            match self.tokenizer.get_token()? {
+                                                Token::Punctuator(
+                                                    PunctuationType::RParentheses,
+                                                ) => {
+                                                    syntax_tree.add_compound_task(task);
                                                 }
-                                                None => {
-                                                    syntax_tree.add_object(object.name);
+                                                token => {
+                                                    let error = SyntacticError {
+                                                        expected: format!(
+                                                            "')' after definition of {}",
+                                                            task.name
+                                                        )
+                                                        .to_string(),
+                                                        found: token,
+                                                        line_number: self
+                                                            .tokenizer
+                                                            .get_line_number(),
+                                                    };
+                                                    return Err(ParsingError::Syntactic(error));
                                                 }
                                             }
                                         }
+                                        // method definition
+                                        Token::Keyword(KeywordName::Method) => {
+                                            let method = self.parse_method()?;
+                                            syntax_tree.add_method(method);
+                                        }
+                                        // action definition
+                                        Token::Keyword(KeywordName::Action) => {
+                                            let action = self.parse_action()?;
+                                            syntax_tree.add_action(action);
+                                        }
+                                        // requirement declaration
+                                        Token::Keyword(KeywordName::Requirements) => {
+                                            let requirements = self.parse_requirements()?;
+                                            for requirement in requirements {
+                                                syntax_tree.add_requirement(requirement);
+                                            }
+                                        }
+                                        // type hierarchy declaration
+                                        Token::Keyword(KeywordName::Types) => {
+                                            let var_types = self.parse_args()?;
+                                            for var_type in var_types {
+                                                syntax_tree.add_var_type(var_type);
+                                            }
+                                        }
+                                        // constants declaration
+                                        Token::Keyword(KeywordName::Constants) => {
+                                            let constants = self.parse_args()?;
+                                            for constant in constants {
+                                                syntax_tree.add_constant(constant);
+                                            }
+                                        }
+                                        token => {
+                                            let error = SyntacticError {
+                                                expected: "a keyword".to_string(),
+                                                found: token,
+                                                line_number: self.tokenizer.get_line_number(),
+                                            };
+                                            return Err(ParsingError::Syntactic(error));
+                                        }
                                     }
-                                    // initial task network declaration
-                                    Token::Keyword(KeywordName::HTN) => {
-                                        let init_tn = self.parse_initial_tn()?;
-                                        syntax_tree.add_init_tn(init_tn);
-                                    }
-                                    _ => todo!(),
+                                }
+                                Token::Punctuator(PunctuationType::RParentheses) => {
+                                    break;
+                                }
+                                _ => {
+                                    panic!("undefined");
                                 }
                             }
-                            Token::EOF | Token::Punctuator(PunctuationType::RParentheses) => {
-                                break;
-                            }
-                            err => {
-                                panic!("unexpected token {:?}", err)
+                        }
+                        return Ok(syntax_tree);
+                    }
+                    // Problem Definition
+                    DefinitionType::Problem(_) => {
+                        loop {
+                            match self.tokenizer.get_token()? {
+                                Token::Punctuator(PunctuationType::LParentheses) => {
+                                    // match declaration type
+                                    match self.tokenizer.get_token()? {
+                                        // requirement declaration
+                                        Token::Keyword(KeywordName::Requirements) => {
+                                            let requirements = self.parse_requirements()?;
+                                            for requirement in requirements {
+                                                syntax_tree.add_requirement(requirement);
+                                            }
+                                        }
+                                        // objects declaration
+                                        Token::Keyword(KeywordName::Objects) => {
+                                            let objects = self.parse_args()?;
+                                            for object in objects {
+                                                match object.var_type {
+                                                    Some(t) => {
+                                                        syntax_tree
+                                                            .add_typed_object(object.name, t);
+                                                    }
+                                                    None => {
+                                                        syntax_tree.add_object(object.name);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        // initial task network declaration
+                                        Token::Keyword(KeywordName::HTN) => {
+                                            let init_tn = self.parse_initial_tn()?;
+                                            syntax_tree.add_init_tn(init_tn);
+                                        }
+                                        // goal state (optional)
+                                        _ => todo!(),
+                                        // initial state
+                                        _ => todo!(),
+                                    }
+                                }
+                                Token::EOF | Token::Punctuator(PunctuationType::RParentheses) => {
+                                    break;
+                                }
+                                err => {
+                                    panic!("unexpected token {:?}", err)
+                                }
                             }
                         }
+                        Ok(syntax_tree)
                     }
-                    Ok(syntax_tree)
                 }
             }
-        } else {
-            // TODO: improve error handling
-            panic!("files should start with '('")
+            token => {
+                let error = SyntacticError{
+                    expected: "start of the file with '('".to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error));
+            }
         }
     }
 
@@ -242,9 +272,13 @@ impl<'a> Parser<'a> {
                 Token::Punctuator(PunctuationType::RParentheses) => {
                     finished = true;
                 }
-                _ => {
-                    // TODO: better error handling
-                    panic!("not a valid requirement")
+                token => {
+                    let error = SyntacticError {
+                        expected: "either a requirement or a ')'".to_string(),
+                        found: token,
+                        line_number: self.tokenizer.get_line_number(),
+                    };
+                    return Err(ParsingError::Syntactic(error));
                 }
             }
         }

@@ -266,7 +266,6 @@ mod tests {
         }
     }
 
-    // TODO: test constraints
     #[test]
     pub fn init_tn_parsing_test() {
         let program = String::from(
@@ -280,6 +279,7 @@ mod tests {
                 :ordering (and
                     (< task0 task1)
                 )
+                :constraints (not (= term1 term2))
             ) ",
         )
         .into_bytes();
@@ -316,6 +316,19 @@ mod tests {
                     assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
                     assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
                     assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
+
+                    match tn.tn.constraints {
+                        Some(constraint) => {
+                            assert_eq!(constraint.len(), 1);
+                            match constraint[0] {
+                                Constraint::NotEqual("term1", "term2") => {},
+                                _ => { panic!("constraint not parsed correctly")}
+                            }
+                        }
+                        _ => {
+                            panic!("constraints are not parsed")
+                        }
+                    }
                 }
                 None => {
                     panic!("init tn not parsed")
