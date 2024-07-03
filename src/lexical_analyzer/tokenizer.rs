@@ -109,6 +109,15 @@ impl LexicalAnalyzer {
                         }),
                     }
                 }
+                // Comment
+                ';' => {
+                        let mut current = self.program[self.cursor.get()] as char;
+                        while current != '\n' {
+                            self.cursor.set(self.cursor.get() + 1);
+                            current = self.program[self.cursor.get()] as char;
+                        }
+                        return self.get_token();
+                }
                 // Other
                 _ => {
                     let mut init_cur_pos = self.cursor.get() - 1;

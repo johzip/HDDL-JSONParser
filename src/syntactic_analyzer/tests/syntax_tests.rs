@@ -577,6 +577,40 @@ mod tests {
         }
     }
 
+
+    #[test]
+    pub fn comment_test() {
+        let program = String::from(
+            ";author: me
+            ; domain bal
+            (define (domain bal)
+                ;task c_1
+                (:task c_1
+                 :parameters (p_1 p_2 - t1 p_3 - t2) ;task parameters are defined here
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.compound_tasks.len(), 1);
+                let c_1 = &ast.compound_tasks[0];
+                assert_eq!(c_1.name, "c_1");
+                let c1_term_names: Vec<&str> =
+                    c_1.parameters.iter().map(|x| x.name).collect();
+                let c1_term_types: Vec<&str> = c_1
+                    .parameters
+                    .iter()
+                    .map(|x| x.var_type.unwrap())
+                    .collect();
+                assert_eq!(c1_term_names, vec!["p_1", "p_2", "p_3"]);
+                assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
+            }
+            Err(_) => panic!("parsing errors"),
+        }
+    }
+
     #[test]
     pub fn constants_declaration_test() {
         let program = String::from(
