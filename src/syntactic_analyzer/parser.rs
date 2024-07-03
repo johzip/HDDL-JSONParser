@@ -20,7 +20,7 @@ impl<'a> Parser<'a> {
                 // Determine file type
                 match self.parse_document_type()? {
                     // Domain Definition
-                    DefinitionType::Domain(_) => {
+                    DefinitionType::Domain(domain_name) => {
                         loop {
                             match self.tokenizer.get_token()? {
                                 Token::Punctuator(PunctuationType::LParentheses) => {
@@ -101,15 +101,20 @@ impl<'a> Parser<'a> {
                                 Token::Punctuator(PunctuationType::RParentheses) => {
                                     break;
                                 }
-                                _ => {
-                                    panic!("undefined");
+                                token => {
+                                    let error = SyntacticError {
+                                        expected: format!("either ')' to close the definition of {}, or '(' to start defining new components", domain_name),
+                                        found: token,
+                                        line_number: self.tokenizer.get_line_number(),
+                                    };
+                                    return Err(ParsingError::Syntactic(error));
                                 }
                             }
                         }
                         return Ok(syntax_tree);
                     }
                     // Problem Definition
-                    DefinitionType::Problem(_) => {
+                    DefinitionType::Problem(problem_name) => {
                         loop {
                             match self.tokenizer.get_token()? {
                                 Token::Punctuator(PunctuationType::LParentheses) => {
@@ -146,20 +151,19 @@ impl<'a> Parser<'a> {
                                         Token::Keyword(KeywordName::Goal) => {
                                             let goal = self.parse_formula()?;
                                             syntax_tree.add_goal(goal)
-                                        },
+                                        }
                                         // initial state
                                         // TODO:
-                                        Token::Keyword(KeywordName::Init) => {
-
-                                        }
+                                        Token::Keyword(KeywordName::Init) => {}
                                         token => {
                                             let error = SyntacticError {
-                                                expected: "a keyword for block definition".to_string(),
+                                                expected: "a keyword for block definition"
+                                                    .to_string(),
                                                 found: token,
                                                 line_number: self.tokenizer.get_line_number(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
-                                        },
+                                        }
                                     }
                                 }
                                 Token::EOF | Token::Punctuator(PunctuationType::RParentheses) => {
@@ -175,7 +179,7 @@ impl<'a> Parser<'a> {
                 }
             }
             token => {
-                let error = SyntacticError{
+                let error = SyntacticError {
                     expected: "start of the file with '('".to_string(),
                     found: token,
                     line_number: self.tokenizer.get_line_number(),
@@ -187,91 +191,162 @@ impl<'a> Parser<'a> {
 
     fn parse_document_type(&self) -> Result<DefinitionType, ParsingError> {
         // match keyword 'define'
-        if let Token::Keyword(KeywordName::Define) = self.tokenizer.get_token()? {
-            // match '(' after keyword 'define
-            if let Token::Punctuator(PunctuationType::LParentheses) = self.tokenizer.get_token()? {
-                // match either 'domain' or 'problem'
+        match self.tokenizer.get_token()? {
+            Token::Keyword(KeywordName::Define) => {
+                // match '(' after keyword 'define
                 match self.tokenizer.get_token()? {
-                    Token::Keyword(KeywordName::Domain) => {
-                        // match domain name
-                        if let Token::Identifier(domain_name) = self.tokenizer.get_token()? {
-                            // match closing paranthesis
-                            if let Token::Punctuator(PunctuationType::RParentheses) =
-                                self.tokenizer.get_token()?
-                            {
-                                return Ok(DefinitionType::Domain(domain_name));
-                            } else {
-                                // TODO: better error handling
-                                panic!("expected ')' found ...")
+                    Token::Punctuator(PunctuationType::LParentheses) => {
+                        // match either 'domain' or 'problem'
+                        match self.tokenizer.get_token()? {
+                            Token::Keyword(KeywordName::Domain) => {
+                                return self.parse_domain_header();
                             }
-                        } else {
-                            // TODO: better error handling
-                            panic!("expected domain name, found blah")
+                            Token::Keyword(KeywordName::Problem) => {
+                                return self.parse_problem_header();
+                            }
+                            token => {
+                                let error = SyntacticError {
+                                    expected: "either keyword 'domain' or 'problem'".to_string(),
+                                    found: token,
+                                    line_number: self.tokenizer.get_line_number(),
+                                };
+                                return Err(ParsingError::Syntactic(error));
+                            }
                         }
                     }
-                    Token::Keyword(KeywordName::Problem) => {
-                        // match problem name
-                        if let Token::Identifier(problem_name) = self.tokenizer.get_token()? {
-                            // match closing paranthesis
-                            if let Token::Punctuator(PunctuationType::RParentheses) =
-                                self.tokenizer.get_token()?
-                            {
-                                // match '(' for domain name
-                                if let Token::Punctuator(PunctuationType::LParentheses) =
-                                    self.tokenizer.get_token()?
-                                {
-                                    if let Token::Keyword(KeywordName::Domain) =
-                                        self.tokenizer.get_token()?
-                                    {
-                                        if let Token::Identifier(domain_name) =
-                                            self.tokenizer.get_token()?
-                                        {
-                                            if let Token::Punctuator(
-                                                PunctuationType::RParentheses,
-                                            ) = self.tokenizer.get_token()?
-                                            {
-                                                return Ok(DefinitionType::Problem(
-                                                    ProblemDefinition {
-                                                        domain_name: domain_name,
-                                                        problem_name: problem_name,
-                                                    },
-                                                ));
-                                            } else {
-                                                // TODO:
-                                                panic!("problem def name is not closed");
-                                            }
-                                        } else {
-                                            // TODO:
-                                            panic!("expected domain name")
-                                        }
-                                    } else {
-                                        // TODO:
-                                        panic!("expected ':domain")
-                                    }
-                                } else {
-                                    // TODO:
-                                    panic!("expected")
-                                }
-                            } else {
-                                // TODO: better error handling
-                                panic!("expected ')' found ...")
-                            }
-                        } else {
-                            // TODO: better error handling
-                            panic!("expected problem name, found blah")
-                        }
-                    }
-                    _ => {
-                        panic!("expected keyword problem/domain, found somethign else")
+                    token => {
+                        let error = SyntacticError {
+                            expected: "'(' after keyword 'define'".to_string(),
+                            found: token,
+                            line_number: self.tokenizer.get_line_number(),
+                        };
+                        return Err(ParsingError::Syntactic(error));
                     }
                 }
-            } else {
-                // TODO: better error handling
-                panic!("expected '(' after define")
             }
-        } else {
-            // TODO:
-            panic!("expected keyword 'define', but found something else")
+            token => {
+                let error = SyntacticError {
+                    expected: "keyword 'define'".to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error));
+            }
+        }
+    }
+
+    fn parse_domain_header(&self) -> Result<DefinitionType, ParsingError> {
+        match self.tokenizer.get_token()? {
+            Token::Identifier(domain_name) => {
+                // match closing paranthesis
+                match self.tokenizer.get_token()? {
+                    Token::Punctuator(PunctuationType::RParentheses) => {
+                        return Ok(DefinitionType::Domain(domain_name));
+                    }
+                    token => {
+                        let error = SyntacticError {
+                            expected: "')'".to_string(),
+                            found: token,
+                            line_number: self.tokenizer.get_line_number(),
+                        };
+                        return Err(ParsingError::Syntactic(error));
+                    }
+                }
+            }
+            token => {
+                let error = SyntacticError {
+                    expected: "domain name".to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error));
+            }
+        }
+    }
+
+    fn parse_problem_header(&self) -> Result<DefinitionType, ParsingError> {
+        // match problem name
+        match self.tokenizer.get_token()? {
+            Token::Identifier(problem_name) => {
+                // match closing paranthesis
+                match self.tokenizer.get_token()? {
+                    Token::Punctuator(PunctuationType::RParentheses) => {
+                        // match '(' for domain name
+                        match self.tokenizer.get_token()? {
+                            Token::Punctuator(PunctuationType::LParentheses) => {
+                                match self.tokenizer.get_token()? {
+                                    Token::Keyword(KeywordName::Domain) => {
+                                        match self.tokenizer.get_token()? {
+                                            Token::Identifier(domain_name) => {
+                                                match self.tokenizer.get_token()? {
+                                                    Token::Punctuator(
+                                                        PunctuationType::RParentheses,
+                                                    ) => {
+                                                        return Ok(DefinitionType::Problem(
+                                                            ProblemDefinition {
+                                                                domain_name: domain_name,
+                                                                problem_name: problem_name,
+                                                            },
+                                                        ));
+                                                    }
+                                                    token => {
+                                                        let error = SyntacticError {
+                                                            expected: format!("the block of the definition of problem '{}' is not closed with ')'", problem_name),
+                                                            found: token,
+                                                            line_number: self.tokenizer.get_line_number(),
+                                                        };
+                                                        return Err(ParsingError::Syntactic(error));
+                                                    }
+                                                }
+                                            }
+                                            token => {
+                                                let error = SyntacticError {
+                                                    expected: "domain name".to_string(),
+                                                    found: token,
+                                                    line_number: self.tokenizer.get_line_number(),
+                                                };
+                                                return Err(ParsingError::Syntactic(error));
+                                            }
+                                        }
+                                    }
+                                    token => {
+                                        let error = SyntacticError {
+                                            expected: "keyword 'domain'".to_string(),
+                                            found: token,
+                                            line_number: self.tokenizer.get_line_number(),
+                                        };
+                                        return Err(ParsingError::Syntactic(error));
+                                    }
+                                }
+                            }
+                            token => {
+                                let error = SyntacticError {
+                                    expected: "'('".to_string(),
+                                    found: token,
+                                    line_number: self.tokenizer.get_line_number(),
+                                };
+                                return Err(ParsingError::Syntactic(error));
+                            }
+                        }
+                    }
+                    token => {
+                        let error = SyntacticError {
+                            expected: "')'".to_string(),
+                            found: token,
+                            line_number: self.tokenizer.get_line_number(),
+                        };
+                        return Err(ParsingError::Syntactic(error));
+                    }
+                }
+            }
+            token => {
+                let error = SyntacticError {
+                    expected: "problem name".to_string(),
+                    found: token,
+                    line_number: self.tokenizer.get_line_number(),
+                };
+                return Err(ParsingError::Syntactic(error));
+            }
         }
     }
 
