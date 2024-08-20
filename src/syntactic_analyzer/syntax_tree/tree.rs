@@ -13,6 +13,7 @@ pub struct SyntaxTree<'a> {
     pub init_tn: Option<InitialTaskNetwork<'a>>,
     pub methods: Vec<Method<'a>>,
     pub actions: Vec<Action<'a>>,
+    pub init_state: Vec<Predicate<'a>>,
     pub goal: Option<Formula<'a>>
 }
 
@@ -28,6 +29,7 @@ impl<'a> SyntaxTree<'a> {
             init_tn: None,
             methods: vec![],
             actions: vec![],
+            init_state: vec![],
             goal: None
         }
     }
@@ -62,6 +64,10 @@ impl<'a> SyntaxTree<'a> {
 
     pub fn add_action(&mut self, action: Action<'a>) {
         self.actions.push(action);
+    }
+
+    pub fn add_init_state(&mut self, state: Vec<Predicate<'a>>) {
+        self.init_state = state;
     }
 
     pub fn add_goal(&mut self, goal: Formula<'a>) {

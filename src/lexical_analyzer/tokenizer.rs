@@ -102,7 +102,8 @@ impl LexicalAnalyzer {
                         "ordering" | "order" => Ok(Token::Keyword(KeywordName::Ordering)),
                         "constraints" => Ok(Token::Keyword(KeywordName::Constraints)),
                         "goal" => Ok(Token::Keyword(KeywordName::Goal)),
-
+                        "domain" => return Ok(Token::Keyword(KeywordName::Domain)),
+                        "problem" => return Ok(Token::Keyword(KeywordName::Problem)),
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,
                             line_number: self.line_number.get(),

@@ -353,6 +353,38 @@ mod tests {
     }
 
     #[test]
+    pub fn init_state_parsing_test() {
+        let program = String::from(
+            "(define (problem p1) (domain bal)
+             (:init
+                (pred1 arg1 arg2)
+                (pred2 arg1 arg2 arg3)
+            ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.init_state.len(), 2);
+                let pred1 = &ast.init_state[0];
+                let pred2 = &ast.init_state[1];
+                assert_eq!(pred1.name, "pred1");
+                assert_eq!(pred1.variables.len(), 2);
+                assert_eq!(pred1.variables[0].name, "arg1");
+                assert_eq!(pred1.variables[1].name, "arg2");
+                assert_eq!(pred2.name, "pred2");
+                assert_eq!(pred2.variables.len(), 3);
+                assert_eq!(pred2.variables[0].name, "arg1");
+                assert_eq!(pred2.variables[1].name, "arg2");
+                assert_eq!(pred2.variables[2].name, "arg3");
+            }
+            _ => {
+                panic!("wrong AST")
+            }
+        }
+    }
+
+    #[test]
     pub fn init_tn_parsing_test() {
         let program = String::from(
             "(define (problem p1) (domain bal)

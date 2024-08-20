@@ -153,8 +153,10 @@ impl<'a> Parser<'a> {
                                             syntax_tree.add_goal(goal)
                                         }
                                         // initial state
-                                        // TODO:
-                                        Token::Keyword(KeywordName::Init) => {}
+                                        Token::Keyword(KeywordName::Init) => {
+                                            let init_state = self.parse_predicates()?;
+                                            syntax_tree.add_init_state(init_state)
+                                        }
                                         token => {
                                             let error = SyntacticError {
                                                 expected: "a keyword for block definition"
