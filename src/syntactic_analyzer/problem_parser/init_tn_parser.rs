@@ -115,6 +115,8 @@ impl<'a> Parser<'a> {
                                                 }
                                             }
                                         }
+                                        // no ordering
+                                        Token::Punctuator(PunctuationType::RParentheses) => { }
                                         token => {
                                             let error = SyntacticError{
                                                 expected: "ordering constraints".to_string(),
