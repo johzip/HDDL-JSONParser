@@ -63,6 +63,46 @@ impl<'a> Parser<'a> {
                             }
                         }        
                     },
+                    // Equality
+                    Token::Operator(OperationType::Equal) => {
+                        match self.tokenizer.get_token()? {
+                            Token::Identifier(p1) => {
+                                match self.tokenizer.get_token()? {
+                                    Token::Identifier(p2) => {
+                                        match self.tokenizer.get_token()? {
+                                            Token::Punctuator(PunctuationType::RParentheses) => {
+                                                return Ok(Formula::Equals(p1, p2));
+                                            }
+                                            token => {
+                                                let error = SyntacticError{
+                                                    expected: "equality's closing parenthesis".to_string(),
+                                                    found: token,
+                                                    line_number: self.tokenizer.get_line_number(),
+                                                };
+                                                return Err(ParsingError::Syntactic(error));
+                                            }
+                                        }
+                                    }
+                                    token => {
+                                        let error = SyntacticError{
+                                            expected: "right hand side of the equality".to_string(),
+                                            found: token,
+                                            line_number: self.tokenizer.get_line_number(),
+                                        };
+                                        return Err(ParsingError::Syntactic(error));
+                                    }
+                                }
+                            }
+                            token => {
+                                let error = SyntacticError{
+                                    expected: "left hand side of the equality".to_string(),
+                                    found: token,
+                                    line_number: self.tokenizer.get_line_number(),
+                                };
+                                return Err(ParsingError::Syntactic(error));
+                            }
+                        }
+                    }
                     // Single Atom
                     Token::Identifier(name) => {
                         let predicate = Predicate {

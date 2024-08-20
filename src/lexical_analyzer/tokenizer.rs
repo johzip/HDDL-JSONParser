@@ -75,6 +75,7 @@ impl LexicalAnalyzer {
                             RequirementType::NegativePreconditions,
                         )),
                         "hierarchy" => Ok(Token::Requirement(RequirementType::Hierarchy)),
+                        "equality" => Ok(Token::Requirement(RequirementType::Equality)),
                         "method-preconditions" => Ok(Token::Requirement(
                             RequirementType::MethodPreconditions,
                         )),

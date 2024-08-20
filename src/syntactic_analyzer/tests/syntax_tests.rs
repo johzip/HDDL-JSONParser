@@ -199,7 +199,7 @@ mod tests {
                 (:method m_1
                     :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
                     :task (deliver_abs ?p1 ?l1 ?l2)
-                    :precondition (and (at ?p1 ?l3) (driver ?l1))
+                    :precondition (and (at ?p1 ?l3) (driver ?l1) (not (= ?l1 ?l2)))
                     :subtasks (and
                         (pickup ?p1 ?l1)
                         (deliver_abs ?p1 ?l2 ?l3)
@@ -230,7 +230,7 @@ mod tests {
                     Some(formula) => {
                         match formula {
                             Formula::And(predicates) => {
-                                assert_eq!(predicates.len(), 2);
+                                assert_eq!(predicates.len(), 3);
                                 let pred1 = &*predicates[0];
                                 match pred1 {
                                     Formula::Atom(pred) => {
@@ -246,6 +246,22 @@ mod tests {
                                     Formula::Atom(pred) => {
                                         assert_eq!(pred.name, "driver");
                                         assert_eq!(pred.variables.len(), 1);
+                                    },
+                                    _ => {
+                                        panic!("wrong formula parsing")
+                                    }
+                                }
+
+                                let neq = &*predicates[2];
+                                match neq {
+                                    Formula::Not(equality) => {
+                                        match **equality {
+                                            Formula::Equals(a, b) => {
+                                                assert_eq!(a, "l1");
+                                                assert_eq!(b, "l2");
+                                            }
+                                            _ => { panic!("equality constraint not parsed successfully")}
+                                        }
                                     },
                                     _ => {
                                         panic!("wrong formula parsing")

@@ -14,5 +14,5 @@ pub enum Formula<'a> {
     // ∀vars: formula 
     ForAll(Vec<&'a str>, Vec<Box<Formula<'a>>>),
     // formula = formula'
-    Equals(Vec<Box<Formula<'a>>>, Vec<Box<Formula<'a>>>)
+    Equals(&'a str, &'a str)
 }

@@ -70,7 +70,8 @@ pub enum RequirementType {
     Hierarchy,
     TypedObjects,
     NegativePreconditions,
-    UniversalPreconditions
+    UniversalPreconditions,
+    Equality
 }
 
 #[derive(Debug, PartialEq, Eq)]
