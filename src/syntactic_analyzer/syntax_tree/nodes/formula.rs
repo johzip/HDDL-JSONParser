@@ -12,7 +12,7 @@ pub enum Formula<'a> {
     // ∃vars: formula 
     Exists(Vec<&'a str>, Vec<Box<Formula<'a>>>),
     // ∀vars: formula 
-    ForAll(Vec<&'a str>, Vec<Box<Formula<'a>>>),
+    ForAll(Vec<Variable<'a>>, Box<Formula<'a>>),
     // formula = formula'
     Equals(&'a str, &'a str)
 }

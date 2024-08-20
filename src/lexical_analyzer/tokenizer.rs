@@ -140,7 +140,7 @@ impl LexicalAnalyzer {
                                 Some(x) => return Ok(Token::Operator(x)),
                                 // Identifier
                                 None => {
-                                    if lexeme.chars().all(|c| c.is_alphanumeric() || c == '_') {
+                                    if lexeme.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
                                         return Ok(Token::Identifier(lexeme));
                                     } else {
                                         Err(LexicalError {

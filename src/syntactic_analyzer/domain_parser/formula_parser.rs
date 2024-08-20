@@ -103,6 +103,41 @@ impl<'a> Parser<'a> {
                             }
                         }
                     }
+                    // Universal Quantifier
+                    Token::Operator(OperationType::ForAll) => {
+                        match self.tokenizer.get_token()? {
+                            Token::Punctuator(PunctuationType::LParentheses) => {
+                                let params = self.parse_args()?;
+                                let expression = Box::new(self.parse_formula()?);
+                                match self.tokenizer.get_token()? {
+                                    Token::Punctuator(PunctuationType::RParentheses) => {
+                                        return Ok(Formula::ForAll(params, expression));
+                                    }
+                                    token => {
+                                        let error = SyntacticError{
+                                            expected: "')' to close the forall statement".to_string(),
+                                            found: token,
+                                            line_number: self.tokenizer.get_line_number(),
+                                        };
+                                        return Err(ParsingError::Syntactic(error));
+                                    }
+                                }
+                            }
+                            token => {
+                                let error = SyntacticError{
+                                    expected: "'(' after forall keyword".to_string(),
+                                    found: token,
+                                    line_number: self.tokenizer.get_line_number(),
+                                };
+                                return Err(ParsingError::Syntactic(error));
+                            }
+                        }
+                    }
+                    // Existential Quantifier
+                    Token::Operator(OperationType::Exists) => {
+                        // TODO:
+                        todo!()
+                    }
                     // Single Atom
                     Token::Identifier(name) => {
                         let predicate = Predicate {

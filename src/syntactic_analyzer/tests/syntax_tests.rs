@@ -283,6 +283,76 @@ mod tests {
     }
 
     #[test]
+    pub fn universal_quantification_test() {
+        let program = String::from(
+            "(define (domain bal)
+                (:method m_1
+                    :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
+                    :task (deliver_abs ?p1 ?l1 ?l2)
+                    :precondition (forall (?l1 ?l2 - loc) (= ?l1 ?l2))
+                    :subtasks (and
+                        (pickup ?p1 ?l1)
+                        (deliver_abs ?p1 ?l2 ?l3)
+                    )
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(program);
+        match Parser::new(&lexer).parse() {
+            Ok(ast) => {
+                assert_eq!(ast.methods.len(), 1);
+                let method = &ast.methods[0];
+                assert_eq!(method.name, "m_1");
+                assert_eq!(method.task_name, "deliver_abs");
+                assert_eq!(method.task_terms.len(), 3);
+                assert_eq!(method.task_terms[0].name, "p1");
+                assert_eq!(method.task_terms[1].name, "l1");
+                assert_eq!(method.task_terms[2].name, "l2");
+                match &method.precondition {
+                    Some(formula) => {
+                        match formula {
+                            Formula::ForAll(params, exp) => {
+                                assert_eq!(params.len(), 2);
+                                assert_eq!(params[0].name, "l1");
+                                match params[0].var_type {
+                                    Some(x) => {
+                                        assert_eq!(x, "loc");
+                                    }
+                                    _ => { panic!("wrong parameter type") }
+                                }
+                                assert_eq!(params[1].name, "l2");
+                                match params[1].var_type {
+                                    Some(x) => {
+                                        assert_eq!(x, "loc");
+                                    }
+                                    _ => { panic!("wrong parameter type") }
+                                }
+                                match **exp {
+                                    Formula::Equals(a,b ) => {
+                                        assert_eq!(a, "l1");
+                                        assert_eq!(b, "l2");
+                                    }
+                                    _ => {
+                                        panic!("wrong expression parsing")
+                                    }
+                                }
+                            }
+                            _ => {
+                                panic!("wrong formula parsing")
+                            }
+                        }
+                    }
+                    _ => {
+                        panic!("wrong formula parsing")
+                    }
+                }
+            }
+            _ => panic!("AST not created"),
+        }
+    }
+
+    #[test]
     pub fn init_tn_parsing_test() {
         let program = String::from(
             "(define (problem p1) (domain bal)
