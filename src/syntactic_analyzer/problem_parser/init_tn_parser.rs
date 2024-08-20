@@ -267,8 +267,8 @@ impl<'a> Parser<'a> {
                             }
                         }
                     }
-                    Token::Punctuator(PunctuationType::LParentheses) => {
-                        return Ok(vec![self.parse_subtask()?]);
+                    Token::Punctuator(PunctuationType::RParentheses) => {
+                        return Ok(vec![]);
                     }
                     token => {
                         let error = SyntacticError {

@@ -525,7 +525,7 @@ mod tests {
                     .collect();
                 assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
-                match &action.preconditions {
+                match &action.preconditions.as_ref().unwrap() {
                     Formula::Not(formula) => match &**formula {
                         Formula::Atom(predicate) => {
                             assert_eq!(predicate.name, "at");
@@ -538,7 +538,7 @@ mod tests {
                     },
                     _ => panic!("wrong formula"),
                 }
-                match &action.effects {
+                match &action.effects.as_ref().unwrap() {
                     Formula::And(formula) => {
                         assert_eq!(formula.len(), 2);
                         if let Formula::Not(exp) = formula[0].as_ref() {
@@ -595,7 +595,7 @@ mod tests {
                     .collect();
                 assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
-                match &action.effects {
+                match &action.effects.as_ref().unwrap() {
                     Formula::Xor(formula) => {
                         assert_eq!(formula.len(), 2);
                         if let Formula::Not(exp) = formula[0].as_ref() {
