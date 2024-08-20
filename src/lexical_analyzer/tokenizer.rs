@@ -266,7 +266,7 @@ impl LexicalAnalyzer {
 
     fn is_whitespace(c: &char) -> bool {
         match c {
-            ' ' | '\t' | '\n' => true,
+            ' ' | '\t' | '\n' | '\r' => true,
             _ => false,
         }
     }

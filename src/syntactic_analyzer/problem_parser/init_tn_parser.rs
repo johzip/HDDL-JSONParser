@@ -245,8 +245,10 @@ impl<'a> Parser<'a> {
     fn parse_subtasks(&self) -> Result<Vec<Subtask>, ParsingError> {
         match self.tokenizer.get_token()? {
             Token::Punctuator(PunctuationType::LParentheses) => {
-                match self.tokenizer.get_token()? {
+                match self.tokenizer.lookahead()? {
                     Token::Operator(OperationType::And) => {
+                        // skip '('
+                        let _ = self.tokenizer.get_token()?;
                         let mut subtasks = vec![];
                         loop {
                             match self.tokenizer.get_token()? {
@@ -267,7 +269,14 @@ impl<'a> Parser<'a> {
                             }
                         }
                     }
+                    // one subtask
+                    Token::Identifier(_) => {
+                        return Ok(vec![self.parse_subtask()?]);
+                    }
+                    // no subtasks
                     Token::Punctuator(PunctuationType::RParentheses) => {
+                        // consume ')'
+                        let _ = self.tokenizer.get_token()?;
                         return Ok(vec![]);
                     }
                     token => {
