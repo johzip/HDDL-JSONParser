@@ -6,6 +6,7 @@ mod problem_parser;
 mod syntax_tree;
 
 pub use parser::Parser;
+pub use syntax_tree::SyntaxTree;
 use definition_types::*;
 use crate::parsing_errors::SyntacticError;
 use crate::lexical_analyzer::*;

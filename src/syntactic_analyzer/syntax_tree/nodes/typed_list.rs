@@ -15,3 +15,11 @@ impl <'a> Variable<'a> {
         }
     }
 }
+
+impl <'a> Eq for Variable<'a> {}
+
+impl <'a> PartialEq for Variable<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        self.name.eq(other.name)
+    }
+}
