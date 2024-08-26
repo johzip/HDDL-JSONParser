@@ -1,4 +1,6 @@
 use super::*;
+
+#[derive(Debug)]
 pub enum ParsingError<'a>{
     Lexiacal(LexicalError<'a>),
     Syntactic(SyntacticError<'a>),
