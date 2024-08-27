@@ -4,7 +4,7 @@ pub struct Arguements <'a> {
 
 pub struct Variable<'a> {
     pub name: &'a str,
-    pub var_type: Option<&'a str> 
+    pub var_type: Option<&'a str>
 }
 
 impl <'a> Variable<'a> {

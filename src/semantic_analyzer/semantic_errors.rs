@@ -8,10 +8,18 @@ pub enum SemanticError<'a>{
     DuplicateActionDeclaration(&'a str),
     DuplicateCompoundTaskDeclaration(&'a str),
     DuplicateMethodDeclaration(&'a str),
-    // Parameter Errors
-    TypeError,
-    UndefinedEntity,
+    // Undefined Entities
+    // TODO: test implementation
+    UndefinedPredicate(&'a str),
+    // TODO: test implementation
+    UndefinedType(&'a str),
+    // TODO: test implementation
+    UndefinedTask(&'a str),
+    // Parameter Error
     UnusedElement,
+    IncompatibleType,
+    // TODO: test implementation
+    InconsistentPredicateArity(&'a str),
     // Ordering Errors
     CyclicTypeDeclaration,
     CyclicOrderingDeclaration,
