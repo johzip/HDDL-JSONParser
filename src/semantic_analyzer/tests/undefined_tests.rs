@@ -162,3 +162,72 @@ pub fn undefined_subtask_test() {
         }
     }
 }
+
+#[test]
+pub fn undefined_type_compound_task_test() {
+    let program = String::from(
+        "(define (domain bal)
+                (:types t1)
+                (:predicates 
+                    (hold ?a_1 ?a_2)
+                    (pred_2)
+                    (at ?a_1)
+                )
+                (:task c_1
+                    :parameters (?p_1 ?p_2 ?p_3 - t1 ?p4 - t5)
+                )
+             ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(program);
+    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+        Ok(_) => {
+            panic!("errors are not caught")
+        }
+        Err(error) => {
+            match error {
+                SemanticError::UndefinedType(x) => {
+                    assert_eq!(x, "t5")
+                    // TODO: assert locality in future
+                }
+                _ => {
+                    panic!("caught wrong error")
+                }
+            }
+        }
+    }
+}
+
+
+
+#[test]
+pub fn undefined_type_predicate_test() {
+    let program = String::from(
+        "(define (domain bal)
+                (:types t1)
+                (:predicates 
+                    (pred_2)
+                    (at ?a_1)
+                    (hold ?a_1 ?a_2 - t1 ?a_3 - t2)
+                )
+             ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(program);
+    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+        Ok(_) => {
+            panic!("errors are not caught")
+        }
+        Err(error) => {
+            match error {
+                SemanticError::UndefinedType(x) => {
+                    assert_eq!(x, "t2")
+                    // TODO: assert locality in future
+                }
+                _ => {
+                    panic!("caught wrong error")
+                }
+            }
+        }
+    }
+}

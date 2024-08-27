@@ -11,9 +11,10 @@ pub enum SemanticError<'a>{
     DuplicateMethodDeclaration(&'a str),
     // Undefined Entities
     UndefinedPredicate(&'a str),
-    // TODO: test implementation
     UndefinedType(&'a str),
     UndefinedSubtask(&'a str),
+    // TODO: implement
+    UndefinedTask(&'a str),
     // Parameter Error
     // TODO: implement
     UnusedElement,

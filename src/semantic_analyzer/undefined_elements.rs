@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, ops::Sub};
 
 use super::*;
 
@@ -41,11 +41,11 @@ pub fn check_predicate_declarations<'a>(
 }
 
 pub fn check_subtask_declarations<'a>(
-    tn: &HTN<'a>,
+    subtasks: &Vec<Subtask<'a>>,
     declared_compound_tasks: &Vec<Task<'a>>,
     declared_actions: &Vec<Action<'a>>,
 ) -> Result<(), SemanticError<'a>> {
-    for task in tn.subtasks.iter() {
+    for task in subtasks.iter() {
         let task_name = task.task_symbol;
         let mut is_compound = false;
         for declared_compound_task in declared_compound_tasks.iter() {
