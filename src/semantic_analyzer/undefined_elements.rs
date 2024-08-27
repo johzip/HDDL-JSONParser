@@ -32,7 +32,11 @@ pub fn check_predicate_declarations<'a>(
                 check_predicate_declarations(&*f, declared_predicates)?;
             }
         }
-        // TODO: add support for imply, exists, equals and for all
+        Formula::ForAll(_, new_formula) => {
+            return check_predicate_declarations(&*new_formula, declared_predicates);
+        }
+        Formula::Equals(_, _) => {}
+        // TODO: add support for imply, and exists
         _ => {
             panic!()
         }

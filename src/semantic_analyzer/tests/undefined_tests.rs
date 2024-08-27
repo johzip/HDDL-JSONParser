@@ -278,3 +278,50 @@ pub fn undefined_type_predicate_test() {
         }
     }
 }
+
+
+#[test]
+pub fn undefined_predicate_forall_quantification_test() {
+    let program = String::from(
+        "(define (domain bal)
+                (:predicates 
+                    (hold ?a_1 ?a_2)
+                    (pred_2)
+                    (at ?a_1)
+                )
+                (:task c_1
+                    :parameters (?p_1 ?p_2 ?p_3)
+                )
+                (:task c_2
+                    :parameters ()
+                )
+                (:method m_1
+                    :parameters () 
+                    :task (c_2)
+                    :precondition (forall (?pos - location) (and (not (at ?pos)) (wro ?pos)))
+                    :subtasks (and
+                        (c_1 ?p1 ?l1 ?l2)
+                        (c_2)
+                    )
+                )
+             ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(program);
+    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+        Ok(_) => {
+            panic!("errors are not caught")
+        }
+        Err(error) => {
+            match error {
+                SemanticError::UndefinedPredicate(x) => {
+                    assert_eq!(x, "wro")
+                    // TODO: assert locality in future
+                }
+                _ => {
+                    panic!("caught wrong error")
+                }
+            }
+        }
+    }
+}
