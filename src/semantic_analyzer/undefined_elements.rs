@@ -46,10 +46,12 @@ pub fn check_subtask_declarations<'a>(
     declared_actions: &Vec<Action<'a>>,
 ) -> Result<(), SemanticError<'a>> {
     for task in subtasks.iter() {
-        let task_name = task.task_symbol;
         let mut is_compound = false;
         for declared_compound_task in declared_compound_tasks.iter() {
-            if task_name == declared_compound_task.name {
+            if task.task_symbol == declared_compound_task.name {
+                if task.terms.len() != declared_compound_task.parameters.len() {
+                    return Err(SemanticError::InconsistentTaskArity(&task.task_symbol));
+                }
                 is_compound = true;
                 break;
             }
@@ -57,14 +59,18 @@ pub fn check_subtask_declarations<'a>(
         let mut is_primitive = false;
         if !is_compound {
             for declared_action in declared_actions.iter() {
-                if task_name == declared_action.name {
-                    is_primitive = true;
-                    break;
+                if task.task_symbol == declared_action.name {
+                    if task.terms.len() != declared_action.parameters.len() {
+                        return Err(SemanticError::InconsistentTaskArity(&task.task_symbol));
+                    } else {
+                        is_primitive = true;
+                        break;
+                    }
                 }
             }
         }
         if !is_primitive && !is_compound{
-            return Err(SemanticError::UndefinedSubtask(task_name));
+            return Err(SemanticError::UndefinedSubtask(task.task_symbol));
         }
     }
     Ok(())

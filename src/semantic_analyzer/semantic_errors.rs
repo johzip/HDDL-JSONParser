@@ -15,17 +15,17 @@ pub enum SemanticError<'a>{
     UndefinedSubtask(&'a str),
     // TODO: implement
     UndefinedTask(&'a str),
-    // Parameter Error
-    // TODO: implement
-    UnusedElement,
+    // Inconsistency Error
     // TODO: implement
     IncompatibleType,
     InconsistentPredicateArity(&'a str),
-    // TODO: implement
     InconsistentTaskArity(&'a str),
     // Ordering Errors
     // TODO: implement
     CyclicTypeDeclaration,
     // TODO: implement
     CyclicOrderingDeclaration,
+    // Redundant Elements
+    // TODO: implement
+    UnusedElement,
 }

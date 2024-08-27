@@ -7,7 +7,6 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
     let _ = check_duplicate_actions(&ast.actions)?;
     let _ = check_duplicate_compound_tasks(&ast.compound_tasks)?;
     let _ = check_duplicate_methods(&ast.methods)?;
-
     
     // assert predicate arg types are declared
     for predicate in ast.predicates.iter() {
