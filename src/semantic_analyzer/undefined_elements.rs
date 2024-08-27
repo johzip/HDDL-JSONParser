@@ -22,8 +22,19 @@ pub fn check_predicate_declarations<'a>(
             }
             return Err(SemanticError::UndefinedPredicate(&predicate.name));
         }
-        new_formula => {
-            return check_predicate_declarations(new_formula, declared_predicates);
+        Formula::Not(new_formula) => {
+            return check_predicate_declarations(&*new_formula, declared_predicates);
+        }
+        Formula::And(new_formula) |
+        Formula::Or(new_formula) |
+        Formula::Xor(new_formula) => {
+            for f in new_formula {
+                check_predicate_declarations(&*f, declared_predicates)?;
+            }
+        }
+        // TODO: add support for imply, exists, equals and for all
+        _ => {
+            panic!()
         }
     }
     return Ok(());
@@ -52,14 +63,14 @@ pub fn check_subtask_declarations<'a>(
                 }
             }
         }
-        if !is_primitive {
-            return Err(SemanticError::UndefinedTask(task_name));
+        if !is_primitive && !is_compound{
+            return Err(SemanticError::UndefinedSubtask(task_name));
         }
     }
     Ok(())
 }
 
-pub fn check_type_declarations(
+pub fn check_type_declarations<'a>(
     parameters: &Vec<Variable<'a>>,
     declared_types: &Option<Vec<Variable<'a>>>,
 ) -> Result<(), SemanticError<'a>> {
@@ -80,7 +91,7 @@ pub fn check_type_declarations(
         None => {
             for parameter in parameters.iter() {
                 match &parameter.var_type {
-                    Some(_) => {
+                    Some(t) => {
                         return Err(SemanticError::UndefinedType(&t));
                     }
                     _ => {}

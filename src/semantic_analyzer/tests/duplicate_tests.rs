@@ -89,7 +89,7 @@ pub fn predicates_duplicate_test() {
 }
 
 #[test]
-pub fn action_parsing_test() {
+pub fn action_duplicate_test() {
     let program = String::from(
         "(define (domain bal)
             (:action a_1
@@ -165,7 +165,7 @@ pub fn compound_task_duplicate_test() {
 }
 
 #[test]
-pub fn method_parsing_test() {
+pub fn method_duplicate_test() {
     let program = String::from(
         "(define (domain bal)
                 (:method m_1

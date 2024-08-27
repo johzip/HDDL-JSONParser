@@ -1,5 +1,6 @@
 use crate::RequirementType;
 
+#[derive(Debug)]
 pub enum SemanticError<'a>{
     // Duplicate Errors
     DuplicateObjectDeclaration(&'a str),
@@ -9,18 +10,21 @@ pub enum SemanticError<'a>{
     DuplicateCompoundTaskDeclaration(&'a str),
     DuplicateMethodDeclaration(&'a str),
     // Undefined Entities
-    // TODO: test implementation
     UndefinedPredicate(&'a str),
     // TODO: test implementation
     UndefinedType(&'a str),
-    // TODO: test implementation
-    UndefinedTask(&'a str),
+    UndefinedSubtask(&'a str),
     // Parameter Error
+    // TODO: implement
     UnusedElement,
+    // TODO: implement
     IncompatibleType,
-    // TODO: test implementation
     InconsistentPredicateArity(&'a str),
+    // TODO: implement
+    InconsistentTaskArity(&'a str),
     // Ordering Errors
+    // TODO: implement
     CyclicTypeDeclaration,
+    // TODO: implement
     CyclicOrderingDeclaration,
 }

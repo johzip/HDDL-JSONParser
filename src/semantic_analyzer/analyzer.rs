@@ -9,7 +9,7 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
     let _ = check_duplicate_methods(&ast.methods)?;
     for action in ast.actions.iter() {
         // assert parameter types are declared
-        check_type_declarations(&action.parameters, &ast.types);
+        let _ = check_type_declarations(&action.parameters, &ast.types)?;
         // assert precondition predicates are declared
         match &action.preconditions {
             Some(precondition) => {
@@ -27,7 +27,7 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
     }
     for method in ast.methods.iter() {
         // assert parameter types are declared
-        check_type_declarations(&method.parameters, &ast.types);
+        let _ = check_type_declarations(&method.params, &ast.types)?;
         // Assert preconditions are valid
         match &method.precondition {
             Some(precondition) => {
