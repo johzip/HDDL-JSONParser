@@ -55,9 +55,10 @@ pub fn check_subtask_declarations<'a>(
             if task.task_symbol == declared_compound_task.name {
                 if task.terms.len() != declared_compound_task.parameters.len() {
                     return Err(SemanticError::InconsistentTaskArity(&task.task_symbol));
+                } else {
+                    is_compound = true;
+                    break;
                 }
-                is_compound = true;
-                break;
             }
         }
         let mut is_primitive = false;

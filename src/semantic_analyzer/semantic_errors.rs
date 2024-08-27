@@ -13,7 +13,6 @@ pub enum SemanticError<'a>{
     UndefinedPredicate(&'a str),
     UndefinedType(&'a str),
     UndefinedSubtask(&'a str),
-    // TODO: implement
     UndefinedTask(&'a str),
     // Inconsistency Error
     // TODO: implement

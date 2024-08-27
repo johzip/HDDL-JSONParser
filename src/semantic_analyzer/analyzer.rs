@@ -45,8 +45,20 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
             }
             _ => {}
         }
-        // TODO: Assert the compound task is valid
-        
+        let mut is_method_task_declared = false;
+        for declared_compound_task in ast.compound_tasks.iter() {
+            if method.task_name == declared_compound_task.name {
+                if method.task_terms.len() != declared_compound_task.parameters.len() {
+                    return Err(SemanticError::InconsistentTaskArity(&method.task_name));
+                } else {
+                    is_method_task_declared = true;
+                    break;
+                }
+            }
+        }
+        if !is_method_task_declared {
+            return Err(SemanticError::UndefinedTask(&method.task_name));
+        }
         // Assert subtasks are valid
         check_subtask_declarations(&method.tn.subtasks, &ast.compound_tasks, &ast.actions)?;
     }
