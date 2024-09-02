@@ -1,3 +1,5 @@
+use ordering_cycle_detector::check_ordering_acyclic;
+
 use super::*;
 
 pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError<'a>> {
@@ -61,6 +63,8 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
         }
         // Assert subtasks are valid
         check_subtask_declarations(&method.tn.subtasks, &ast.compound_tasks, &ast.actions)?;
+        // Assert orderings are acyclic
+        check_ordering_acyclic(&method.tn)?;
     }
     Ok(())
 }

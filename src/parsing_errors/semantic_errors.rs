@@ -22,8 +22,7 @@ pub enum SemanticError<'a>{
     // Ordering Errors
     // TODO: implement
     CyclicTypeDeclaration,
-    // TODO: implement
-    CyclicOrderingDeclaration,
+    CyclicOrderingDeclaration(&'a str),
     // Redundant Elements
     // TODO: implement
     UnusedType,
