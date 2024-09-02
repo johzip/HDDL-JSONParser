@@ -9,13 +9,13 @@ impl <'a> Parser <'a> {
         let mut effects = None;
         // Parse Preconditions
         match self.tokenizer.lookahead()? {
-            Token::Keyword(KeywordName::Precondition) => {
+            TokenType::Keyword(KeywordName::Precondition) => {
                 // skip precondition keyword
                 let _ = self.tokenizer.get_token();
                 preconditions = Some(self.parse_formula()?);
             },
             // the action has no precondition
-            Token::Keyword(KeywordName::Effect) => {}
+            TokenType::Keyword(KeywordName::Effect) => {}
             // undefined sequenec 
             token => {
                 let error = SyntacticError{
@@ -28,13 +28,13 @@ impl <'a> Parser <'a> {
         }
         // Parse Effects
         match self.tokenizer.lookahead()? {
-            Token::Keyword(KeywordName::Effect) => {
+            TokenType::Keyword(KeywordName::Effect) => {
                 // skip effects keyword
                 let _ = self.tokenizer.get_token();
                 effects = Some(self.parse_formula()?);
             },
             // action has no effects
-            Token::Punctuator(PunctuationType::RParentheses) => {}
+            TokenType::Punctuator(PunctuationType::RParentheses) => {}
             token => {
                 let error = SyntacticError{
                     expected: format!("(potentially empty) effects of {}", task.name).to_string(),
@@ -46,7 +46,7 @@ impl <'a> Parser <'a> {
         }
         // skip action block's closing parantheses
         match self.tokenizer.get_token()? {
-            Token::Punctuator(PunctuationType::RParentheses) => {},
+            TokenType::Punctuator(PunctuationType::RParentheses) => {},
             token => {
                 let error = SyntacticError {
                     expected: format!("closing the scope of {} using ')'", task.name).to_string(),

@@ -5,16 +5,16 @@ use super::*;
 impl<'a> Parser<'a> {
     pub fn parse_formula(&'a self) -> Result<Formula, ParsingError<'a>> {
         match self.tokenizer.get_token()? {
-            Token::Punctuator(PunctuationType::RParentheses) => {
+            TokenType::Punctuator(PunctuationType::RParentheses) => {
                 return Ok(Formula::Empty);
             },
-            Token::Punctuator(PunctuationType::LParentheses) => {
+            TokenType::Punctuator(PunctuationType::LParentheses) => {
                 match self.tokenizer.get_token()? {
                     // Not Operation
-                    Token::Operator(OperationType::Not) => {
+                    TokenType::Operator(OperationType::Not) => {
                         let formula = self.parse_formula()?;
                         match self.tokenizer.get_token()? {
-                            Token::Punctuator(PunctuationType::RParentheses) => {
+                            TokenType::Punctuator(PunctuationType::RParentheses) => {
                                 return Ok(Formula::Not(Box::new(formula)));
                             }
                             token => {
@@ -28,7 +28,7 @@ impl<'a> Parser<'a> {
                         }
                     },
                     // And Connector
-                    Token::Operator(OperationType::And) => {
+                    TokenType::Operator(OperationType::And) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -40,7 +40,7 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Xor Connector
-                    Token::Operator(OperationType::Xor) => {
+                    TokenType::Operator(OperationType::Xor) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -52,7 +52,7 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Or Connector
-                    Token::Operator(OperationType::Or) => {
+                    TokenType::Operator(OperationType::Or) => {
                         let mut expressions = vec![];
                         loop {
                             let formula = self.parse_formula()?;
@@ -64,13 +64,13 @@ impl<'a> Parser<'a> {
                         }        
                     },
                     // Equality
-                    Token::Operator(OperationType::Equal) => {
+                    TokenType::Operator(OperationType::Equal) => {
                         match self.tokenizer.get_token()? {
-                            Token::Identifier(p1) => {
+                            TokenType::Identifier(p1) => {
                                 match self.tokenizer.get_token()? {
-                                    Token::Identifier(p2) => {
+                                    TokenType::Identifier(p2) => {
                                         match self.tokenizer.get_token()? {
-                                            Token::Punctuator(PunctuationType::RParentheses) => {
+                                            TokenType::Punctuator(PunctuationType::RParentheses) => {
                                                 return Ok(Formula::Equals(p1, p2));
                                             }
                                             token => {
@@ -104,13 +104,13 @@ impl<'a> Parser<'a> {
                         }
                     }
                     // Universal Quantifier
-                    Token::Operator(OperationType::ForAll) => {
+                    TokenType::Operator(OperationType::ForAll) => {
                         match self.tokenizer.get_token()? {
-                            Token::Punctuator(PunctuationType::LParentheses) => {
+                            TokenType::Punctuator(PunctuationType::LParentheses) => {
                                 let params = self.parse_args()?;
                                 let expression = Box::new(self.parse_formula()?);
                                 match self.tokenizer.get_token()? {
-                                    Token::Punctuator(PunctuationType::RParentheses) => {
+                                    TokenType::Punctuator(PunctuationType::RParentheses) => {
                                         return Ok(Formula::ForAll(params, expression));
                                     }
                                     token => {
@@ -134,19 +134,19 @@ impl<'a> Parser<'a> {
                         }
                     }
                     // Existential Quantifier
-                    Token::Operator(OperationType::Exists) => {
+                    TokenType::Operator(OperationType::Exists) => {
                         // TODO:
                         todo!()
                     }
                     // Single Atom
-                    Token::Identifier(name) => {
+                    TokenType::Identifier(name) => {
                         let predicate = Predicate {
                             name: name,
                             variables: self.parse_args()?
                         };
                         return Ok(Formula::Atom(predicate));
                     }
-                    Token::Punctuator(PunctuationType::RParentheses) => {
+                    TokenType::Punctuator(PunctuationType::RParentheses) => {
                         return Ok(Formula::Empty);
                     }
                     token => {

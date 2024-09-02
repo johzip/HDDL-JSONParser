@@ -15,10 +15,10 @@ pub enum SemanticError<'a>{
     UndefinedSubtask(&'a str),
     UndefinedTask(&'a str),
     // Inconsistency Error
-    // TODO: implement
-    IncompatibleType,
     InconsistentPredicateArity(&'a str),
     InconsistentTaskArity(&'a str),
+    // TODO: implement
+    IncompatibleType,
     // Ordering Errors
     // TODO: implement
     CyclicTypeDeclaration,
@@ -26,5 +26,15 @@ pub enum SemanticError<'a>{
     CyclicOrderingDeclaration,
     // Redundant Elements
     // TODO: implement
-    UnusedElement,
+    UnusedType,
+    // TODO: implement
+    UnusedPredicate,
+    // TODO: implement
+    UnusedParameter,
+    // Complementary Predicates
+    // TODO: implement
+    ComplementaryEffects(&'a str),
+    // TODO: implement
+    ComplementaryPreconditions(&'a str),
+    
 }

@@ -6,4 +6,4 @@ pub use lexical_errors::*;
 pub use syntactical_errors::*;
 pub use generic_error::*;
 
-use crate::lexical_analyzer::Token;
+use crate::lexical_analyzer::TokenType;
