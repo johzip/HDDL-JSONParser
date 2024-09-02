@@ -80,34 +80,3 @@ pub fn check_subtask_declarations<'a>(
     }
     Ok(())
 }
-
-pub fn check_type_declarations<'a>(
-    parameters: &Vec<Variable<'a>>,
-    declared_types: &Option<GraphMap<&str, (), Directed>>,
-) -> Result<(), SemanticError<'a>> {
-    match &declared_types {
-        Some(graph) => {
-            for parameter in parameters.iter() {
-                match &parameter.var_type {
-                    Some(t) => {
-                        if !graph.contains_node(t) {
-                            return Err(SemanticError::UndefinedType(t));
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-        None => {
-            for parameter in parameters.iter() {
-                match &parameter.var_type {
-                    Some(t) => {
-                        return Err(SemanticError::UndefinedType(&t));
-                    }
-                    _ => {}
-                }
-            }
-        }
-    }
-    Ok(())
-}

@@ -9,42 +9,15 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
     let _ = check_duplicate_objects(&ast.objects)?;
     let _ = check_duplicate_requirements(&ast.requirements)?;
 
-    let mut types: Option<GraphMap<&str, (), Directed>> = None;
-    match &ast.types {
-        None => {},
-        Some(typing) => {
-            let mut type_graph = GraphMap::<_, (), Directed>::new();
-            for delcared_type in typing {
-                if !type_graph.contains_node(delcared_type.name) {
-                    type_graph.add_node(delcared_type.name);
-                }
-                match &delcared_type.var_type {
-                    None => {},
-                    Some(parent) => {
-                        if !type_graph.contains_node(parent) {
-                            type_graph.add_node(parent);
-                        }
-                        type_graph.add_edge(delcared_type.name, parent, ());
-                    }
-                }
-            }
-            match toposort(&type_graph, None) {
-                Ok(_) => {},
-                Err(cycle_item) => {
-                    return Err(SemanticError::CyclicTypeDeclaration(cycle_item.node_id()));
-                }
-            }
-            types = Some(type_graph);
-        }
-    }
-    
+    let type_checker = TypeChecker::new(&ast.types);
+    let _ = type_checker.check_acyclicity()?;
     // assert predicates are correct
     let mut declared_predicates = HashSet::new();
     for predicate in ast.predicates.iter() {
         if !declared_predicates.insert(predicate.name) {
             return Err(SemanticError::DuplicatePredicateDeclaration(&predicate.name));
         }
-        let _ = check_type_declarations(&predicate.variables, &types)?;
+        let _ = type_checker.check_type_declarations(&predicate.variables)?;
     }
 
     // assert compound tasks are correct
@@ -54,7 +27,7 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
             return Err(SemanticError::DuplicateCompoundTaskDeclaration(task.name));
         }
         // assert parameter types are declared
-        let _ = check_type_declarations(&task.parameters, &types)?;
+        let _ = type_checker.check_type_declarations(&task.parameters)?;
     }
 
     // assert actions are correct
@@ -64,7 +37,7 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
             return Err(SemanticError::DuplicateActionDeclaration(action.name));
         }
         // assert parameter types are declared
-        let _ = check_type_declarations(&action.parameters, &types)?;
+        let _ = type_checker.check_type_declarations(&action.parameters)?;
         // assert precondition predicates are declared
         match &action.preconditions {
             Some(precondition) => {
@@ -88,7 +61,7 @@ pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError
             return Err(SemanticError::DuplicateMethodDeclaration(method.name));
         }
         // assert parameter types are declared
-        let _ = check_type_declarations(&method.params, &types)?;
+        let _ = type_checker.check_type_declarations(&method.params)?;
         // Assert preconditions are valid
         match &method.precondition {
             Some(precondition) => {
