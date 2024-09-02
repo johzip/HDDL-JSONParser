@@ -61,6 +61,7 @@ pub fn requirements_duplicate_test() {
 pub fn predicates_duplicate_test() {
     let program = String::from(
         "(define (domain bal)
+            (:types t_1 t_2)
             (:predicates 
                 (pred_1 ?a_1 ?a_2 - t_1 ?a_3 - t_2)
                 (pred_2)
@@ -92,6 +93,11 @@ pub fn predicates_duplicate_test() {
 pub fn action_duplicate_test() {
     let program = String::from(
         "(define (domain bal)
+            (:types t1 t2)
+            (:predicates 
+                (at ?a)
+                (hold ?a ?b)
+            )
             (:action a_1
              :parameters (p_1 p_2 - t1 p_3 - t2)
              :precondition (not (at p_1))
@@ -134,13 +140,13 @@ pub fn compound_task_duplicate_test() {
     let program = String::from(
         "(define (domain bal)
                 (:task c_1
-                 :parameters (p_1 p_2 - t1 p_3 - t2)
+                 :parameters (p_1 p_2 p_3)
                 )
                 (:task c_2
-                 :parameters (p_1 - t1)
+                 :parameters (p_1)
                 )
                 (:task c_1
-                 :parameters (p_1 p_2 - t1)
+                 :parameters (p_1 p_2)
                 )
              ) ",
     )
@@ -168,8 +174,13 @@ pub fn compound_task_duplicate_test() {
 pub fn method_duplicate_test() {
     let program = String::from(
         "(define (domain bal)
+                (:task deliver_abs :parameters (?a ?b ?c))
+                (:action pickup
+                    :parameters(?p1 ?l1)
+                    :precondition ()
+                )
                 (:method m_1
-                    :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
+                    :parameters (?p1 ?l1 ?l2 ?l3) 
                     :task (deliver_abs ?p1 ?l1 ?l2)
                     :subtasks (and
                         (pickup ?p1 ?l1)
@@ -177,14 +188,14 @@ pub fn method_duplicate_test() {
                     )
                 )
                 (:method m_2
-                    :parameters (?p1 - p ?l1 ?l2 - loc) 
+                    :parameters (?p1 ?l1 ?l2) 
                     :task (deliver_abs ?p1 ?l1 ?l2)
                     :subtasks (and
                         (pickup ?p1 ?l1)
                     )
                 )
                 (:method m_1
-                    :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
+                    :parameters (?p1 ?l1 ?l2 ?l3) 
                     :task (deliver_abs ?p1 ?l1 ?l2)
                     :subtasks (and
                         (deliver_abs ?p1 ?l2 ?l3)

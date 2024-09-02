@@ -1,7 +1,7 @@
 mod analyzer;
 mod duplicate_detection;
 mod undefined_elements;
-mod ordering_cycle_detector;
+mod cycle_detection;
 mod tests;
 
 use crate::syntactic_analyzer::*;

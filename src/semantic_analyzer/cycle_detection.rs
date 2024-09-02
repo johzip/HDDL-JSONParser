@@ -22,3 +22,7 @@ pub fn check_ordering_acyclic<'a>(tn: &'a HTN<'a>) -> Result<(), SemanticError<'
         }
     }
 }
+
+pub fn check_types_acyclic<'a>(types: Vec<Variable<'a>>) -> Result<(), SemanticError<'a>> {
+    todo!()
+}
