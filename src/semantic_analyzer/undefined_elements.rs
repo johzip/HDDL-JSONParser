@@ -1,5 +1,5 @@
 use std::{collections::HashSet, ops::Sub};
-
+use petgraph::{prelude::GraphMap, Directed};
 use super::*;
 
 pub fn check_predicate_declarations<'a>(
@@ -83,16 +83,15 @@ pub fn check_subtask_declarations<'a>(
 
 pub fn check_type_declarations<'a>(
     parameters: &Vec<Variable<'a>>,
-    declared_types: &Option<Vec<Variable<'a>>>,
+    declared_types: &Option<GraphMap<&str, (), Directed>>,
 ) -> Result<(), SemanticError<'a>> {
     match &declared_types {
-        Some(typing) => {
-            let types: HashSet<&'a str> = typing.iter().map(|x| x.name).collect();
+        Some(graph) => {
             for parameter in parameters.iter() {
                 match &parameter.var_type {
                     Some(t) => {
-                        if !types.contains(t) {
-                            return Err(SemanticError::UndefinedType(&t));
+                        if !graph.contains_node(t) {
+                            return Err(SemanticError::UndefinedType(t));
                         }
                     }
                     _ => {}

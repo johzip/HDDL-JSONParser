@@ -52,3 +52,37 @@ pub fn cyclic_method_ordering_test() {
         }
     }
 }
+
+#[test]
+pub fn cyclic_types_test() {
+    let program = String::from(
+        "(define (domain bal)
+            (:types
+            t1 t2 - t3
+            t4 t5 - t6
+            t3 t6 - t7
+            t7 - t1
+            )
+        ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(program);
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    match verify_semantics(&ast) {
+        Ok(_) => {
+            panic!("errors are not caught")
+        }
+        Err(error) => {
+            match error {
+                SemanticError::CyclicTypeDeclaration(x) => {
+                    assert_eq!(x, "t7")
+                    // TODO: assert locality in future
+                }
+                _ => {
+                    panic!("caught wrong error")
+                }
+            }
+        }
+    }
+}

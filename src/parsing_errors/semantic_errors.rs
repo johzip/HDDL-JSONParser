@@ -20,8 +20,7 @@ pub enum SemanticError<'a>{
     // TODO: implement
     IncompatibleType,
     // Ordering Errors
-    // TODO: implement
-    CyclicTypeDeclaration,
+    CyclicTypeDeclaration(&'a str),
     CyclicOrderingDeclaration(&'a str),
     // Redundant Elements
     // TODO: implement
