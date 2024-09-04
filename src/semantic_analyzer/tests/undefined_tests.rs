@@ -141,9 +141,9 @@ pub fn undefined_subtask_test() {
                     :parameters (?p_1)
                 )
                 (:method m_1
-                    :parameters (?p1 ?l1 ?l2 ?l3) 
+                    :parameters (?p1 ?p2 ?p3 ?l1 ?l2 ?l3) 
                     :task (c_2 ?p1)
-                    :precondition (oneof (and (not (hold ?p_2 ?p_3)) (at ?p_2)) (pred_2))
+                    :precondition (oneof (and (not (hold ?p2 ?p3)) (at ?p2)) (pred_2))
                     :subtasks (and
                         (c_1 ?p1 ?l1 ?l2)
                         (c_2 ?p1)
@@ -167,8 +167,8 @@ pub fn undefined_subtask_test() {
                     assert_eq!(x, "c_3")
                     // TODO: assert locality in future
                 }
-                _ => {
-                    panic!("caught wrong error")
+                error => {
+                    panic!("{:?}", error)
                 }
             }
         }
@@ -192,9 +192,9 @@ pub fn inconsistent_subtask_arity_test() {
                     :parameters (?p_1)
                 )
                 (:method m_1
-                    :parameters (?p1 ?l1 ?l2 ?l3) 
+                    :parameters (?p1 ?p2 ?p3 ?l1 ?l2 ?l3) 
                     :task (c_1 ?p1 ?l1 ?l2)
-                    :precondition (oneof (and (not (hold ?p_2 ?p_3)) (at ?p_2)) (pred_2))
+                    :precondition (oneof (and (not (hold ?p2 ?p3)) (at ?p2)) (pred_2))
                     :subtasks (and
                         (c_1 ?p1 ?l1 ?l2)
                         (c_2 ?p1 ?l3)
@@ -217,8 +217,8 @@ pub fn inconsistent_subtask_arity_test() {
                     assert_eq!(x, "c_2")
                     // TODO: assert locality in future
                 }
-                _ => {
-                    panic!("caught wrong error")
+                error => {
+                    panic!("{:?}", error)
                 }
             }
         }

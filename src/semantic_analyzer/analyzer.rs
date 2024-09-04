@@ -68,7 +68,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 Some(precondition) => {
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
                     let precond_predicates = precondition.get_predicates();
-                    check_predicate_declarations(precondition, &self.ast.predicates)?;
+                    self.type_checker.check_formula(&precond_predicates, &method.params, &declared_predicates)?;
                 }
                 _ => {}
             }
@@ -132,4 +132,6 @@ impl<'a> SemanticAnalyzer<'a> {
         }
         Ok(declared_tasks)
     }
+
+    // fn verify_formula(formula: &Formula<'a>, declared_predicates: HashSet<u>)
 }
