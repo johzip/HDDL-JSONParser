@@ -63,6 +63,7 @@ impl<'a> TypeChecker<'a> {
         None
     }
 
+    // TODO: Add support for "universal qunatification" parameters
     pub fn check_formula(
         &self,
         formula: &Vec<&Predicate<'a>>,

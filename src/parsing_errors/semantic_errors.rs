@@ -14,12 +14,10 @@ pub enum SemanticError<'a>{
     UndefinedType(&'a str),
     UndefinedSubtask(&'a str),
     UndefinedTask(&'a str),
-    // TODO test implementation
     UndefinedParameter(&'a str),
     // Inconsistency Error
     InconsistentPredicateArity(&'a str),
     InconsistentTaskArity(&'a str),
-    // TODO: implement
     InconsistentPredicateArgType(TypeError<'a>),
     // TODO: implement
     InconsistentTaskArgType(TypeError<'a>),

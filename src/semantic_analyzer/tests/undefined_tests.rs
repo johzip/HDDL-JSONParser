@@ -124,6 +124,53 @@ pub fn undefined_predicate_method_precondition_test() {
     }
 }
 
+#[test]
+pub fn undefined_method_parameters_test() {
+    let program = String::from(
+        "(define (domain bal)
+                (:predicates 
+                    (hold ?a_1 ?a_2)
+                    (pred_2)
+                    (at ?a_1)
+                )
+                (:task deliver_abs :parameters (?p1 ?l1 ?l2))
+                (:action pickup
+                    :parameters(?p1 ?l1)
+                    :precondition(hold ?p1 ?l1)
+                )
+                (:method m_1
+                    :parameters (?p1 ?p2 ?p3 ?l1 ?l2 ?l3) 
+                    :task (deliver_abs ?p1 ?l1 ?l2)
+                    :precondition (oneof (and (not (hold ?p2 ?p3)) (at ?p5)))
+                    :subtasks (and
+                        (pickup ?p1 ?l1)
+                        (deliver_abs ?p1 ?l2 ?l3)
+                    )
+                )
+             ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(program);
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
+        Ok(_) => {
+            panic!("errors are not caught")
+        }
+        Err(error) => {
+            match error {
+                SemanticError::UndefinedParameter(x) => {
+                    assert_eq!(x, "p5")
+                    // TODO: assert locality in future
+                }
+                x => {
+                    panic!("{:?}", x)
+                }
+            }
+        }
+    }
+}
 
 #[test]
 pub fn undefined_subtask_test() {
