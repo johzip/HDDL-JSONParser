@@ -38,24 +38,29 @@ impl <'a> TypeChecker <'a> {
         }
     }
 
-    pub fn check_acyclicity(&self) -> Result<(), SemanticError<'a>> {
+    pub fn check_acyclicity(&self) -> Option<SemanticError<'a>> {
         match toposort(&self.type_hierarchy, None) {
-            Ok(_) => {Ok(())},
+            Ok(_) => {None},
             Err(cycle_item) => {
                 let node = cycle_item.node_id();
-                return Err(SemanticError::CyclicTypeDeclaration(node));
+                return Some(SemanticError::CyclicTypeDeclaration(node));
             }
         }
     }
 
-    pub fn check_type_declarations(&self, parameters: &Vec<Variable<'a>>) -> Result<(), SemanticError<'a>> {
+    pub fn check_type_declarations(&self, parameters: &Vec<Variable<'a>>) -> Option<SemanticError<'a>> {
         for parameter in parameters.iter() {
             if let Some(t) = parameter.var_type {
                 if !self.type_hierarchy.contains_node(t) {
-                    return Err(SemanticError::UndefinedType(t));
+                    return Some(SemanticError::UndefinedType(t));
                 }
             }
         }
-        Ok(())
+        None
+    }
+
+    // TODO:
+    pub fn check_formula(&self, formula: Formula<'a>, parameters: &Vec<Variable<'a>>) -> Result<(), SemanticError<'a>> {
+        todo!()
     }
 }

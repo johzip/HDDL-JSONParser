@@ -1,4 +1,4 @@
-use analyzer::verify_semantics;
+use analyzer::*;
 use super::*;
 
 #[test]
@@ -35,7 +35,10 @@ pub fn cyclic_method_ordering_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -69,7 +72,8 @@ pub fn cyclic_types_test() {
     let lexer = LexicalAnalyzer::new(program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
-    match verify_semantics(&ast) {
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }

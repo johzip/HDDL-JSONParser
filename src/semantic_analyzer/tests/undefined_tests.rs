@@ -1,4 +1,4 @@
-use analyzer::verify_semantics;
+use analyzer::*;
 
 use super::*;
 
@@ -20,7 +20,10 @@ pub fn undefined_predicate_action_precondition_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -56,7 +59,10 @@ pub fn inconsistent_predicate_action_effect_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -97,7 +103,10 @@ pub fn undefined_predicate_method_precondition_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -145,7 +154,10 @@ pub fn undefined_subtask_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -192,7 +204,10 @@ pub fn inconsistent_subtask_arity_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -227,7 +242,10 @@ pub fn undefined_type_compound_task_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -261,7 +279,10 @@ pub fn undefined_type_predicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -308,7 +329,9 @@ pub fn undefined_predicate_forall_quantification_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -351,7 +374,10 @@ pub fn undefined_method_task_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }

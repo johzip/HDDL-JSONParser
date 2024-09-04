@@ -1,4 +1,4 @@
-use analyzer::verify_semantics;
+use analyzer::*;
 
 use super::*;
 
@@ -11,7 +11,10 @@ pub fn objects_duplicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -39,7 +42,10 @@ pub fn requirements_duplicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -71,7 +77,10 @@ pub fn predicates_duplicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -117,7 +126,10 @@ pub fn action_duplicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -152,7 +164,10 @@ pub fn compound_task_duplicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }
@@ -205,7 +220,10 @@ pub fn method_duplicate_test() {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(program);
-    match verify_semantics(Parser::new(&lexer).parse().as_ref().unwrap()) {
+    let parser = Parser::new(&lexer);
+    let ast = parser.parse().unwrap();
+    let semantic_parser = SemanticAnalyzer::new(&ast);
+    match semantic_parser.verify_ast() {
         Ok(_) => {
             panic!("errors are not caught")
         }

@@ -5,88 +5,133 @@ use petgraph::{algo::toposort, prelude::GraphMap, Directed};
 
 use super::*;
 
-pub fn verify_semantics<'a>(ast: &'a SyntaxTree<'a>) -> Result<(), SemanticError<'a>> {
-    let _ = check_duplicate_objects(&ast.objects)?;
-    let _ = check_duplicate_requirements(&ast.requirements)?;
+pub struct SemanticAnalyzer<'a> {
+    ast: &'a SyntaxTree<'a>,
+    type_checker: TypeChecker<'a>,
+}
 
-    let type_checker = TypeChecker::new(&ast.types);
-    let _ = type_checker.check_acyclicity()?;
-    // assert predicates are correct
-    let mut declared_predicates = HashSet::new();
-    for predicate in ast.predicates.iter() {
-        if !declared_predicates.insert(predicate.name) {
-            return Err(SemanticError::DuplicatePredicateDeclaration(&predicate.name));
-        }
-        let _ = type_checker.check_type_declarations(&predicate.variables)?;
-    }
-
-    // assert compound tasks are correct
-    let mut declared_tasks = HashSet::new();
-    for task in ast.compound_tasks.iter() {
-        if !declared_tasks.insert(task.name) {
-            return Err(SemanticError::DuplicateCompoundTaskDeclaration(task.name));
-        }
-        // assert parameter types are declared
-        let _ = type_checker.check_type_declarations(&task.parameters)?;
-    }
-
-    // assert actions are correct
-    let mut declared_actions = HashSet::new();
-    for action in ast.actions.iter() {
-        if !declared_actions.insert(action.name) {
-            return Err(SemanticError::DuplicateActionDeclaration(action.name));
-        }
-        // assert parameter types are declared
-        let _ = type_checker.check_type_declarations(&action.parameters)?;
-        // assert precondition predicates are declared
-        match &action.preconditions {
-            Some(precondition) => {
-                check_predicate_declarations(precondition, &ast.predicates)?;
-            }
-            _ => {}
-        }
-        // assert effect predicates are declared
-        match &action.effects {
-            Some(effect) => {
-                check_predicate_declarations(effect, &ast.predicates)?;
-            }
-            _ => {}
+impl<'a> SemanticAnalyzer<'a> {
+    pub fn new(ast: &'a SyntaxTree<'a>) -> SemanticAnalyzer<'a> {
+        SemanticAnalyzer {
+            ast,
+            type_checker: TypeChecker::new(&ast.types),
         }
     }
 
-    // assert methods are correct
-    let mut declared_methods = HashSet::new();
-    for method in ast.methods.iter() {
-        if !declared_methods.insert(method.name) {
-            return Err(SemanticError::DuplicateMethodDeclaration(method.name));
+    pub fn verify_ast(&'a self) -> Result<(), SemanticError<'a>> {
+        // Assert there are no duplicate objects
+        if let Some(duplicate) = check_duplicate_objects(&self.ast.objects) {
+            return Err(duplicate);
+        // Assert there are no duplicate requirements
+        } else if let Some(duplicate) = check_duplicate_requirements(&self.ast.requirements) {
+            return Err(duplicate);
+        // Assert type hierarchy is acyclic
+        } else if let Some(cycle) = self.type_checker.check_acyclicity() {
+            return Err(cycle);
         }
-        // assert parameter types are declared
-        let _ = type_checker.check_type_declarations(&method.params)?;
-        // Assert preconditions are valid
-        match &method.precondition {
-            Some(precondition) => {
-                check_predicate_declarations(precondition, &ast.predicates)?;
+        let declared_predicates = self.verify_predicates()?;
+        let declared_tasks = self.verify_compound_tasks()?;
+        // assert actions are correct
+        let mut declared_actions = HashSet::new();
+        for action in self.ast.actions.iter() {
+            if !declared_actions.insert(action.name) {
+                return Err(SemanticError::DuplicateActionDeclaration(action.name));
             }
-            _ => {}
+            // assert parameter types are declared
+            if let Some(undeclared_type) = self.type_checker.check_type_declarations(&action.parameters) {
+                return Err(undeclared_type);
+            }
+            // assert precondition predicates are declared
+            match &action.preconditions {
+                Some(precondition) => {
+                    check_predicate_declarations(precondition, &self.ast.predicates)?;
+                }
+                _ => {}
+            }
+            // assert effect predicates are declared
+            match &action.effects {
+                Some(effect) => {
+                    check_predicate_declarations(effect, &self.ast.predicates)?;
+                }
+                _ => {}
+            }
         }
-        let mut is_method_task_declared = false;
-        for declared_compound_task in ast.compound_tasks.iter() {
-            if method.task_name == declared_compound_task.name {
-                if method.task_terms.len() != declared_compound_task.parameters.len() {
-                    return Err(SemanticError::InconsistentTaskArity(&method.task_name));
-                } else {
-                    is_method_task_declared = true;
-                    break;
+
+        // assert methods are correct
+        let mut declared_methods = HashSet::new();
+        for method in self.ast.methods.iter() {
+            if !declared_methods.insert(method.name) {
+                return Err(SemanticError::DuplicateMethodDeclaration(method.name));
+            }
+            // assert parameter types are declared
+            if let Some(undeclared_pred) =  self.type_checker.check_type_declarations(&method.params){
+                return Err(undeclared_pred);
+            }
+            // Assert preconditions are valid
+            match &method.precondition {
+                Some(precondition) => {
+                    check_predicate_declarations(precondition, &self.ast.predicates)?;
+                }
+                _ => {}
+            }
+            // Assert task is defined
+            if !declared_tasks.contains(method.task_name) {
+                return Err(SemanticError::UndefinedTask(&method.task_name));
+            } else {
+                // Assert task arity is consistent
+                for declared_compound_task in self.ast.compound_tasks.iter() {
+                    if method.task_name == declared_compound_task.name {
+                        if method.task_terms.len() != declared_compound_task.parameters.len() {
+                            return Err(SemanticError::InconsistentTaskArity(&method.task_name));
+                        } else {
+                            break;
+                        }
+                    }
                 }
             }
+            // Assert subtasks are valid
+            check_subtask_declarations(
+                &method.tn.subtasks,
+                &self.ast.compound_tasks,
+                &self.ast.actions
+            )?;
+            // Assert orderings are acyclic
+            check_ordering_acyclic(&method.tn)?;
         }
-        if !is_method_task_declared {
-            return Err(SemanticError::UndefinedTask(&method.task_name));
-        }
-        // Assert subtasks are valid
-        check_subtask_declarations(&method.tn.subtasks, &ast.compound_tasks, &ast.actions)?;
-        // Assert orderings are acyclic
-        check_ordering_acyclic(&method.tn)?;
+        Ok(())
     }
-    Ok(())
+
+    // returns declared predicates (if there is no error)
+    fn verify_predicates(&'a self) -> Result<HashSet<&'a str>, SemanticError<'a>> {
+        let mut declared_predicates = HashSet::new();
+        for predicate in self.ast.predicates.iter() {
+            if !declared_predicates.insert(predicate.name) {
+                return Err(SemanticError::DuplicatePredicateDeclaration(
+                    &predicate.name,
+                ));
+            }
+            if let Some(error) = self
+                .type_checker
+                .check_type_declarations(&predicate.variables)
+            {
+                return Err(error);
+            }
+        }
+        Ok(declared_predicates)
+    }
+
+    // returns declared compound tasks (if there is no error)
+    fn verify_compound_tasks(&'a self) -> Result<HashSet<&'a str>, SemanticError<'a>> {
+        let mut declared_tasks = HashSet::new();
+        for task in self.ast.compound_tasks.iter() {
+            if !declared_tasks.insert(task.name) {
+                return Err(SemanticError::DuplicateCompoundTaskDeclaration(task.name));
+            }
+            // assert parameter types are declared
+            if let Some(error) = self.type_checker.check_type_declarations(&task.parameters) {
+                return Err(error);
+            }
+        }
+        Ok(declared_tasks)
+    }
 }
