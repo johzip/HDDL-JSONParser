@@ -37,14 +37,12 @@ impl<'a> SemanticAnalyzer<'a> {
             if !declared_actions.insert(action.name) {
                 return Err(SemanticError::DuplicateActionDeclaration(action.name));
             }
-            // assert parameter types are declared
-            if let Some(undeclared_type) = self.type_checker.check_type_declarations(&action.parameters) {
-                return Err(undeclared_type);
-            }
             // assert precondition predicates are declared
             match &action.preconditions {
                 Some(precondition) => {
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
+                    let precond_predicates = precondition.get_predicates();
+                    self.type_checker.check_formula(&precond_predicates, &action.parameters, &declared_predicates)?;
                 }
                 _ => {}
             }
@@ -52,6 +50,8 @@ impl<'a> SemanticAnalyzer<'a> {
             match &action.effects {
                 Some(effect) => {
                     check_predicate_declarations(effect, &self.ast.predicates)?;
+                    let eff_predicates = effect.get_predicates();
+                    self.type_checker.check_formula(&eff_predicates, &action.parameters, &declared_predicates)?;
                 }
                 _ => {}
             }
@@ -63,13 +63,11 @@ impl<'a> SemanticAnalyzer<'a> {
             if !declared_methods.insert(method.name) {
                 return Err(SemanticError::DuplicateMethodDeclaration(method.name));
             }
-            // assert parameter types are declared
-            if let Some(undeclared_pred) =  self.type_checker.check_type_declarations(&method.params){
-                return Err(undeclared_pred);
-            }
             // Assert preconditions are valid
             match &method.precondition {
                 Some(precondition) => {
+                    check_predicate_declarations(precondition, &self.ast.predicates)?;
+                    let precond_predicates = precondition.get_predicates();
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
                 }
                 _ => {}
@@ -102,10 +100,10 @@ impl<'a> SemanticAnalyzer<'a> {
     }
 
     // returns declared predicates (if there is no error)
-    fn verify_predicates(&'a self) -> Result<HashSet<&'a str>, SemanticError<'a>> {
+    fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticError<'a>> {
         let mut declared_predicates = HashSet::new();
         for predicate in self.ast.predicates.iter() {
-            if !declared_predicates.insert(predicate.name) {
+            if !declared_predicates.insert(predicate) {
                 return Err(SemanticError::DuplicatePredicateDeclaration(
                     &predicate.name,
                 ));

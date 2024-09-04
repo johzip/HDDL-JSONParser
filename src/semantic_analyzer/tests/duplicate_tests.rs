@@ -104,21 +104,21 @@ pub fn action_duplicate_test() {
         "(define (domain bal)
             (:types t1 t2)
             (:predicates 
-                (at ?a)
+                (at ?a )
                 (hold ?a ?b)
             )
             (:action a_1
-             :parameters (p_1 p_2 - t1 p_3 - t2)
+             :parameters (p_1 p_2  p_3)
              :precondition (not (at p_1))
              :effect (and (not (hold p_2 p_3)) (at p_2))
             )
             (:action a_2
-             :parameters (p_1 p_2 - t1)
+             :parameters (p_1 p_2)
              :precondition (not (at p_1))
              :effect (and (not (at p_2)))
             )
             (:action a_1
-             :parameters (p_1 p_2 - t1 p_3 p4 p5 - t2)
+             :parameters (p_1 p_2 p_3 p4 p5)
              :precondition (not (at p_1))
              :effect (and (not (hold p_2 p_3)) (at p_2))
             )
@@ -139,8 +139,8 @@ pub fn action_duplicate_test() {
                     assert_eq!(x, "a_1")
                     // TODO: assert locality in future
                 }
-                _ => {
-                    panic!("caught wrong error")
+                token => {
+                    panic!("{:?}", token)
                 }
             }
         }

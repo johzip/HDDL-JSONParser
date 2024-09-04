@@ -52,7 +52,7 @@ pub fn inconsistent_predicate_action_effect_test() {
             )
             (:action a_1
              :parameters (?p_1 ?p_2 ?p_3)
-             :precondition (and (not (at ?p_1)) (hold ?p1 ?p2))
+             :precondition (and (not (at ?p_1)) (hold ?p_1 ?p_2))
              :effect (and (not (hold ?p_2 ?p_3 p_2)) (at ?p_2))
             )
          ) ",
@@ -341,8 +341,8 @@ pub fn undefined_predicate_forall_quantification_test() {
                     assert_eq!(x, "wro")
                     // TODO: assert locality in future
                 }
-                _ => {
-                    panic!("caught wrong error")
+                error => {
+                    panic!("{:?}", error)
                 }
             }
         }

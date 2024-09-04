@@ -14,13 +14,15 @@ pub enum SemanticError<'a>{
     UndefinedType(&'a str),
     UndefinedSubtask(&'a str),
     UndefinedTask(&'a str),
+    // TODO test implementation
+    UndefinedParameter(&'a str),
     // Inconsistency Error
     InconsistentPredicateArity(&'a str),
     InconsistentTaskArity(&'a str),
     // TODO: implement
-    InconsistentPredicateArgType,
+    InconsistentPredicateArgType(TypeError<'a>),
     // TODO: implement
-    InconsistentTaskArgType,
+    InconsistentTaskArgType(TypeError<'a>),
     // Ordering Errors
     CyclicTypeDeclaration(&'a str),
     CyclicOrderingDeclaration(&'a str),
@@ -37,3 +39,11 @@ pub enum SemanticError<'a>{
     // TODO: implement
     ComplementaryPreconditions(&'a str),
 }
+
+
+#[derive(Debug)]
+pub struct TypeError<'a> {
+    pub expected: Option<&'a str>,
+    pub found: Option<&'a str>,
+    pub var_name: &'a str
+} 
