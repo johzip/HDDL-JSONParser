@@ -100,6 +100,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 }
             }
 
+            // Assert task type is consistent
             match self.type_checker.is_task_consistent(
                 &method.task_name,
                 &method.task_terms.iter().map(|x| {
@@ -115,6 +116,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 _ => {}
             }
 
+            // Assert subtask types are consistent
             for subtask in method.tn.subtasks.iter() {
                 let _ = self.type_checker.is_task_consistent(
                     &subtask.task_symbol,

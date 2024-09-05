@@ -19,23 +19,20 @@ pub enum SemanticError<'a>{
     InconsistentPredicateArity(&'a str),
     InconsistentTaskArity(&'a str),
     InconsistentPredicateArgType(TypeError<'a>),
-    // TODO: implement
     InconsistentTaskArgType(TypeError<'a>),
     // Ordering Errors
     CyclicTypeDeclaration(&'a str),
     CyclicOrderingDeclaration(&'a str),
-    // Redundant Elements
-    // TODO: implement
-    UnusedType(&'a str),
-    // TODO: implement
-    UnusedPredicate(&'a str),
-    // TODO: implement
-    UnusedParameter(&'a str),
-    // Complementary Predicates
+    // Predicate Errors
     // TODO: implement
     ComplementaryEffects(&'a str),
     // TODO: implement
     ComplementaryPreconditions(&'a str),
+    // TODO: implement
+    ImmutablePredicate,
+    // Compound Task errors
+    // TODO: implement
+    NoPrimitiveRefinement(&'a str)
 }
 
 
