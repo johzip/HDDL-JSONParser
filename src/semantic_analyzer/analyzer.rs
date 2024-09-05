@@ -34,7 +34,7 @@ impl<'a> SemanticAnalyzer<'a> {
         // assert actions are correct
         let mut declared_actions = HashSet::new();
         for action in self.ast.actions.iter() {
-            if !declared_actions.insert(action.name) {
+            if !declared_actions.insert(action) {
                 return Err(SemanticError::DuplicateActionDeclaration(action.name));
             }
             // assert precondition predicates are declared
@@ -42,7 +42,11 @@ impl<'a> SemanticAnalyzer<'a> {
                 Some(precondition) => {
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
                     let precond_predicates = precondition.get_predicates();
-                    self.type_checker.check_formula(&precond_predicates, &action.parameters, &declared_predicates)?;
+                    self.type_checker.check_formula(
+                        &precond_predicates,
+                        &action.parameters,
+                        &declared_predicates,
+                    )?;
                 }
                 _ => {}
             }
@@ -51,7 +55,11 @@ impl<'a> SemanticAnalyzer<'a> {
                 Some(effect) => {
                     check_predicate_declarations(effect, &self.ast.predicates)?;
                     let eff_predicates = effect.get_predicates();
-                    self.type_checker.check_formula(&eff_predicates, &action.parameters, &declared_predicates)?;
+                    self.type_checker.check_formula(
+                        &eff_predicates,
+                        &action.parameters,
+                        &declared_predicates,
+                    )?;
                 }
                 _ => {}
             }
@@ -68,7 +76,11 @@ impl<'a> SemanticAnalyzer<'a> {
                 Some(precondition) => {
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
                     let precond_predicates = precondition.get_predicates();
-                    self.type_checker.check_formula(&precond_predicates, &method.params, &declared_predicates)?;
+                    self.type_checker.check_formula(
+                        &precond_predicates,
+                        &method.params,
+                        &declared_predicates,
+                    )?;
                 }
                 _ => {}
             }
@@ -87,12 +99,31 @@ impl<'a> SemanticAnalyzer<'a> {
                     }
                 }
             }
-            // Assert subtasks are valid
-            check_subtask_declarations(
-                &method.tn.subtasks,
-                &self.ast.compound_tasks,
-                &self.ast.actions
-            )?;
+
+            match self.type_checker.is_task_consistent(
+                &method.task_name,
+                &method.task_terms.iter().map(|x| {
+                    x.name
+                }).collect(),
+                &method.params,
+                &declared_tasks,
+                &HashSet::new(),
+            ) {
+                Err(SemanticError::UndefinedSubtask(task_name)) => {
+                    return Err(SemanticError::UndefinedTask(task_name));
+                }
+                _ => {}
+            }
+
+            for subtask in method.tn.subtasks.iter() {
+                let _ = self.type_checker.is_task_consistent(
+                    &subtask.task_symbol,
+                    &subtask.terms,
+                    &method.params,
+                    &declared_tasks,
+                    &declared_actions,
+                )?;
+            }
             // Assert orderings are acyclic
             check_ordering_acyclic(&method.tn)?;
         }
@@ -119,10 +150,10 @@ impl<'a> SemanticAnalyzer<'a> {
     }
 
     // returns declared compound tasks (if there is no error)
-    fn verify_compound_tasks(&'a self) -> Result<HashSet<&'a str>, SemanticError<'a>> {
+    fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticError<'a>> {
         let mut declared_tasks = HashSet::new();
         for task in self.ast.compound_tasks.iter() {
-            if !declared_tasks.insert(task.name) {
+            if !declared_tasks.insert(task) {
                 return Err(SemanticError::DuplicateCompoundTaskDeclaration(task.name));
             }
             // assert parameter types are declared
