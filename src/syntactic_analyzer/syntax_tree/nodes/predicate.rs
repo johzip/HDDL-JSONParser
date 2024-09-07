@@ -2,6 +2,7 @@ use std::hash::Hash;
 
 use super::*;
 
+#[derive(Clone)]
 pub struct Predicate<'a> {
     pub name: &'a str,
     pub variables: Vec<Variable<'a>>
