@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::*;
 
 #[derive(Clone)]
@@ -179,6 +181,98 @@ impl<'a> Formula<'a> {
             _ => unreachable!("formula is not simplified"),
         }
     }
+
+    pub fn to_clauses(&self) -> (u32, Vec<Vec<i32>>) {
+        let mut literal_ids = HashMap::new();
+        let mut clauses = vec![];
+        let mut count = 1;
+        match self.to_cnf() {
+            Formula::And(subformula) => {
+                for f in subformula {
+                    let mut clause = vec![];
+                    match *f {
+                        Formula::Empty => {}
+                        Formula::Not(pred_box) => {
+                            if let Formula::Atom(predicate) = *pred_box {
+                                if !literal_ids.contains_key(predicate.name) {
+                                    literal_ids.insert(predicate.name, count);
+                                    count+=1;
+                                }
+                                clause.push(-1 * literal_ids.get(predicate.name).unwrap());
+                            } else {
+                                panic!("not simplified")
+                            }
+                        }
+                        Formula::Or(disjuncts) => {
+                            for disjunct in disjuncts {
+                                match *disjunct {
+                                    Formula::Atom(predicate) => {
+                                        if !literal_ids.contains_key(predicate.name) {
+                                            literal_ids.insert(predicate.name, count);
+                                            count+=1;
+                                        }
+                                        clause.push(*literal_ids.get(predicate.name).unwrap());
+                                    },
+                                    Formula::Not(pred_box) => {
+                                        if let Formula::Atom(predicate) = *pred_box {
+                                            if !literal_ids.contains_key(predicate.name) {
+                                                literal_ids.insert(predicate.name, count);
+                                                count+=1;
+                                            }
+                                            clause.push(-1 * literal_ids.get(predicate.name).unwrap());
+                                        } else {
+                                            panic!("not simplified")
+                                        }
+                                    }
+                                    _ => panic!("not in CNF")
+                                }
+                            }
+                        }
+                        _ => panic!("not in CNF")
+
+                    }
+                    clauses.push(clause);
+                }
+            }
+            Formula::Or(disjuncts) => {
+                for disjunct in disjuncts.iter() {
+                    let mut clause = vec![];
+                    match &**disjunct {
+                        Formula::Atom(predicate) => {
+                            if !literal_ids.contains_key(predicate.name) {
+                                literal_ids.insert(predicate.name, count);
+                                count+=1;
+                            }
+                        },
+                        Formula::Not(pred_box) => {
+                            if let Formula::Atom(predicate) = &**pred_box {
+                                if !literal_ids.contains_key(predicate.name) {
+                                    literal_ids.insert(predicate.name, count);
+                                    count+=1;
+                                }
+                                clause.push(-1 * literal_ids.get(predicate.name).unwrap());
+                            } else {
+                                panic!("not simplified")
+                            }
+                        }
+                        _ => panic!("not in CNF")
+                    }
+                    return (disjuncts.len() as u32, vec![clause]);
+                }
+            }
+            Formula::Not(p) => {
+                if let Formula::Atom(predicate) = *p {
+                    if !literal_ids.contains_key(predicate.name) {
+                        literal_ids.insert(predicate.name, count);
+                        count+=1;
+                    }
+
+                }
+            }
+            _ => panic!()
+        }
+        ((count - 1) as u32, clauses)
+    }
 }
 
 #[cfg(test)]
@@ -258,5 +352,25 @@ mod tests {
             }
             _ => panic!("wrong result"),
         }
+    }
+
+    #[test]
+    pub fn cnf_clause_test() {
+        let cnf = Formula::And(vec![
+            Box::new(Formula::Or(vec![
+                Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })))),
+            ])),
+            Box::new(Formula::Or(vec![
+                Box::new(Formula::Atom(Predicate { name: "b", variables: vec![] })),
+                Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })))),
+            ])),
+        ]);
+        let (var_count, clauses) = cnf.to_clauses();
+        assert_eq!(var_count, 3);
+        assert_eq!(clauses.len(), 2);
+        assert_eq!(clauses[0], vec![1, -2]);
+        assert_eq!(clauses[1], vec![3, 2, -1]);
     }
 }
