@@ -29,8 +29,20 @@ impl<'a> SemanticAnalyzer<'a> {
         } else if let Some(cycle) = self.type_checker.check_acyclicity() {
             return Err(cycle);
         }
+
+        // Domain declarations
         let declared_predicates = self.verify_predicates()?;
         let declared_tasks = self.verify_compound_tasks()?;
+        let mut declared_constants = HashSet::new();
+        match &self.ast.constants {
+            Some(constants) => {
+                for c in constants {
+                    declared_constants.insert(c);
+                }
+            },
+            None => {}
+        }
+
         // assert actions are correct
         let mut declared_actions = HashSet::new();
         for action in self.ast.actions.iter() {
@@ -45,6 +57,7 @@ impl<'a> SemanticAnalyzer<'a> {
                     self.type_checker.check_formula(
                         &precond_predicates,
                         &action.parameters,
+                        &declared_constants,
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
@@ -63,6 +76,7 @@ impl<'a> SemanticAnalyzer<'a> {
                     self.type_checker.check_formula(
                         &eff_predicates,
                         &action.parameters,
+                        &declared_constants,
                         &declared_predicates,
                     )?;
                 }
@@ -84,6 +98,7 @@ impl<'a> SemanticAnalyzer<'a> {
                     self.type_checker.check_formula(
                         &precond_predicates,
                         &method.params,
+                        &declared_constants,
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
@@ -117,6 +132,7 @@ impl<'a> SemanticAnalyzer<'a> {
                     x.name
                 }).collect(),
                 &method.params,
+                &declared_constants,
                 &declared_tasks,
                 &HashSet::new(),
             ) {
@@ -132,6 +148,7 @@ impl<'a> SemanticAnalyzer<'a> {
                     &subtask.task_symbol,
                     &subtask.terms,
                     &method.params,
+                    &declared_constants,
                     &declared_tasks,
                     &declared_actions,
                 )?;

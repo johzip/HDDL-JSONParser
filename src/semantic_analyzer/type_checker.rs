@@ -68,6 +68,7 @@ impl<'a> TypeChecker<'a> {
         &self,
         formula: &Vec<&Predicate<'a>>,
         parameters: &Vec<Variable<'a>>,
+        declared_constants: &HashSet<&Variable<'a>>,
         declared_predicates: &HashSet<&'a Predicate<'a>>,
     ) -> Result<(), SemanticError<'a>> {
         // Assert all types are declared
@@ -88,7 +89,9 @@ impl<'a> TypeChecker<'a> {
                                 found_list.push((var.name, par_type));
                             }
                             None => {
-                                return Err(SemanticError::UndefinedParameter(&var.name));
+                                if !declared_constants.contains(&var.name) {
+                                    return Err(SemanticError::UndefinedParameter(&var.name));
+                                }
                             }
                         }
                     }
@@ -151,6 +154,7 @@ impl<'a> TypeChecker<'a> {
         task_name: &'a str,
         task_terms: &Vec<&'a str>,
         parameters: &Vec<Variable<'a>>,
+        declared_constants: &HashSet<&Variable<'a>>,
         declared_tasks: &HashSet<&Task<'a>>,
         declared_actions: &HashSet<&Action<'a>>,
     ) -> Result<(), SemanticError<'a>> {
@@ -166,7 +170,9 @@ impl<'a> TypeChecker<'a> {
                     found.push((term, typing));
                 }
                 None => {
-                    return Err(SemanticError::UndefinedParameter(&term));
+                    if !declared_constants.contains(term) {
+                        return Err(SemanticError::UndefinedParameter(&term));
+                    }
                 }
             }
         }
