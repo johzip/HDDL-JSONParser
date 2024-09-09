@@ -9,9 +9,16 @@ pub fn analyze(program: Vec<u8>) -> Result<(), String> {
     let lexer = LexicalAnalyzer::new(program);
     let parser = syntactic_analyzer::Parser::new(&lexer);
     match parser.parse() {
-        Ok(_) => {
-            return Ok(());
-        },
+        Ok(ast) => {
+            let semantic_verifier = semantic_analyzer::SemanticAnalyzer::new(&ast);
+            match semantic_verifier.verify_ast(){
+                Ok(_) => {
+                    return Ok(());
+                },
+                token => panic!("{:?}", token)
+            }
+        }
         _ => panic!("wrong program")
     }
+    
 }

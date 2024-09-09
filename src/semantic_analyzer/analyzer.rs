@@ -47,6 +47,11 @@ impl<'a> SemanticAnalyzer<'a> {
                         &action.parameters,
                         &declared_predicates,
                     )?;
+                    if !precondition.is_sat() {
+                        return Err(
+                            SemanticError::UnsatisfiableActionPrecondition(&action.name)
+                        );
+                    }
                 }
                 _ => {}
             }
@@ -81,6 +86,11 @@ impl<'a> SemanticAnalyzer<'a> {
                         &method.params,
                         &declared_predicates,
                     )?;
+                    if !precondition.is_sat() {
+                        return Err(
+                            SemanticError::UnsatisfiableMethodPrecondition(&method.name)
+                        );
+                    }
                 }
                 _ => {}
             }

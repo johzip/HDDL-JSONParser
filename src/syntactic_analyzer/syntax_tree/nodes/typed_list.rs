@@ -2,7 +2,7 @@ pub struct Arguements <'a> {
     pub arguments: Vec<Variable<'a>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Variable<'a> {
     pub name: &'a str,
     pub var_type: Option<&'a str>

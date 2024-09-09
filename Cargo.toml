@@ -10,4 +10,5 @@ name = "integration"
 path = "tests/integration.rs"
 
 [dependencies]
+Robinson = { version = "0.1.0", path = "Robinson" }
 petgraph = "*"

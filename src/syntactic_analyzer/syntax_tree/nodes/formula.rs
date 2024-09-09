@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
+extern crate Robinson;
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Formula<'a> {
     Empty,
     Atom(Predicate<'a>),
@@ -48,7 +49,6 @@ impl<'a> Formula<'a> {
         return predicates;
     }
 
-    // TODO: test
     pub fn to_cnf(&self) -> Formula<'a> {
         return self.simplify().to_nnf().distribute_disjunction();
     }
@@ -57,23 +57,65 @@ impl<'a> Formula<'a> {
         match self {
             Formula::Empty => Formula::Empty,
             Formula::Atom(_) => self.clone(),
-            Formula::Not(f) => Formula::Not(Box::new(f.simplify())),
-            Formula::And(fs) => Formula::And(fs.iter().map(|f| Box::new(f.simplify())).collect()),
-            Formula::Or(fs) => Formula::Or(fs.iter().map(|f| Box::new(f.simplify())).collect()),
+            Formula::Not(f) => {
+                match &**f {
+                    Formula::Not(sub_f) => {
+                        sub_f.as_ref().clone()
+                    },
+                    _ => {
+                        Formula::Not(Box::new(f.simplify()))
+                    }
+                }
+            },
+            Formula::And(fs) => {
+                let mut conjuncts = vec![];
+                for f in fs {
+                    match &**f {
+                        Formula::And(sub_fs) => {
+                            for sub_f in sub_fs {
+                                conjuncts.push(Box::new(sub_f.simplify()));
+                            }
+                        }
+                        other => {
+                            conjuncts.push(Box::new(other.simplify()));
+                        }
+                    }
+                }
+                Formula::And(conjuncts)
+            },
+            Formula::Or(fs) => {
+                let mut disjuncts = vec![];
+                for f in fs {
+                    match &**f {
+                        Formula::Or(sub_fs) => {
+                            for sub_f in sub_fs {
+                                disjuncts.push(Box::new(sub_f.simplify()));
+                            }
+                        }
+                        other => {
+                            disjuncts.push(Box::new(other.simplify()));
+                        }
+                    }
+                }
+                Formula::Or(disjuncts)
+            },
             Formula::Xor(fs) => {
                 // Convert XOR to a combination of AND, OR, and NOT
-                let mut result = Vec::new();
-                for (i, f) in fs.iter().enumerate() {
-                    let mut clause = Vec::new();
-                    for (j, g) in fs.iter().enumerate() {
+                let new_fs: Vec<Box<Formula>> = fs.iter().map(|f| {
+                    Box::new(f.simplify())
+                }).collect();
+                let mut result = vec![];
+                for (i, f_1) in new_fs.iter().enumerate() {
+                    let mut clause = vec![f_1.clone()];
+                    for (j, f_2) in new_fs.iter().enumerate() {
                         if i == j {
-                            clause.push(Box::new(g.simplify()));
-                        } else {
-                            clause.push(Box::new(Formula::Not(Box::new(g.simplify()))));
+                            continue;
                         }
+                        clause.push(Box::new(Formula::Not(f_2.clone())));
                     }
                     result.push(Box::new(Formula::Or(clause)));
                 }
+                result.push(Box::new(Formula::Or(new_fs)));
                 Formula::And(result)
             }
             Formula::Imply(antecedents, consequents) => {
@@ -182,23 +224,33 @@ impl<'a> Formula<'a> {
         }
     }
 
-    pub fn to_clauses(&self) -> (u32, Vec<Vec<i32>>) {
+    fn to_clauses(&self) -> (u32, Vec<Vec<i32>>) {
         let mut literal_ids = HashMap::new();
-        let mut clauses = vec![];
+        let mut clauses: Vec<Vec<i32>> = vec![];
         let mut count = 1;
         match self.to_cnf() {
+            Formula::Empty => {
+                return (0, vec![]);
+            }
             Formula::And(subformula) => {
                 for f in subformula {
-                    let mut clause = vec![];
+                    let mut clause: Vec<i32> = vec![];
                     match *f {
                         Formula::Empty => {}
+                        Formula::Atom(predicate) => {
+                            if !literal_ids.contains_key(predicate.name) {
+                                literal_ids.insert(predicate.name, count);
+                                count+=1;
+                            }
+                            clause.push(*literal_ids.get(predicate.name).unwrap());
+                        }
                         Formula::Not(pred_box) => {
                             if let Formula::Atom(predicate) = *pred_box {
                                 if !literal_ids.contains_key(predicate.name) {
                                     literal_ids.insert(predicate.name, count);
                                     count+=1;
                                 }
-                                clause.push(-1 * literal_ids.get(predicate.name).unwrap());
+                                clause.push(-1 * literal_ids.get(predicate.name).unwrap().clone());
                             } else {
                                 panic!("not simplified")
                             }
@@ -219,7 +271,7 @@ impl<'a> Formula<'a> {
                                                 literal_ids.insert(predicate.name, count);
                                                 count+=1;
                                             }
-                                            clause.push(-1 * literal_ids.get(predicate.name).unwrap());
+                                            clause.push(-1 * literal_ids.get(predicate.name).unwrap().clone());
                                         } else {
                                             panic!("not simplified")
                                         }
@@ -228,7 +280,7 @@ impl<'a> Formula<'a> {
                                 }
                             }
                         }
-                        _ => panic!("not in CNF")
+                        token => panic!("not in CNF, found {:?}", token)
 
                     }
                     clauses.push(clause);
@@ -266,12 +318,29 @@ impl<'a> Formula<'a> {
                         literal_ids.insert(predicate.name, count);
                         count+=1;
                     }
-
+                    let clause = vec![-1 * literal_ids.get(predicate.name).unwrap()];
+                    clauses.push(clause);
+                } else {
+                    panic!("not simplified")
                 }
             }
-            _ => panic!()
+            Formula::Atom(predicate) => {
+                if !literal_ids.contains_key(predicate.name) {
+                    literal_ids.insert(predicate.name, count);
+                    count+=1;
+                }
+                let clause = vec![literal_ids.get(predicate.name).unwrap().clone()];
+                clauses.push(clause);
+            }
+            token => panic!("unexpected {:?}", token)
         }
         ((count - 1) as u32, clauses)
+    }
+
+    pub fn is_sat(&self) -> bool {
+        let cnf = self.to_cnf();
+        let (var_count, mut clauses) = cnf.to_clauses();
+        Robinson::parser::preproc_and_solve(clauses.as_mut(), var_count as usize)
     }
 }
 
@@ -372,5 +441,104 @@ mod tests {
         assert_eq!(clauses.len(), 2);
         assert_eq!(clauses[0], vec![1, -2]);
         assert_eq!(clauses[1], vec![3, 2, -1]);
+    }
+
+    #[test]
+    pub fn is_sat_test() {
+        let cnf = Formula::And(vec![
+            Box::new(Formula::Or(vec![
+                Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })))),
+            ])),
+            Box::new(Formula::Or(vec![
+                Box::new(Formula::Atom(Predicate { name: "b", variables: vec![] })),
+                Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })))),
+            ])),
+        ]);
+        assert_eq!(cnf.is_sat(), true);
+    }
+
+    #[test]
+    pub fn xor_simplification_test() {
+        // (a xor b) = (a+b).(~a+~b)
+        let f1 = Formula::Xor(vec![
+            Box::new(Formula::Atom(Predicate {
+                name: "a",
+                variables: vec![],
+            })),
+            Box::new(Formula::Atom(Predicate {
+                name: "b",
+                variables: vec![],
+            })),
+        ]);
+        let cnf = f1.to_cnf();
+        match cnf {
+            Formula::And(a) => {
+                match &*a[0] {
+                    Formula::Or(disjuncts) => {
+                        assert_eq!(disjuncts.len(), 2);
+                        match &*disjuncts[0] {
+                            Formula::Atom(predicate) => {
+                                assert_eq!(predicate.name, "a");
+                            }
+                            token => panic!("{:?}", token)
+                        }
+                        match &*disjuncts[1] {
+                            Formula::Not(pred_box) => {
+                                if let Formula::Atom(predicate) = pred_box.as_ref() {
+                                    assert_eq!(predicate.name, "b");
+                                } else {
+                                    panic!()
+                                }
+                            }
+                            token => panic!("{:?}", token)
+                        }
+                    },
+                    token => panic!("{:?}", token),
+                }
+                match &*a[1] {
+                    Formula::Or(disjuncts) => {
+                        assert_eq!(disjuncts.len(), 2);
+                        match &*disjuncts[0] {
+                            Formula::Atom(predicate) => {
+                                assert_eq!(predicate.name, "b");
+                            }
+                            token => panic!("{:?}", token)
+                        }
+                        match &*disjuncts[1] {
+                            Formula::Not(pred_box) => {
+                                if let Formula::Atom(predicate) = pred_box.as_ref() {
+                                    assert_eq!(predicate.name, "a");
+                                } else {
+                                    panic!()
+                                }
+                            }
+                            token => panic!("{:?}", token)
+                        }
+                    },
+                    token => panic!("{:?}", token),
+                }
+                match &*a[2] {
+                    Formula::Or(disjuncts) => {
+                        assert_eq!(disjuncts.len(), 2);
+                        match &*disjuncts[0] {
+                            Formula::Atom(predicate) => {
+                                assert_eq!(predicate.name, "a");
+                            }
+                            token => panic!("{:?}", token)
+                        }
+                        match &*disjuncts[1] {
+                            Formula::Atom(predicate) => {
+                                assert_eq!(predicate.name, "b");
+                            }
+                            token => panic!("{:?}", token)
+                        }
+                    },
+                    token => panic!("{:?}", token),
+                }
+            }
+            token => panic!("{:?}", token),
+        }
     }
 }

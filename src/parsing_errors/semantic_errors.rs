@@ -23,11 +23,10 @@ pub enum SemanticError<'a>{
     // Ordering Errors
     CyclicTypeDeclaration(&'a str),
     CyclicOrderingDeclaration(&'a str),
-    // Predicate Errors
-    // TODO: implement
-    ComplementaryEffects(&'a str),
-    // TODO: implement
-    ComplementaryPreconditions(&'a str),
+    // Action Errors
+    UnsatisfiableActionPrecondition(&'a str),
+    // TODO: test
+    UnsatisfiableMethodPrecondition(&'a str),
     // TODO: implement
     ImmutablePredicate,
     // Compound Task errors
