@@ -22,7 +22,7 @@ pub enum Formula<'a> {
 }
 
 impl<'a> Formula<'a> {
-    pub fn get_predicates(&self) -> Vec<&Predicate<'a>> {
+    pub fn get_propositional_predicates(&self) -> Vec<&Predicate<'a>> {
         let mut predicates = vec![];
         match &*self {
             Formula::Empty => {}
@@ -30,21 +30,24 @@ impl<'a> Formula<'a> {
                 predicates.push(predicate);
             }
             Formula::Not(new_formula) => {
-                predicates.extend(new_formula.get_predicates().iter());
+                predicates.extend(new_formula.get_propositional_predicates().iter());
             }
             Formula::And(new_formula) | Formula::Or(new_formula) | Formula::Xor(new_formula) => {
                 for f in new_formula {
-                    predicates.extend(f.get_predicates().iter());
+                    predicates.extend(f.get_propositional_predicates().iter());
                 }
             }
-            Formula::ForAll(_, new_formula) => {
-                predicates.extend(new_formula.get_predicates().iter());
+            Formula::Imply(ps, qs) => {
+                for p in ps {
+                    predicates.extend(p.get_propositional_predicates().iter());
+                }
+                for q in qs {
+                    predicates.extend(q.get_propositional_predicates().iter());
+                }
             }
             Formula::Equals(_, _) => {}
-            // TODO: add support for imply, and exists
-            _ => {
-                panic!()
-            }
+            // not propositional
+            Formula::ForAll(_, _) | Formula::Exists(_, _) => {}
         }
         return predicates;
     }
@@ -174,20 +177,16 @@ impl<'a> Formula<'a> {
                         .map(|f| Box::new(Formula::Not(Box::new(f.to_nnf()))))
                         .collect(),
                 ),
-                // TODO: test
                 Formula::Exists(quantifier, f) => Formula::ForAll(
                     quantifier.clone(),
                     Box::new(Formula::Not(Box::new(f.to_nnf()))),
                 ),
-                // TODO: test
                 Formula::ForAll(quantifier, f) => Formula::Exists(
                     quantifier.clone(),
                     Box::new(Formula::Not(Box::new(f.to_nnf()))),
                 ),
                 //
-                Formula::Xor(_) | Formula::Imply(_, _) => unreachable!(),
-                // TODO: add support
-                Formula::Equals(_, _) => panic!(),
+                Formula::Xor(_) | Formula::Imply(_, _) | Formula::Equals(_, _) => unreachable!("not simplified")
             },
             Formula::And(fs) => Formula::And(fs.iter().map(|f| Box::new(f.to_nnf())).collect()),
             Formula::Or(fs) => Formula::Or(fs.iter().map(|f| Box::new(f.to_nnf())).collect()),
@@ -238,15 +237,59 @@ impl<'a> Formula<'a> {
                     Formula::And(result.into_iter().map(Box::new).collect())
                 }
             }
+            Formula::Exists(q, vars) => {
+                Formula::Exists(q.clone(), Box::new(vars.distribute_disjunction()))
+            }
+            Formula::ForAll(q, vars) => {
+                Formula::ForAll(q.clone(), Box::new(vars.distribute_disjunction()))
+            }
             _ => unreachable!("formula is not simplified"),
         }
+    }
+
+    fn drop_quantifiers(&self) -> Formula<'a> {
+        match self {
+            Formula::Empty => {},
+            Formula::Atom(_) => {},
+            Formula::Not(f) => {
+                return Formula::Not(Box::new(f.drop_quantifiers()))
+            }
+            Formula::And(fs) => {
+                return Formula::And(fs.iter().map(|f| {
+                    Box::new(f.drop_quantifiers())
+                }).collect());
+            }
+            Formula::Or(fs) => {
+                return Formula::Or(fs.iter().map(|f| {
+                    Box::new(f.drop_quantifiers())
+                }).collect());
+            }
+            Formula::Xor(fs) => {
+                return Formula::Xor(fs.iter().map(|f| {
+                    Box::new(f.drop_quantifiers())
+                }).collect());
+            }
+            Formula::Imply(ps, qs) => {
+                let new_ps = ps.iter().map(|p| {
+                    Box::new(p.drop_quantifiers())
+                }).collect();
+                let new_qs = qs.iter().map(|q| {
+                    Box::new(q.drop_quantifiers())
+                }).collect();
+                return Formula::Imply(new_ps, new_qs);
+            }
+            Formula::Equals(_, _) => {}
+            Formula::ForAll(_, _) | Formula::Exists(_, _) => {return Formula::Empty}
+        }
+        self.clone()
     }
 
     fn to_clauses(&self) -> (u32, Vec<Vec<i32>>) {
         let mut literal_ids = HashMap::new();
         let mut clauses: Vec<Vec<i32>> = vec![];
         let mut count = 1;
-        match self.to_cnf() {
+        let propositional = self.drop_quantifiers();
+        match propositional.to_cnf() {
             Formula::Empty => {
                 return (0, vec![]);
             }

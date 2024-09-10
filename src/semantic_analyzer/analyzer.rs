@@ -53,7 +53,7 @@ impl<'a> SemanticAnalyzer<'a> {
             match &action.preconditions {
                 Some(precondition) => {
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
-                    let precond_predicates = precondition.get_predicates();
+                    let precond_predicates = precondition.get_propositional_predicates();
                     self.type_checker.check_formula(
                         &precond_predicates,
                         &action.parameters,
@@ -72,7 +72,7 @@ impl<'a> SemanticAnalyzer<'a> {
             match &action.effects {
                 Some(effect) => {
                     check_predicate_declarations(effect, &self.ast.predicates)?;
-                    let eff_predicates = effect.get_predicates();
+                    let eff_predicates = effect.get_propositional_predicates();
                     self.type_checker.check_formula(
                         &eff_predicates,
                         &action.parameters,
@@ -94,7 +94,7 @@ impl<'a> SemanticAnalyzer<'a> {
             match &method.precondition {
                 Some(precondition) => {
                     check_predicate_declarations(precondition, &self.ast.predicates)?;
-                    let precond_predicates = precondition.get_predicates();
+                    let precond_predicates = precondition.get_propositional_predicates();
                     self.type_checker.check_formula(
                         &precond_predicates,
                         &method.params,
