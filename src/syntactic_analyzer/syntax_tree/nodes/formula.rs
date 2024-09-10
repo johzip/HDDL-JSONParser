@@ -62,6 +62,12 @@ impl<'a> Formula<'a> {
                     Formula::Not(sub_f) => {
                         sub_f.as_ref().clone()
                     },
+                    Formula::Equals(a, b) => {
+                        Formula::Xor(vec![
+                            Box::new(Formula::Atom(Predicate { name: a, variables: vec![] })),
+                            Box::new(Formula::Atom(Predicate { name: b, variables: vec![] })),
+                        ]).simplify()
+                    }
                     _ => {
                         Formula::Not(Box::new(f.simplify()))
                     }
@@ -133,8 +139,20 @@ impl<'a> Formula<'a> {
             Formula::ForAll(quantifier, f) => {
                 Formula::ForAll(quantifier.clone(), Box::new(f.simplify()))
             }
-            // TODO: Add support
-            Formula::Equals(_, _) => panic!(),
+            Formula::Equals(a, b) => {
+                // a = b -> (a ^ b) v (~a ^ ~b)
+                let pred_a = Box::new(
+                    Formula::Atom(Predicate::new(&a, vec![]))
+                );
+                let pred_b = Box::new(
+                    Formula::Atom(Predicate::new(&b, vec![]))
+                );
+                let pos_conjunct = Formula::And(vec![pred_a.clone(), pred_b.clone()]);
+                let not_a = Box::new(Formula::Not(pred_a));
+                let not_b = Box::new(Formula::Not(pred_b));
+                let neg_conjunct = Formula::And(vec![not_a, not_b]);
+                Formula::Or(vec![Box::new(pos_conjunct), Box::new(neg_conjunct)])
+            },
         }
     }
 
@@ -273,7 +291,7 @@ impl<'a> Formula<'a> {
                                             }
                                             clause.push(-1 * literal_ids.get(predicate.name).unwrap().clone());
                                         } else {
-                                            panic!("not simplified")
+                                            panic!("not simplified: {:?}", *pred_box)
                                         }
                                     }
                                     _ => panic!("not in CNF")
