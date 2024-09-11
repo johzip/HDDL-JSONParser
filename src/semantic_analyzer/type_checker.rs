@@ -91,6 +91,8 @@ impl<'a> TypeChecker<'a> {
                             None => {
                                 if !declared_constants.contains(&var.name) {
                                     return Err(SemanticError::UndefinedParameter(&var.name));
+                                } else {
+                                    found_list.push((var.name, &declared_constants.get(&var.name).unwrap().var_type))
                                 }
                             }
                         }
@@ -172,6 +174,8 @@ impl<'a> TypeChecker<'a> {
                 None => {
                     if !declared_constants.contains(term) {
                         return Err(SemanticError::UndefinedParameter(&term));
+                    } else {
+                        found.push((term, &declared_constants.get(term).unwrap().var_type))
                     }
                 }
             }
