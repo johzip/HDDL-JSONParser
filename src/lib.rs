@@ -1,7 +1,7 @@
 mod lexical_analyzer;
 mod syntactic_analyzer;
 mod semantic_analyzer;
-mod parsing_errors;
+mod output;
 
 use lexical_analyzer::*;
 

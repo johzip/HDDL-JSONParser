@@ -6,7 +6,7 @@ mod type_checker;
 mod tests;
 
 use crate::syntactic_analyzer::*;
-use crate::parsing_errors::*;
+use crate::output::*;
 use duplicate_detection::*;
 use undefined_elements::*;
 use type_checker::TypeChecker;

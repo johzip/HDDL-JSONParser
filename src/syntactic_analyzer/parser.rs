@@ -1,5 +1,3 @@
-use crate::parsing_errors::ParsingError;
-
 use self::definition_types::ProblemDefinition;
 
 use super::*;

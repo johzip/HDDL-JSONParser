@@ -1,5 +1,5 @@
 use super::*;
-use crate::{parsing_errors::ParsingError, syntactic_analyzer::SyntacticError};
+use crate::{syntactic_analyzer::SyntacticError};
 
 impl<'a> Parser<'a> {
     pub fn parse_args(&self) -> Result<Vec<Variable<'a>>, ParsingError> {
