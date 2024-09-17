@@ -20,7 +20,7 @@ pub fn basic_type_checking_test () {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(&program);
-    let parser = Parser::new(&lexer);
+    let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
     match semantic_parser.verify_ast() {
@@ -64,7 +64,7 @@ pub fn effect_type_checking_test () {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(&program);
-    let parser = Parser::new(&lexer);
+    let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
     match semantic_parser.verify_ast() {
@@ -103,7 +103,7 @@ pub fn method_prec_type_checking_test () {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(&program);
-    let parser = Parser::new(&lexer);
+    let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
     match semantic_parser.verify_ast() {
@@ -150,7 +150,7 @@ pub fn method_subtask_checking_test () {
     )
     .into_bytes();
     let lexer = LexicalAnalyzer::new(&program);
-    let parser = Parser::new(&lexer);
+    let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
     match semantic_parser.verify_ast() {

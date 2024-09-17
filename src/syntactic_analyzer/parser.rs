@@ -3,11 +3,11 @@ use self::definition_types::ProblemDefinition;
 use super::*;
 
 pub struct Parser<'a> {
-    pub tokenizer: &'a LexicalAnalyzer<'a>,
+    pub tokenizer: LexicalAnalyzer<'a>,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokenizer: &'a LexicalAnalyzer) -> Parser<'a> {
+    pub fn new(tokenizer: LexicalAnalyzer<'a>) -> Parser<'a> {
         Parser { tokenizer }
     }
     pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError<'a>> {

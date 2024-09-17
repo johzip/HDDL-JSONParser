@@ -10,14 +10,14 @@ mod tests {
     pub fn file_type_test() {
         let program = String::from("(define (domain jajaja) (:predicates ()) ) ").into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        let parser = Parser::new(&lexer);
+        let parser = Parser::new(lexer);
         match parser.parse() {
             Ok(_) => {}
             _ => panic!("parsing error"),
         }
         let program = String::from("(define (problem jajaja2) (domain blahblah)) ").into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        let parser = Parser::new(&lexer);
+        let parser = Parser::new(lexer);
         match parser.parse() {
             Ok(_) => {}
             _ => panic!("parsing error"),
@@ -32,7 +32,7 @@ mod tests {
                           )")
                 .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.objects[0].name, "a");
                 assert_eq!(symbols.objects[0].var_type.unwrap(), "d");
@@ -54,7 +54,7 @@ mod tests {
         let program =
             String::from("(define (problem p1) (domain bal) (:objects a b c) )").into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.objects[0].name, "a");
                 assert_eq!(symbols.objects[1].name, "b");
@@ -74,7 +74,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.requirements.len(), 4);
                 assert_eq!(
@@ -117,7 +117,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.predicates.len(), 3);
                 for predicate in symbols.predicates {
@@ -169,7 +169,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
@@ -209,7 +209,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
@@ -299,7 +299,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
@@ -363,7 +363,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.init_state.len(), 2);
                 let pred1 = &ast.init_state[0];
@@ -402,7 +402,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => match ast.init_tn {
                 Some(tn) => {
                     match tn.parameters {
@@ -471,7 +471,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => match ast.init_tn {
                 Some(tn) => {
                     assert_eq!(tn.parameters.is_none(), true);
@@ -511,7 +511,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.compound_tasks.len(), 1);
                 let c_1 = &ast.compound_tasks[0];
@@ -543,7 +543,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.actions.len(), 1);
                 let action = &ast.actions[0];
@@ -613,7 +613,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.actions.len(), 1);
                 let action = &ast.actions[0];
@@ -670,7 +670,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 let types = ast.types.unwrap();
                 assert_eq!(types.len(), 8);
@@ -710,7 +710,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 assert_eq!(ast.compound_tasks.len(), 1);
                 let c_1 = &ast.compound_tasks[0];
@@ -742,7 +742,7 @@ mod tests {
         )
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
-        match Parser::new(&lexer).parse() {
+        match Parser::new(lexer).parse() {
             Ok(ast) => {
                 let constants = ast.constants.unwrap();
                 assert_eq!(constants.len(), 8);

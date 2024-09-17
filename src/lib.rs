@@ -7,7 +7,7 @@ use lexical_analyzer::*;
 
 pub fn analyze(program: &Vec<u8>) -> Result<(), String> {
     let lexer = LexicalAnalyzer::new(program);
-    let parser = syntactic_analyzer::Parser::new(&lexer);
+    let parser = syntactic_analyzer::Parser::new(lexer);
     match parser.parse() {
         Ok(ast) => {
             let semantic_verifier = semantic_analyzer::SemanticAnalyzer::new(&ast);

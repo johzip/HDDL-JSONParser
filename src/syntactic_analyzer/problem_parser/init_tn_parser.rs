@@ -196,7 +196,7 @@ impl<'a> Parser<'a> {
     }
 
     // parse a single ordering constraint
-    fn parse_ordering(&self) -> Result<Vec<(&'a str, &'a str)>, ParsingError> {
+    fn parse_ordering(&'a self) -> Result<Vec<(&'a str, &'a str)>, ParsingError> {
         let mut orderings: Vec<(&str, &str)> = vec![];
         match self.tokenizer.get_token()? {
             TokenType::Operator(OperationType::LessThan) => {
@@ -301,7 +301,7 @@ impl<'a> Parser<'a> {
     }
 
     // parses a single subtask
-    fn parse_subtask(&self) -> Result<Subtask, ParsingError<'a>> {
+    fn parse_subtask(&'a self) -> Result<Subtask, ParsingError<'a>> {
         match self.tokenizer.get_token()? {
             TokenType::Identifier(id) => {
                 let mut terms = vec![];
@@ -407,7 +407,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_constraints(&self) -> Result<Vec<Constraint<'a>>, ParsingError> {
+    pub fn parse_constraints(&'a self) -> Result<Vec<Constraint<'a>>, ParsingError> {
         match self.tokenizer.get_token()? {
             TokenType::Punctuator(PunctuationType::LParentheses) => {
                 let mut constraints = vec![];
@@ -468,7 +468,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_constraint(&self) -> Result<Constraint<'a>, ParsingError> {
+    pub fn parse_constraint(&'a self) -> Result<Constraint<'a>, ParsingError> {
         match self.tokenizer.get_token()? {
             TokenType::Operator(OperationType::Not) => {
                 match self.tokenizer.get_token()? {
