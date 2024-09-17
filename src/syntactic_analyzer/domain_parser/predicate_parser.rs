@@ -32,6 +32,7 @@ impl<'a> Parser<'a> {
             Token::Identifier(predicate_name) => {
                 return Ok(Predicate {
                     name: predicate_name,
+                    name_pos: self.tokenizer.get_last_token_position(),
                     variables: self.parse_args()?,
                 })
             }

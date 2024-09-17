@@ -1,3 +1,5 @@
+use crate::TokenPosition;
+
 use super::*;
 
 pub struct InitialTaskNetwork<'a> {
@@ -13,8 +15,11 @@ pub struct HTN<'a> {
 
 pub struct Subtask<'a> {
     pub id: Option<&'a str>,
+    pub id_pos: Option<TokenPosition>,
     pub task_symbol: &'a str,
-    pub terms: Vec<&'a str>
+    pub task_symbol_pos: TokenPosition,
+    pub terms: Vec<&'a str>,
+    pub terms_pos: Vec<TokenPosition>,
 }
 
 pub enum Constraint<'a> {

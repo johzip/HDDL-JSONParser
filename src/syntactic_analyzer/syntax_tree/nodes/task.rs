@@ -1,16 +1,20 @@
 use std::{borrow::Borrow, hash::Hash};
 
+use crate::TokenPosition;
+
 use super::*;
 
 pub struct Task<'a> {
     pub name: &'a str,
+    pub name_pos: TokenPosition,
     pub parameters: Vec<Symbol<'a>>
 }
 
 impl <'a> Task <'a> {
-    pub fn new(name: &'a str, parameters: Vec<Symbol<'a>>) -> Task<'a> {
+    pub fn new(name: &'a str, name_pos: TokenPosition, parameters: Vec<Symbol<'a>>) -> Task<'a> {
         Task {
             name,
+            name_pos,
             parameters
         }
     }

@@ -67,8 +67,8 @@ impl<'a> Formula<'a> {
                     },
                     Formula::Equals(a, b) => {
                         Formula::Xor(vec![
-                            Box::new(Formula::Atom(Predicate { name: a, variables: vec![] })),
-                            Box::new(Formula::Atom(Predicate { name: b, variables: vec![] })),
+                            Box::new(Formula::Atom(Predicate::new_dummy(a))),
+                            Box::new(Formula::Atom(Predicate::new_dummy(b))),
                         ]).simplify()
                     }
                     _ => {
@@ -145,10 +145,10 @@ impl<'a> Formula<'a> {
             Formula::Equals(a, b) => {
                 // a = b -> (a ^ b) v (~a ^ ~b)
                 let pred_a = Box::new(
-                    Formula::Atom(Predicate::new(&a, vec![]))
+                    Formula::Atom(Predicate::new_dummy(&a))
                 );
                 let pred_b = Box::new(
-                    Formula::Atom(Predicate::new(&b, vec![]))
+                    Formula::Atom(Predicate::new_dummy(&b))
                 );
                 let pos_conjunct = Formula::And(vec![pred_a.clone(), pred_b.clone()]);
                 let not_a = Box::new(Formula::Not(pred_a));
@@ -413,14 +413,8 @@ mod tests {
     pub fn demorgan_rules_test() {
         // ~(a^b) = ~a v ~b
         let f1 = Formula::Not(Box::new(Formula::And(vec![
-            Box::new(Formula::Atom(Predicate {
-                name: "a",
-                variables: vec![],
-            })),
-            Box::new(Formula::Atom(Predicate {
-                name: "b",
-                variables: vec![],
-            })),
+            Box::new(Formula::Atom(Predicate::new_dummy("a"))),
+            Box::new(Formula::Atom(Predicate::new_dummy("b"))),
         ])));
         let cnf = f1.to_cnf();
         match cnf {
@@ -449,14 +443,8 @@ mod tests {
 
         // ~(a v b) = ~a ^ ~b
         let f2 = Formula::Not(Box::new(Formula::Or(vec![
-            Box::new(Formula::Atom(Predicate {
-                name: "a",
-                variables: vec![],
-            })),
-            Box::new(Formula::Atom(Predicate {
-                name: "b",
-                variables: vec![],
-            })),
+            Box::new(Formula::Atom(Predicate::new_dummy("a"))),
+            Box::new(Formula::Atom(Predicate::new_dummy("b"))),
         ])));
         let cnf = f2.to_cnf();
         match cnf {
@@ -488,13 +476,13 @@ mod tests {
     pub fn cnf_clause_test() {
         let cnf = Formula::And(vec![
             Box::new(Formula::Or(vec![
-                Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })),
-                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })))),
+                Box::new(Formula::Atom(Predicate::new_dummy("a"))),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate::new_dummy("c"))))),
             ])),
             Box::new(Formula::Or(vec![
-                Box::new(Formula::Atom(Predicate { name: "b", variables: vec![] })),
-                Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })),
-                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })))),
+                Box::new(Formula::Atom(Predicate::new_dummy("b"))),
+                Box::new(Formula::Atom(Predicate::new_dummy("c"))),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate::new_dummy("a"))))),
             ])),
         ]);
         let (var_count, clauses) = cnf.to_clauses();
@@ -508,13 +496,13 @@ mod tests {
     pub fn is_sat_test() {
         let cnf = Formula::And(vec![
             Box::new(Formula::Or(vec![
-                Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })),
-                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })))),
+                Box::new(Formula::Atom(Predicate::new_dummy("a"))),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate::new_dummy("c"))))),
             ])),
             Box::new(Formula::Or(vec![
-                Box::new(Formula::Atom(Predicate { name: "b", variables: vec![] })),
-                Box::new(Formula::Atom(Predicate { name: "c", variables: vec![] })),
-                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate { name: "a", variables: vec![] })))),
+                Box::new(Formula::Atom(Predicate::new_dummy("b"))),
+                Box::new(Formula::Atom(Predicate::new_dummy("c"))),
+                Box::new(Formula::Not(Box::new(Formula::Atom(Predicate::new_dummy("a"))))),
             ])),
         ]);
         assert_eq!(cnf.is_sat(), true);
@@ -524,14 +512,8 @@ mod tests {
     pub fn xor_simplification_test() {
         // (a xor b) = (a+b).(~a+~b)
         let f1 = Formula::Xor(vec![
-            Box::new(Formula::Atom(Predicate {
-                name: "a",
-                variables: vec![],
-            })),
-            Box::new(Formula::Atom(Predicate {
-                name: "b",
-                variables: vec![],
-            })),
+            Box::new(Formula::Atom(Predicate::new_dummy("a"))),
+            Box::new(Formula::Atom(Predicate::new_dummy("b"))),
         ]);
         let cnf = f1.to_cnf();
         match cnf {

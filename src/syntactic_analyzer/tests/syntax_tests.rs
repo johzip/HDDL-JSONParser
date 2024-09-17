@@ -154,9 +154,12 @@ mod tests {
                                 ("a_3", Some("t_2"))
                             ]
                         );
+                        assert_eq!(predicate.name_pos.line, 3);
                     } else if predicate.name == "pred_2" {
                         assert_eq!(predicate.variables.len(), 0);
+                        assert_eq!(predicate.name_pos.line, 4);
                     } else if predicate.name == "pred_3" {
+                        assert_eq!(predicate.name_pos.line, 5);
                         let items: Vec<(&str, Option<&str>)> = predicate
                             .variables
                             .iter()
@@ -193,15 +196,27 @@ mod tests {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
+                assert_eq!(method.name_pos.line, 2);
                 assert_eq!(method.task_name, "deliver_abs");
+                assert_eq!(method.task_name_pos.line, 4);
                 assert_eq!(method.task_terms.len(), 3);
                 assert_eq!(method.task_terms[0].name, "p1");
                 assert_eq!(method.task_terms[1].name, "l1");
                 assert_eq!(method.task_terms[2].name, "l2");
                 assert_eq!(method.tn.subtasks[0].task_symbol, "pickup");
+                assert_eq!(method.tn.subtasks[0].task_symbol_pos.line, 6);
+                let term_pos_lines1: Vec<u32> = method.tn.subtasks[0].terms_pos.iter().map(|x| {
+                    x.line
+                }).collect();
+                assert_eq!(term_pos_lines1, vec![6, 6]);
                 assert_eq!(method.tn.subtasks[0].terms[0], "p1");
                 assert_eq!(method.tn.subtasks[0].terms[1], "l1");
                 assert_eq!(method.tn.subtasks[1].task_symbol, "deliver_abs");
+                let term_pos_lines2: Vec<u32> = method.tn.subtasks[1].terms_pos.iter().map(|x| {
+                    x.line
+                }).collect();
+                assert_eq!(term_pos_lines2, vec![7, 7, 7]);
+                assert_eq!(method.tn.subtasks[1].task_symbol_pos.line, 7);
                 assert_eq!(method.tn.subtasks[1].terms[0], "p1");
                 assert_eq!(method.tn.subtasks[1].terms[1], "l2");
                 assert_eq!(method.tn.subtasks[1].terms[2], "l3");
@@ -218,7 +233,8 @@ mod tests {
                 (:method m_1
                     :parameters (?p1 - p ?l1 ?l2 ?l3 - loc) 
                     :task (deliver_abs ?p1 ?l1 ?l2)
-                    :precondition (and (at ?p1 ?l3) (driver ?l1) (not (= ?l1 ?l2)))
+                    :precondition (and (at ?p1 ?l3)
+                    (driver ?l1) (not (= ?l1 ?l2)))
                     :subtasks (and
                         (pickup ?p1 ?l1)
                         (deliver_abs ?p1 ?l2 ?l3)
@@ -254,6 +270,7 @@ mod tests {
                                 match pred1 {
                                     Formula::Atom(pred) => {
                                         assert_eq!(pred.name, "at");
+                                        assert_eq!(pred.name_pos.line, 5);
                                         assert_eq!(pred.variables.len(), 2);
                                     },
                                     _ => {
@@ -264,6 +281,7 @@ mod tests {
                                 match pred2 {
                                     Formula::Atom(pred) => {
                                         assert_eq!(pred.name, "driver");
+                                        assert_eq!(pred.name_pos.line, 6);
                                         assert_eq!(pred.variables.len(), 1);
                                     },
                                     _ => {
@@ -410,8 +428,10 @@ mod tests {
              (:htn
                 :parameters (?d)
                 :subtasks (and
-                    (task0 (deliver package_0 city_loc_0))
-                    (task1 (retrieve package_1 city_loc_2 truck3))
+                    (task0 (deliver package_0 
+                            city_loc_0))
+                    (task1 (retrieve package_1
+                            city_loc_2 truck3))
                 )
                 :ordering (and
                     (< task0 task1)
@@ -445,11 +465,21 @@ mod tests {
                     assert_eq!(tn.tn.subtasks[0].id, Some("task0"));
                     assert_eq!(tn.tn.subtasks[0].task_symbol, "deliver");
                     assert_eq!(tn.tn.subtasks[0].terms.len(), 2);
+                    assert_eq!(tn.tn.subtasks[0].id_pos.unwrap().line, 5);
+                    let s0_term_lines: Vec<u32> = tn.tn.subtasks[0].terms_pos.iter().map(|x| {
+                        x.line
+                    }).collect();
+                    assert_eq!(s0_term_lines, vec![5, 6]);
                     assert_eq!(tn.tn.subtasks[0].terms[0], "package_0");
                     assert_eq!(tn.tn.subtasks[0].terms[1], "city_loc_0");
                     assert_eq!(tn.tn.subtasks[1].id, Some("task1"));
                     assert_eq!(tn.tn.subtasks[1].task_symbol, "retrieve");
                     assert_eq!(tn.tn.subtasks[1].terms.len(), 3);
+                    assert_eq!(tn.tn.subtasks[1].id_pos.unwrap().line, 7);
+                    let s1_term_lines: Vec<u32> = tn.tn.subtasks[1].terms_pos.iter().map(|x| {
+                        x.line
+                    }).collect();
+                    assert_eq!(s1_term_lines, vec![7, 8, 8]);
                     assert_eq!(tn.tn.subtasks[1].terms[0], "package_1");
                     assert_eq!(tn.tn.subtasks[1].terms[1], "city_loc_2");
                     assert_eq!(tn.tn.subtasks[1].terms[2], "truck3");
@@ -523,6 +553,7 @@ mod tests {
     pub fn compound_task_parsing_test() {
         let program = String::from(
             "(define (domain bal)
+                (:predicates )
                 (:task c_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
                 )
@@ -535,6 +566,7 @@ mod tests {
                 assert_eq!(ast.compound_tasks.len(), 1);
                 let c_1 = &ast.compound_tasks[0];
                 assert_eq!(c_1.name, "c_1");
+                assert_eq!(c_1.name_pos.line, 3);
                 let c1_term_names: Vec<&str> =
                     c_1.parameters.iter().map(|x| x.name).collect();
                 let c1_term_types: Vec<&str> = c_1
@@ -544,6 +576,7 @@ mod tests {
                     .collect();
                 assert_eq!(c1_term_names, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
+                assert_eq!(c_1.parameters[0].type_pos.unwrap().line, 4);
             }
             Err(_) => panic!("parsing errors"),
         }
@@ -556,7 +589,8 @@ mod tests {
                 (:action a_1
                  :parameters (p_1 p_2 - t1 p_3 - t2)
                  :precondition (not (at p_1))
-                 :effect (and (not (hold p_2 p_3)) (at p_2))
+                 :effect (and (not (hold p_2 p_3))
+                 (at p_2))
                 )
              ) ",
         )

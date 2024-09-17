@@ -140,6 +140,7 @@ impl<'a> Parser<'a> {
                     Token::Identifier(name) => {
                         let predicate = Predicate {
                             name: name,
+                            name_pos: self.tokenizer.get_last_token_position(),
                             variables: self.parse_args()?
                         };
                         return Ok(Formula::Atom(predicate));
