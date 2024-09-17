@@ -3,7 +3,7 @@ use self::definition_types::ProblemDefinition;
 use super::*;
 
 pub struct Parser<'a> {
-    pub tokenizer: &'a LexicalAnalyzer,
+    pub tokenizer: &'a LexicalAnalyzer<'a>,
 }
 
 impl<'a> Parser<'a> {

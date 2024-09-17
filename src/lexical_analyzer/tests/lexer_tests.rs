@@ -6,7 +6,7 @@ mod lexer_test {
     #[test]
     pub fn punctuation_recognition_test() {
         let program = String::from("-( \n) ").into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         match lexer.get_token() {
             Ok(TokenType::Punctuator(PunctuationType::Dash)) => {},
             _ => panic!("wrong token")
@@ -28,7 +28,7 @@ mod lexer_test {
     #[test]
     pub fn ordering_relation_recognition_test() {
         let program = String::from("<=  \n> >= < \n").into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         match lexer.get_token() {
             Ok(TokenType::Operator(OperationType::LessThanOrEqual)) => {},
             _ => panic!("wrong token")
@@ -54,7 +54,7 @@ mod lexer_test {
     #[test]
     pub fn logical_operator_recognition_test() {
         let program = String::from("and or oneof not exists forall imply\n").into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         match lexer.get_token() {
             Ok(TokenType::Operator(OperationType::And)) => {},
             _ => panic!("wrong token")
@@ -92,7 +92,7 @@ mod lexer_test {
     #[test]
     pub fn variable_recognition_test() {
         let program = String::from("?test_id ?pred-aa ").into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         match lexer.get_token() {
             Ok(TokenType::Identifier(x)) => {
                 assert_eq!(x, &String::from("test_id"))
@@ -115,7 +115,7 @@ mod lexer_test {
             :effect :subtasks :tasks :ordered-tasks :ordered-subtasks :order\n
             :ordering :constraints\n"
         ).into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         match lexer.get_token() {
             Ok(TokenType::Keyword(KeywordName::Define)) => {},
             _ => panic!("wrong token")
@@ -211,7 +211,7 @@ mod lexer_test {
         let program = String::from(
             "var123 var_3123 te23 v\n"
         ).into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         match lexer.get_token() {
             Ok(TokenType::Identifier("var123")) => {},
             _ => panic!("wrong token")
@@ -249,7 +249,7 @@ mod lexer_test {
                 )
             ) "
         ).into_bytes();
-        let lexer = LexicalAnalyzer::new(program);
+        let lexer = LexicalAnalyzer::new(&program);
         loop {
             let peek = lexer.lookahead();
             let actual = lexer.get_token();

@@ -10,7 +10,7 @@ pub fn objects_duplicate_test() {
                           )",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
@@ -41,7 +41,7 @@ pub fn requirements_duplicate_test() {
          ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
@@ -76,7 +76,7 @@ pub fn predicates_duplicate_test() {
          ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
@@ -125,7 +125,7 @@ pub fn action_duplicate_test() {
          ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
@@ -163,7 +163,7 @@ pub fn compound_task_duplicate_test() {
              ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
@@ -219,7 +219,7 @@ pub fn method_duplicate_test() {
              ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);

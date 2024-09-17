@@ -34,7 +34,7 @@ pub fn cyclic_method_ordering_test() {
              ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);
@@ -69,7 +69,7 @@ pub fn cyclic_types_test() {
         ) ",
     )
     .into_bytes();
-    let lexer = LexicalAnalyzer::new(program);
+    let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(&lexer);
     let ast = parser.parse().unwrap();
     let semantic_parser = SemanticAnalyzer::new(&ast);

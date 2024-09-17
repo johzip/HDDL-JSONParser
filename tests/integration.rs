@@ -9,7 +9,7 @@ pub fn domains_integration_test() {
     for path in domain_paths {
         let domain = fs::read(path.unwrap().path());
         if let Ok(program) = domain {
-            let result = analyze(program);
+            let result = analyze(&program);
             if result.is_err() {
                 panic!("read failed");
             }
@@ -25,7 +25,7 @@ pub fn problems_integration_test() {
     for path in problem_paths {
         let problem = fs::read(path.unwrap().path());
         if let Ok(program) = problem {
-            let result = analyze(program);
+            let result = analyze(&program);
             if result.is_err() {
                 panic!("read failed");
             }

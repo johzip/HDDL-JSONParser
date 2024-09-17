@@ -5,7 +5,7 @@ mod output;
 
 use lexical_analyzer::*;
 
-pub fn analyze(program: Vec<u8>) -> Result<(), String> {
+pub fn analyze(program: &Vec<u8>) -> Result<(), String> {
     let lexer = LexicalAnalyzer::new(program);
     let parser = syntactic_analyzer::Parser::new(&lexer);
     match parser.parse() {
