@@ -18,3 +18,9 @@ impl <'a> From<SyntacticError<'a>> for ParsingError<'a> {
         ParsingError::Syntactic(value)
     }
 }
+
+impl <'a> From<SemanticError<'a>> for ParsingError<'a> {
+    fn from(value: SemanticError<'a>) -> Self {
+        ParsingError::Semantic(value)
+    }
+}

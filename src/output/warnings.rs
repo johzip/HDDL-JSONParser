@@ -1,4 +1,4 @@
-pub enum Warnings<'a> {
+pub enum Warning<'a> {
     // Redundant Elements
     // TODO: implement
     UnusedType(&'a str),
