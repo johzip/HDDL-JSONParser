@@ -1,6 +1,6 @@
 mod predicate;
 mod task;
-mod typed_list;
+mod symbol;
 mod htn;
 mod method;
 mod action;
@@ -8,7 +8,7 @@ mod formula;
 
 pub use predicate::Predicate;
 pub use task::Task;
-pub use typed_list::*;
+pub use symbol::*;
 pub use htn::*;
 pub use method::*;
 pub use action::*;

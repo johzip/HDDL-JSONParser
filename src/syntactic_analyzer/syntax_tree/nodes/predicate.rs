@@ -5,11 +5,11 @@ use super::*;
 #[derive(Clone, Debug)]
 pub struct Predicate<'a> {
     pub name: &'a str,
-    pub variables: Vec<Variable<'a>>
+    pub variables: Vec<Symbol<'a>>
 }
 
 impl <'a> Predicate<'a> {
-    pub fn new(name: &'a str, variables: Vec<Variable<'a>>) -> Predicate<'a> {
+    pub fn new(name: &'a str, variables: Vec<Symbol<'a>>) -> Predicate<'a> {
         Predicate {
             name,
             variables

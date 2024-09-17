@@ -35,15 +35,15 @@ mod tests {
         match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.objects[0].name, "a");
-                assert_eq!(symbols.objects[0].var_type.unwrap(), "d");
+                assert_eq!(symbols.objects[0].symbol_type.unwrap(), "d");
                 assert_eq!(symbols.objects[1].name, "b");
-                assert_eq!(symbols.objects[1].var_type.unwrap(), "d");
+                assert_eq!(symbols.objects[1].symbol_type.unwrap(), "d");
                 assert_eq!(symbols.objects[2].name, "c");
-                assert_eq!(symbols.objects[2].var_type.unwrap(), "d");
+                assert_eq!(symbols.objects[2].symbol_type.unwrap(), "d");
                 assert_eq!(symbols.objects[3].name, "s");
-                assert_eq!(symbols.objects[3].var_type.unwrap(), "f");
+                assert_eq!(symbols.objects[3].symbol_type.unwrap(), "f");
                 assert_eq!(symbols.objects[4].name, "t");
-                assert_eq!(symbols.objects[4].var_type.is_none(), true);
+                assert_eq!(symbols.objects[4].symbol_type.is_none(), true);
             }
             Err(_) => panic!("parsing errors"),
         }
@@ -124,7 +124,7 @@ mod tests {
                     let items: Vec<(&str, Option<&str>)> = predicate
                         .variables
                         .iter()
-                        .map(|x| (x.name, x.var_type))
+                        .map(|x| (x.name, x.symbol_type))
                         .collect();
                     if predicate.name == "pred_1" {
                         assert_eq!(
@@ -141,7 +141,7 @@ mod tests {
                         let items: Vec<(&str, Option<&str>)> = predicate
                             .variables
                             .iter()
-                            .map(|x| (x.name, x.var_type))
+                            .map(|x| (x.name, x.symbol_type))
                             .collect();
                         assert_eq!(items, vec![("a_1", None), ("a_2", None)]);
                     } else {
@@ -315,14 +315,14 @@ mod tests {
                             Formula::ForAll(params, exp) => {
                                 assert_eq!(params.len(), 2);
                                 assert_eq!(params[0].name, "l1");
-                                match params[0].var_type {
+                                match params[0].symbol_type {
                                     Some(x) => {
                                         assert_eq!(x, "loc");
                                     }
                                     _ => { panic!("wrong parameter type") }
                                 }
                                 assert_eq!(params[1].name, "l2");
-                                match params[1].var_type {
+                                match params[1].symbol_type {
                                     Some(x) => {
                                         assert_eq!(x, "loc");
                                     }
@@ -409,7 +409,7 @@ mod tests {
                         Some(p) => {
                             assert_eq!(p.len(), 1);
                             assert_eq!(p[0].name, "d");
-                            assert_eq!(p[0].var_type.is_none(), true);
+                            assert_eq!(p[0].symbol_type.is_none(), true);
                         }
                         _ => panic!("wrong set of params")
                     }
@@ -521,7 +521,7 @@ mod tests {
                 let c1_term_types: Vec<&str> = c_1
                     .parameters
                     .iter()
-                    .map(|x| x.var_type.unwrap())
+                    .map(|x| x.symbol_type.unwrap())
                     .collect();
                 assert_eq!(c1_term_names, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
@@ -553,7 +553,7 @@ mod tests {
                 let a1_var_types: Vec<&str> = action
                     .parameters                    
                     .iter()
-                    .map(|x| x.var_type.unwrap())
+                    .map(|x| x.symbol_type.unwrap())
                     .collect();
                 assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
@@ -623,7 +623,7 @@ mod tests {
                 let a1_var_types: Vec<&str> = action
                     .parameters                    
                     .iter()
-                    .map(|x| x.var_type.unwrap())
+                    .map(|x| x.symbol_type.unwrap())
                     .collect();
                 assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
@@ -675,21 +675,21 @@ mod tests {
                 let types = ast.types.unwrap();
                 assert_eq!(types.len(), 8);
                 assert_eq!(types[0].name, "Port");
-                assert_eq!(types[0].var_type.unwrap(), "Object");
+                assert_eq!(types[0].symbol_type.unwrap(), "Object");
                 assert_eq!(types[1].name, "AbstractDevice");
-                assert_eq!(types[1].var_type.unwrap(), "Object");
+                assert_eq!(types[1].symbol_type.unwrap(), "Object");
                 assert_eq!(types[2].name, "AbstractCable");
-                assert_eq!(types[2].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(types[2].symbol_type.unwrap(), "AbstractDevice");
                 assert_eq!(types[3].name, "Device");
-                assert_eq!(types[3].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(types[3].symbol_type.unwrap(), "AbstractDevice");
                 assert_eq!(types[4].name, "PlugType");
-                assert_eq!(types[4].var_type.unwrap(), "Enum");
+                assert_eq!(types[4].symbol_type.unwrap(), "Enum");
                 assert_eq!(types[5].name, "PlugFace");
-                assert_eq!(types[5].var_type.unwrap(), "Enum");
+                assert_eq!(types[5].symbol_type.unwrap(), "Enum");
                 assert_eq!(types[6].name, "PlugDirection");
-                assert_eq!(types[6].var_type.unwrap(), "Enum");
+                assert_eq!(types[6].symbol_type.unwrap(), "Enum");
                 assert_eq!(types[7].name, "SignalType");
-                assert_eq!(types[7].var_type.unwrap(), "Enum");
+                assert_eq!(types[7].symbol_type.unwrap(), "Enum");
             }
             _ => panic!("parsing erro")
         }
@@ -720,7 +720,7 @@ mod tests {
                 let c1_term_types: Vec<&str> = c_1
                     .parameters
                     .iter()
-                    .map(|x| x.var_type.unwrap())
+                    .map(|x| x.symbol_type.unwrap())
                     .collect();
                 assert_eq!(c1_term_names, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
@@ -747,21 +747,21 @@ mod tests {
                 let constants = ast.constants.unwrap();
                 assert_eq!(constants.len(), 8);
                 assert_eq!(constants[0].name, "Port");
-                assert_eq!(constants[0].var_type.unwrap(), "Object");
+                assert_eq!(constants[0].symbol_type.unwrap(), "Object");
                 assert_eq!(constants[1].name, "AbstractDevice");
-                assert_eq!(constants[1].var_type.unwrap(), "Object");
+                assert_eq!(constants[1].symbol_type.unwrap(), "Object");
                 assert_eq!(constants[2].name, "AbstractCable");
-                assert_eq!(constants[2].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(constants[2].symbol_type.unwrap(), "AbstractDevice");
                 assert_eq!(constants[3].name, "Device");
-                assert_eq!(constants[3].var_type.unwrap(), "AbstractDevice");
+                assert_eq!(constants[3].symbol_type.unwrap(), "AbstractDevice");
                 assert_eq!(constants[4].name, "PlugType");
-                assert_eq!(constants[4].var_type.unwrap(), "Enum");
+                assert_eq!(constants[4].symbol_type.unwrap(), "Enum");
                 assert_eq!(constants[5].name, "PlugFace");
-                assert_eq!(constants[5].var_type.unwrap(), "Enum");
+                assert_eq!(constants[5].symbol_type.unwrap(), "Enum");
                 assert_eq!(constants[6].name, "PlugDirection");
-                assert_eq!(constants[6].var_type.unwrap(), "Enum");
+                assert_eq!(constants[6].symbol_type.unwrap(), "Enum");
                 assert_eq!(constants[7].name, "SignalType");
-                assert_eq!(constants[7].var_type.unwrap(), "Enum");
+                assert_eq!(constants[7].symbol_type.unwrap(), "Enum");
             }
             _ => panic!("parsing erro")
         }

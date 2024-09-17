@@ -1,7 +1,7 @@
 use super::*;
 
 pub struct InitialTaskNetwork<'a> {
-    pub parameters: Option<Vec<Variable<'a>>>,
+    pub parameters: Option<Vec<Symbol<'a>>>,
     pub tn: HTN<'a>
 }
 

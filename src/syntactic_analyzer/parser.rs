@@ -129,7 +129,7 @@ impl<'a> Parser<'a> {
                                         TokenType::Keyword(KeywordName::Objects) => {
                                             let objects = self.parse_args()?;
                                             for object in objects {
-                                                match object.var_type {
+                                                match object.symbol_type {
                                                     Some(t) => {
                                                         syntax_tree
                                                             .add_typed_object(object.name, t);

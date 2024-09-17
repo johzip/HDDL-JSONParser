@@ -1,7 +1,7 @@
 use super::*;
 
 impl<'a> Parser<'a> {
-    pub fn parse_args(&'a self) -> Result<Vec<Variable<'a>>, ParsingError> {
+    pub fn parse_args(&'a self) -> Result<Vec<Symbol<'a>>, ParsingError> {
         let mut objects = vec![];
         let mut result = vec![];
         let mut token = self.tokenizer.get_token()?;
@@ -18,7 +18,7 @@ impl<'a> Parser<'a> {
                     match object_type {
                         TokenType::Identifier(t) => {
                             for o in objects {
-                                result.push(Variable::new(o, Some(t)));
+                                result.push(Symbol::new(o, Some(t)));
                             }
                             objects = vec![];
                         }
@@ -41,7 +41,7 @@ impl<'a> Parser<'a> {
                 }
                 TokenType::Punctuator(PunctuationType::RParentheses) => {
                     for o in objects {
-                        result.push(Variable::new(o, None));
+                        result.push(Symbol::new(o, None));
                     }
                     return Ok(result);
                 }

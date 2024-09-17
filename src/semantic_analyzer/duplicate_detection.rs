@@ -4,7 +4,7 @@ use crate::RequirementType;
 
 use super::*;
 
-pub fn check_duplicate_objects<'a>(objects: &'a Vec<Variable<'a>>) -> Option<SemanticError<'a>> {
+pub fn check_duplicate_objects<'a>(objects: &'a Vec<Symbol<'a>>) -> Option<SemanticError<'a>> {
     let mut names = HashSet::new();
     for obj in objects {
         if !names.insert(obj.name) {

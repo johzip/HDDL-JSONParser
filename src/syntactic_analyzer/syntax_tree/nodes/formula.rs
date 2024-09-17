@@ -14,9 +14,9 @@ pub enum Formula<'a> {
     // formula -> formula'
     Imply(Vec<Box<Formula<'a>>>, Vec<Box<Formula<'a>>>),
     // ∃vars: formula
-    Exists(Vec<Variable<'a>>, Box<Formula<'a>>),
+    Exists(Vec<Symbol<'a>>, Box<Formula<'a>>),
     // ∀vars: formula
-    ForAll(Vec<Variable<'a>>, Box<Formula<'a>>),
+    ForAll(Vec<Symbol<'a>>, Box<Formula<'a>>),
     // formula = formula'
     Equals(&'a str, &'a str),
 }

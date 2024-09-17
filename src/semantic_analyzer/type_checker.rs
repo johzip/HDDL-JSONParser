@@ -10,7 +10,7 @@ pub struct TypeChecker<'a> {
 }
 
 impl<'a> TypeChecker<'a> {
-    pub fn new(types: &Option<Vec<Variable<'a>>>) -> TypeChecker<'a> {
+    pub fn new(types: &Option<Vec<Symbol<'a>>>) -> TypeChecker<'a> {
         match &types {
             None => TypeChecker {
                 type_hierarchy: GraphMap::new(),
@@ -22,7 +22,7 @@ impl<'a> TypeChecker<'a> {
                     if !type_graph.contains_node(delcared_type.name) {
                         type_graph.add_node(delcared_type.name);
                     }
-                    match &delcared_type.var_type {
+                    match &delcared_type.symbol_type {
                         None => {}
                         Some(parent) => {
                             if !type_graph.contains_node(parent) {
@@ -51,10 +51,10 @@ impl<'a> TypeChecker<'a> {
 
     pub fn check_type_declarations(
         &self,
-        parameters: &Vec<Variable<'a>>,
+        parameters: &Vec<Symbol<'a>>,
     ) -> Option<SemanticError<'a>> {
         for parameter in parameters.iter() {
-            if let Some(t) = parameter.var_type {
+            if let Some(t) = parameter.symbol_type {
                 if !self.type_hierarchy.contains_node(t) {
                     return Some(SemanticError::UndefinedType(t));
                 }
@@ -67,8 +67,8 @@ impl<'a> TypeChecker<'a> {
     pub fn check_formula(
         &self,
         formula: &Vec<&Predicate<'a>>,
-        parameters: &Vec<Variable<'a>>,
-        declared_constants: &HashSet<&Variable<'a>>,
+        parameters: &Vec<Symbol<'a>>,
+        declared_constants: &HashSet<&Symbol<'a>>,
         declared_predicates: &HashSet<&'a Predicate<'a>>,
     ) -> Result<(), SemanticError<'a>> {
         // Assert all types are declared
@@ -77,7 +77,7 @@ impl<'a> TypeChecker<'a> {
         }
         // Store parameter types
         let par_types: HashMap<&str, Option<&str>> =
-            HashMap::from_iter(parameters.iter().map(|par| (par.name, par.var_type)));
+            HashMap::from_iter(parameters.iter().map(|par| (par.name, par.symbol_type)));
         // Assert predicate typing correctness
         for used_predicate in formula {
             match declared_predicates.get(used_predicate) {
@@ -92,7 +92,7 @@ impl<'a> TypeChecker<'a> {
                                 if !declared_constants.contains(&var.name) {
                                     return Err(SemanticError::UndefinedParameter(&var.name));
                                 } else {
-                                    found_list.push((var.name, &declared_constants.get(&var.name).unwrap().var_type))
+                                    found_list.push((var.name, &declared_constants.get(&var.name).unwrap().symbol_type))
                                 }
                             }
                         }
@@ -100,7 +100,7 @@ impl<'a> TypeChecker<'a> {
                     let mut expected_list: Vec<&Option<&str>> = predicate_definition
                         .variables
                         .iter()
-                        .map(|x| &x.var_type)
+                        .map(|x| &x.symbol_type)
                         .collect();
                     // Assert args have the same arity
                     if &found_list.len() != &expected_list.len() {
@@ -155,15 +155,15 @@ impl<'a> TypeChecker<'a> {
         &self,
         task_name: &'a str,
         task_terms: &Vec<&'a str>,
-        parameters: &Vec<Variable<'a>>,
-        declared_constants: &HashSet<&Variable<'a>>,
+        parameters: &Vec<Symbol<'a>>,
+        declared_constants: &HashSet<&Symbol<'a>>,
         declared_tasks: &HashSet<&Task<'a>>,
         declared_actions: &HashSet<&Action<'a>>,
     ) -> Result<(), SemanticError<'a>> {
         // Store parameter types
         let par_types: HashMap<&str, Option<&str>> =
             HashMap::from_iter(parameters.iter().map(|par| {
-                (par.name, par.var_type)
+                (par.name, par.symbol_type)
             }));
         let mut found = vec![];
         for term in task_terms {
@@ -175,7 +175,7 @@ impl<'a> TypeChecker<'a> {
                     if !declared_constants.contains(term) {
                         return Err(SemanticError::UndefinedParameter(&term));
                     } else {
-                        found.push((term, &declared_constants.get(term).unwrap().var_type))
+                        found.push((term, &declared_constants.get(term).unwrap().symbol_type))
                     }
                 }
             }
@@ -183,7 +183,7 @@ impl<'a> TypeChecker<'a> {
         match declared_actions.iter().find(|x| x.name == task_name) {
             Some(definition) => {
                 let expected: Vec<Option<&str>> =
-                    definition.parameters.iter().map(|x| x.var_type).collect();
+                    definition.parameters.iter().map(|x| x.symbol_type).collect();
                 if found.len() != expected.len() {
                     return Err(SemanticError::InconsistentTaskArity(&task_name));
                 }
@@ -201,7 +201,7 @@ impl<'a> TypeChecker<'a> {
             None => match declared_tasks.iter().find(|x| x.name == task_name) {
                 Some(definition) => {
                     let expected: Vec<Option<&str>> =
-                        definition.parameters.iter().map(|x| x.var_type).collect();
+                        definition.parameters.iter().map(|x| x.symbol_type).collect();
                     if found.len() != expected.len() {
                         return Err(SemanticError::InconsistentTaskArity(&task_name));
                     }
