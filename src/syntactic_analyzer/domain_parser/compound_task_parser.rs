@@ -14,7 +14,7 @@ impl <'a> Parser <'a> {
                                 let error = SyntacticError{
                                     expected: "'(' after :parameters".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -24,7 +24,7 @@ impl <'a> Parser <'a> {
                         let error = SyntacticError{
                             expected: format!("a (potentially empty) list of parameters after defininig {}", task_name).to_string(),
                             found: token,
-                            line_number: self.tokenizer.get_line_number(),
+                            position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
@@ -34,7 +34,7 @@ impl <'a> Parser <'a> {
                 let error = SyntacticError{
                     expected: "a task/action name (identifier)".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }

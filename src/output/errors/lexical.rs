@@ -1,3 +1,5 @@
+use crate::TokenPosition;
+
 #[derive(Debug)]
 pub enum LexicalErrorType {
     InvalidIdentifier,
@@ -7,6 +9,6 @@ pub enum LexicalErrorType {
 #[derive(Debug)]
 pub struct LexicalError<'a> {
     pub error_type: LexicalErrorType,
-    pub line_number: u32,
     pub lexeme: &'a str,
+    pub position: TokenPosition
 }

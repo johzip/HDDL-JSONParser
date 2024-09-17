@@ -47,9 +47,9 @@ impl<'a> Parser<'a> {
                                                         )
                                                         .to_string(),
                                                         found: token,
-                                                        line_number: self
+                                                        position: self
                                                             .tokenizer
-                                                            .get_line_number(),
+                                                            .get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
                                                 }
@@ -90,7 +90,7 @@ impl<'a> Parser<'a> {
                                             let error = SyntacticError {
                                                 expected: "a keyword".to_string(),
                                                 found: token,
-                                                line_number: self.tokenizer.get_line_number(),
+                                                position: self.tokenizer.get_last_token_position(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
                                         }
@@ -103,7 +103,7 @@ impl<'a> Parser<'a> {
                                     let error = SyntacticError {
                                         expected: format!("either ')' to close the definition of {}, or '(' to start defining new components", domain_name),
                                         found: token,
-                                        line_number: self.tokenizer.get_line_number(),
+                                        position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
                                 }
@@ -131,11 +131,18 @@ impl<'a> Parser<'a> {
                                             for object in objects {
                                                 match object.symbol_type {
                                                     Some(t) => {
-                                                        syntax_tree
-                                                            .add_typed_object(object.name, t);
+                                                        syntax_tree.add_typed_object(
+                                                            object.name,
+                                                            object.name_pos,
+                                                            t,
+                                                            object.type_pos.unwrap(),
+                                                        );
                                                     }
                                                     None => {
-                                                        syntax_tree.add_object(object.name);
+                                                        syntax_tree.add_object(
+                                                            object.name,
+                                                            object.name_pos,
+                                                        );
                                                     }
                                                 }
                                             }
@@ -160,7 +167,7 @@ impl<'a> Parser<'a> {
                                                 expected: "a keyword for block definition"
                                                     .to_string(),
                                                 found: token,
-                                                line_number: self.tokenizer.get_line_number(),
+                                                position: self.tokenizer.get_last_token_position(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
                                         }
@@ -182,7 +189,7 @@ impl<'a> Parser<'a> {
                 let error = SyntacticError {
                     expected: "start of the file with '('".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }
@@ -208,7 +215,7 @@ impl<'a> Parser<'a> {
                                 let error = SyntacticError {
                                     expected: "either keyword 'domain' or 'problem'".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -218,7 +225,7 @@ impl<'a> Parser<'a> {
                         let error = SyntacticError {
                             expected: "'(' after keyword 'define'".to_string(),
                             found: token,
-                            line_number: self.tokenizer.get_line_number(),
+                            position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
@@ -228,7 +235,7 @@ impl<'a> Parser<'a> {
                 let error = SyntacticError {
                     expected: "keyword 'define'".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }
@@ -247,7 +254,7 @@ impl<'a> Parser<'a> {
                         let error = SyntacticError {
                             expected: "')'".to_string(),
                             found: token,
-                            line_number: self.tokenizer.get_line_number(),
+                            position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
@@ -257,7 +264,7 @@ impl<'a> Parser<'a> {
                 let error = SyntacticError {
                     expected: "domain name".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }
@@ -293,7 +300,7 @@ impl<'a> Parser<'a> {
                                                         let error = SyntacticError {
                                                             expected: format!("the block of the definition of problem '{}' is not closed with ')'", problem_name),
                                                             found: token,
-                                                            line_number: self.tokenizer.get_line_number(),
+                                                            position: self.tokenizer.get_last_token_position(),
                                                         };
                                                         return Err(ParsingError::Syntactic(error));
                                                     }
@@ -303,7 +310,9 @@ impl<'a> Parser<'a> {
                                                 let error = SyntacticError {
                                                     expected: "domain name".to_string(),
                                                     found: token,
-                                                    line_number: self.tokenizer.get_line_number(),
+                                                    position: self
+                                                        .tokenizer
+                                                        .get_last_token_position(),
                                                 };
                                                 return Err(ParsingError::Syntactic(error));
                                             }
@@ -313,7 +322,7 @@ impl<'a> Parser<'a> {
                                         let error = SyntacticError {
                                             expected: "keyword 'domain'".to_string(),
                                             found: token,
-                                            line_number: self.tokenizer.get_line_number(),
+                                            position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
                                     }
@@ -323,7 +332,7 @@ impl<'a> Parser<'a> {
                                 let error = SyntacticError {
                                     expected: "'('".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -333,7 +342,7 @@ impl<'a> Parser<'a> {
                         let error = SyntacticError {
                             expected: "')'".to_string(),
                             found: token,
-                            line_number: self.tokenizer.get_line_number(),
+                            position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
@@ -343,7 +352,7 @@ impl<'a> Parser<'a> {
                 let error = SyntacticError {
                     expected: "problem name".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }
@@ -365,7 +374,7 @@ impl<'a> Parser<'a> {
                     let error = SyntacticError {
                         expected: "either a requirement or a ')'".to_string(),
                         found: token,
-                        line_number: self.tokenizer.get_line_number(),
+                        position: self.tokenizer.get_last_token_position(),
                     };
                     return Err(ParsingError::Syntactic(error));
                 }

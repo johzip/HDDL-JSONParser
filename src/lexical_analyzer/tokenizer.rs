@@ -6,7 +6,7 @@ use super::*;
 pub struct LexicalAnalyzer<'a> {
     program: &'a Vec<u8>,
     cursor: Cell<usize>,
-    line_number: Cell<u32>,
+    last_token_pos: Cell<TokenPosition>,
 }
 
 impl <'a> LexicalAnalyzer <'a> {
@@ -14,7 +14,10 @@ impl <'a> LexicalAnalyzer <'a> {
         LexicalAnalyzer {
             program,
             cursor: Cell::new(0),
-            line_number: Cell::new(1),
+            last_token_pos: Cell::new(TokenPosition {
+                line: 1,
+                column: (1, None)
+            }),
         }
     }
     // get the next token without advancing the cursor
@@ -22,9 +25,8 @@ impl <'a> LexicalAnalyzer <'a> {
         return self.parse(true);
     }
 
-    // get current line number
-    pub fn get_line_number(&self) -> u32 {
-        return self.line_number.get();
+    pub fn get_last_token_position(&self) -> TokenPosition {
+        self.last_token_pos.get()
     }
 
     pub fn get_token(&self) -> Result<Token, LexicalError> {
@@ -106,8 +108,8 @@ impl <'a> LexicalAnalyzer <'a> {
                         "problem" => return Ok(Token::Keyword(KeywordName::Problem)),
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,
-                            line_number: self.line_number.get(),
                             lexeme: lexeme,
+                            position: self.last_token_pos.get()
                         }),
                     }
                 }
@@ -146,8 +148,8 @@ impl <'a> LexicalAnalyzer <'a> {
                                     } else {
                                         Err(LexicalError {
                                             error_type: LexicalErrorType::InvalidIdentifier,
-                                            line_number: self.line_number.get(),
                                             lexeme: lexeme,
+                                            position: self.last_token_pos.get()
                                         })
                                     }
                                 }
@@ -191,8 +193,8 @@ impl <'a> LexicalAnalyzer <'a> {
         if is_invalid {
             return Err(LexicalError {
                 error_type: LexicalErrorType::InvalidIdentifier,
-                line_number: self.line_number.get(),
-                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap()
+                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(),
+                position: self.last_token_pos.get()
             })
         } else {
             return Ok((from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(), cursor_pos))
@@ -214,7 +216,10 @@ impl <'a> LexicalAnalyzer <'a> {
                 return;
             }
             if current == '\n' {
-                self.line_number.set(self.line_number.get() + 1);
+                let new_line = self.last_token_pos.get().line + 1;
+                self.last_token_pos.set(
+                    TokenPosition { line: new_line, column: (0, None) }
+                );
             }
             self.cursor.set(self.cursor.get() + 1);
             current = self.program[self.cursor.get()] as char;

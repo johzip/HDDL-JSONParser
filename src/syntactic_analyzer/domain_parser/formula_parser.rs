@@ -19,7 +19,7 @@ impl<'a> Parser<'a> {
                                 let error = SyntacticError{
                                     expected: "closing the not operator with ')'".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -75,7 +75,7 @@ impl<'a> Parser<'a> {
                                                 let error = SyntacticError{
                                                     expected: "equality's closing parenthesis".to_string(),
                                                     found: token,
-                                                    line_number: self.tokenizer.get_line_number(),
+                                                    position: self.tokenizer.get_last_token_position(),
                                                 };
                                                 return Err(ParsingError::Syntactic(error));
                                             }
@@ -85,7 +85,7 @@ impl<'a> Parser<'a> {
                                         let error = SyntacticError{
                                             expected: "right hand side of the equality".to_string(),
                                             found: token,
-                                            line_number: self.tokenizer.get_line_number(),
+                                            position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
                                     }
@@ -95,7 +95,7 @@ impl<'a> Parser<'a> {
                                 let error = SyntacticError{
                                     expected: "left hand side of the equality".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -115,7 +115,7 @@ impl<'a> Parser<'a> {
                                         let error = SyntacticError{
                                             expected: "')' to close the forall statement".to_string(),
                                             found: token,
-                                            line_number: self.tokenizer.get_line_number(),
+                                            position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
                                     }
@@ -125,7 +125,7 @@ impl<'a> Parser<'a> {
                                 let error = SyntacticError{
                                     expected: "'(' after forall keyword".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -151,7 +151,7 @@ impl<'a> Parser<'a> {
                         let error = SyntacticError{
                             expected: "a boolean formula".to_string(),
                             found: token,
-                            line_number: self.tokenizer.get_line_number(),
+                            position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
@@ -161,7 +161,7 @@ impl<'a> Parser<'a> {
                 let error = SyntacticError {
                     expected: "a (potentially empty) boolean formula definition".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             },

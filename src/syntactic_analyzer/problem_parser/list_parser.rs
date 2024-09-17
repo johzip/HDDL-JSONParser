@@ -7,41 +7,40 @@ impl<'a> Parser<'a> {
         let mut token = self.tokenizer.get_token()?;
         loop {
             while let Token::Identifier(symbol) = token {
-                objects.push(symbol);
+                objects.push((symbol, self.tokenizer.get_last_token_position()));
                 token = self.tokenizer.get_token()?;
             }
             match token {
                 Token::Punctuator(PunctuationType::Dash) => {
                     // match type
                     let object_type = self.tokenizer.get_token()?;
-                    token = self.tokenizer.get_token()?;
+                    let type_pos = self.tokenizer.get_last_token_position();
                     match object_type {
                         Token::Identifier(t) => {
-                            for o in objects {
-                                result.push(Symbol::new(o, Some(t)));
+                            for (o, obj_pos) in objects {
+                                result.push(Symbol::new(
+                                    o,
+                                    obj_pos,
+                                    Some(t),
+                                    Some(type_pos),
+                                ));
                             }
                             objects = vec![];
                         }
                         token => {
                             let error = SyntacticError {
-                                expected: format!(
-                                    "The type of {}",
-                                    objects
-                                        .into_iter()
-                                        .clone()
-                                        .collect::<Vec<&'a str>>()
-                                        .join(", ")
-                                ),
+                                expected: format!("The type of objects"),
                                 found: token,
-                                line_number: self.tokenizer.get_line_number(),
+                                position: type_pos,
                             };
                             return Err(ParsingError::Syntactic(error));
                         }
                     }
+                    token = self.tokenizer.get_token()?;
                 }
                 Token::Punctuator(PunctuationType::RParentheses) => {
-                    for o in objects {
-                        result.push(Symbol::new(o, None));
+                    for (object, object_pos) in objects {
+                        result.push(Symbol::new(object, object_pos, None, None));
                     }
                     return Ok(result);
                 }
@@ -49,7 +48,7 @@ impl<'a> Parser<'a> {
                     let error = SyntacticError {
                         expected: "an identifier".to_string(),
                         found: token,
-                        line_number: self.tokenizer.get_line_number(),
+                        position: self.tokenizer.get_last_token_position(),
                     };
                     return Err(ParsingError::Syntactic(error));
                 }

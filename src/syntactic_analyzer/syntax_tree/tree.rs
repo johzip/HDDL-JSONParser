@@ -1,3 +1,5 @@
+use crate::TokenPosition;
+
 use super::*;
 
 pub struct SyntaxTree<'a> {
@@ -30,12 +32,12 @@ impl<'a> SyntaxTree<'a> {
             goal: None
         }
     }
-    pub fn add_object(&mut self, name: &'a str) {
-        let object = Symbol::new(name, None);
+    pub fn add_object(&mut self, name: &'a str, object_pos: TokenPosition) {
+        let object = Symbol::new(name, object_pos, None, None);
         self.objects.push(object);
     }
-    pub fn add_typed_object(&mut self, name: &'a str, object_type: &'a str) {
-        let object = Symbol::new(name, Some(object_type));
+    pub fn add_typed_object(&mut self, name: &'a str, name_pos: TokenPosition, object_type: &'a str, type_pos: TokenPosition) {
+        let object = Symbol::new(name, name_pos, Some(object_type), Some(type_pos));
         self.objects.push(object);
     }
 

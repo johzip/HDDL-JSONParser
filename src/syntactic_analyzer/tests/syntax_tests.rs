@@ -28,22 +28,35 @@ mod tests {
     pub fn objects_list_test() {
         let program =
             String::from("(define (problem p1) (domain bal)
-                            (:objects a b c - d s - f t)
+                            (:objects a
+                            b c 
+                            - d
+                            s - f t)
                           )")
                 .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.objects[0].name, "a");
+                assert_eq!(symbols.objects[0].name_pos.line, 2);
                 assert_eq!(symbols.objects[0].symbol_type.unwrap(), "d");
+                assert_eq!(symbols.objects[0].type_pos.unwrap().line, 4);
                 assert_eq!(symbols.objects[1].name, "b");
+                assert_eq!(symbols.objects[1].name_pos.line, 3);
                 assert_eq!(symbols.objects[1].symbol_type.unwrap(), "d");
+                assert_eq!(symbols.objects[1].type_pos.unwrap().line, 4);
                 assert_eq!(symbols.objects[2].name, "c");
+                assert_eq!(symbols.objects[2].name_pos.line, 3);
                 assert_eq!(symbols.objects[2].symbol_type.unwrap(), "d");
+                assert_eq!(symbols.objects[2].type_pos.unwrap().line, 4);
                 assert_eq!(symbols.objects[3].name, "s");
+                assert_eq!(symbols.objects[3].name_pos.line, 5);
                 assert_eq!(symbols.objects[3].symbol_type.unwrap(), "f");
+                assert_eq!(symbols.objects[3].type_pos.unwrap().line, 5);
                 assert_eq!(symbols.objects[4].name, "t");
+                assert_eq!(symbols.objects[4].name_pos.line, 5);
                 assert_eq!(symbols.objects[4].symbol_type.is_none(), true);
+                assert_eq!(symbols.objects[4].type_pos.is_none(), true);
             }
             Err(_) => panic!("parsing errors"),
         }
@@ -52,13 +65,19 @@ mod tests {
     #[test]
     pub fn untyped_objects_list_test() {
         let program =
-            String::from("(define (problem p1) (domain bal) (:objects a b c) )").into_bytes();
+            String::from("(define
+            (problem p1) (domain bal)
+            (:objects a b
+            c) )").into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
             Ok(symbols) => {
                 assert_eq!(symbols.objects[0].name, "a");
+                assert_eq!(symbols.objects[0].name_pos.line, 3);
                 assert_eq!(symbols.objects[1].name, "b");
+                assert_eq!(symbols.objects[1].name_pos.line, 3);
                 assert_eq!(symbols.objects[2].name, "c");
+                assert_eq!(symbols.objects[2].name_pos.line, 4);
             }
             Err(_) => panic!("parsing errors"),
         }

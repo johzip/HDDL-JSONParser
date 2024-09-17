@@ -1,16 +1,22 @@
 use std::{borrow::Borrow, hash::Hash};
 
+use crate::TokenPosition;
+
 #[derive(Clone, Debug)]
 pub struct Symbol<'a> {
     pub name: &'a str,
-    pub symbol_type: Option<&'a str>
+    pub name_pos: TokenPosition,
+    pub symbol_type: Option<&'a str>,
+    pub type_pos: Option<TokenPosition>
 }
 
 impl <'a> Symbol<'a> {
-    pub fn new(name: &'a str, var_type: Option<&'a str>) -> Symbol<'a> {
+    pub fn new(name: &'a str, name_pos: TokenPosition, symbol_type: Option<&'a str>, type_pos: Option<TokenPosition>) -> Symbol<'a> {
         Symbol {
             name,
-            symbol_type: var_type
+            name_pos,
+            symbol_type,
+            type_pos
         }
     }
 }

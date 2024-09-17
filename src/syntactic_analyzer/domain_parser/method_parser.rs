@@ -53,7 +53,7 @@ impl<'a> Parser<'a> {
                                                             )
                                                             .to_string(),
                                                             found: token,
-                                                            line_number: self.tokenizer.get_line_number(),
+                                                            position: self.tokenizer.get_last_token_position(),
                                                         };
                                                                 return Err(ParsingError::Syntactic(error));
                                                             }
@@ -63,7 +63,7 @@ impl<'a> Parser<'a> {
                                                         let error = SyntacticError {
                                                             expected: format!("The task that method {} decomposes", method_name).to_string(),
                                                             found: token,
-                                                            line_number: self.tokenizer.get_line_number(),
+                                                            position: self.tokenizer.get_last_token_position(),
                                                         };
                                                         return Err(ParsingError::Syntactic(error));
                                                     }
@@ -74,7 +74,7 @@ impl<'a> Parser<'a> {
                                                 let error = SyntacticError {
                                                     expected: "'(' after keyword :task".to_string(),
                                                     found: token,
-                                                    line_number: self.tokenizer.get_line_number(),
+                                                    position: self.tokenizer.get_last_token_position(),
                                                 };
                                                 return Err(ParsingError::Syntactic(error));
                                             }
@@ -84,7 +84,7 @@ impl<'a> Parser<'a> {
                                         let error = SyntacticError {
                                             expected: "keyword :task".to_string(),
                                             found: token,
-                                            line_number: self.tokenizer.get_line_number(),
+                                            position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
                                     }
@@ -94,7 +94,7 @@ impl<'a> Parser<'a> {
                                 let error = SyntacticError {
                                     expected: "'(' after keyword :parameters".to_string(),
                                     found: token,
-                                    line_number: self.tokenizer.get_line_number(),
+                                    position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
                             }
@@ -105,7 +105,7 @@ impl<'a> Parser<'a> {
                             expected: format!("The parameters of method {} ", method_name)
                                 .to_string(),
                             found: token,
-                            line_number: self.tokenizer.get_line_number(),
+                            position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
@@ -115,7 +115,7 @@ impl<'a> Parser<'a> {
                 let error = SyntacticError {
                     expected: "method name".to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }

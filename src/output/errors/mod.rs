@@ -8,4 +8,5 @@ pub use syntactic::*;
 pub use generic::*;
 pub use semantic::*;
 
-use crate::lexical_analyzer::Token;
+
+use crate::lexical_analyzer::{Token, TokenPosition};

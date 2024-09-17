@@ -19,7 +19,7 @@ impl <'a> Parser <'a> {
                 let error = SyntacticError{
                     expected: format!("(potentially empty) preconditions of {}", task.name).to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error))
             }            
@@ -37,7 +37,7 @@ impl <'a> Parser <'a> {
                 let error = SyntacticError{
                     expected: format!("(potentially empty) effects of {}", task.name).to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error))
             }            
@@ -49,7 +49,7 @@ impl <'a> Parser <'a> {
                 let error = SyntacticError {
                     expected: format!("closing the scope of {} using ')'", task.name).to_string(),
                     found: token,
-                    line_number: self.tokenizer.get_line_number(),
+                    position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
             }
