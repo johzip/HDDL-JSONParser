@@ -3,21 +3,21 @@ use super::*;
 impl<'a> Parser<'a> {
     pub fn parse_method(&'a self) -> Result<Method<'a>, ParsingError> {
         match self.tokenizer.get_token()? {
-            TokenType::Identifier(method_name) => {
+            Token::Identifier(method_name) => {
                 match self.tokenizer.get_token()? {
-                    TokenType::Keyword(KeywordName::Parameters) => {
+                    Token::Keyword(KeywordName::Parameters) => {
                         match self.tokenizer.get_token()? {
-                            TokenType::Punctuator(PunctuationType::LParentheses) => {
+                            Token::Punctuator(PunctuationType::LParentheses) => {
                                 let params = self.parse_args()?;
                                 match self.tokenizer.get_token()? {
-                                    TokenType::Keyword(KeywordName::Task) => {
+                                    Token::Keyword(KeywordName::Task) => {
                                         match self.tokenizer.get_token()? {
-                                            TokenType::Punctuator(PunctuationType::LParentheses) => {
+                                            Token::Punctuator(PunctuationType::LParentheses) => {
                                                 match self.tokenizer.get_token()? {
-                                                    TokenType::Identifier(task_name) => {
+                                                    Token::Identifier(task_name) => {
                                                         let terms = self.parse_args()?;
                                                         match self.tokenizer.lookahead()? {
-                                                            TokenType::Keyword(KeywordName::Precondition) => {
+                                                            Token::Keyword(KeywordName::Precondition) => {
                                                                 // skip "precondition" keyword
                                                                 let _ = self.tokenizer.get_token();
                                                                 let precondition = self.parse_formula()?;
@@ -31,8 +31,8 @@ impl<'a> Parser<'a> {
                                                                     tn,
                                                                 });
                                                             }
-                                                            TokenType::Keyword(KeywordName::Subtasks)
-                                                            | TokenType::Keyword(
+                                                            Token::Keyword(KeywordName::Subtasks)
+                                                            | Token::Keyword(
                                                                 KeywordName::OrderedSubtasks,
                                                             ) => {
                                                                 let tn = self.parse_htn()?;

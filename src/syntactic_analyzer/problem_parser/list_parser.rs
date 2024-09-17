@@ -6,17 +6,17 @@ impl<'a> Parser<'a> {
         let mut result = vec![];
         let mut token = self.tokenizer.get_token()?;
         loop {
-            while let TokenType::Identifier(symbol) = token {
+            while let Token::Identifier(symbol) = token {
                 objects.push(symbol);
                 token = self.tokenizer.get_token()?;
             }
             match token {
-                TokenType::Punctuator(PunctuationType::Dash) => {
+                Token::Punctuator(PunctuationType::Dash) => {
                     // match type
                     let object_type = self.tokenizer.get_token()?;
                     token = self.tokenizer.get_token()?;
                     match object_type {
-                        TokenType::Identifier(t) => {
+                        Token::Identifier(t) => {
                             for o in objects {
                                 result.push(Symbol::new(o, Some(t)));
                             }
@@ -39,7 +39,7 @@ impl<'a> Parser<'a> {
                         }
                     }
                 }
-                TokenType::Punctuator(PunctuationType::RParentheses) => {
+                Token::Punctuator(PunctuationType::RParentheses) => {
                     for o in objects {
                         result.push(Symbol::new(o, None));
                     }

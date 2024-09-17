@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum TokenType<'a> {
+pub enum Token<'a> {
     Keyword(KeywordName),
     Identifier(&'a str),
     Operator(OperationType),

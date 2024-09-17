@@ -3,11 +3,11 @@ use super::*;
 impl <'a> Parser <'a> {
     pub fn parse_task(&'a self) -> Result<Task, ParsingError<'a>>{
         match self.tokenizer.get_token()? {
-            TokenType::Identifier(task_name) => {
+            Token::Identifier(task_name) => {
                 match self.tokenizer.get_token()? {
-                    TokenType::Keyword(KeywordName::Parameters) => {
+                    Token::Keyword(KeywordName::Parameters) => {
                         match self.tokenizer.get_token()? {
-                            TokenType::Punctuator(PunctuationType::LParentheses) => {
+                            Token::Punctuator(PunctuationType::LParentheses) => {
                                 return Ok(Task::new(task_name, self.parse_args()?))
                             }
                             token => {
