@@ -10,6 +10,19 @@ pub enum Token<'a> {
     EOF
 }
 
+impl <'a> fmt::Display for Token<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            Token::Keyword(keyword) => write!(fmt, "Keyword {}", keyword),
+            Token::Identifier(id) => write!(fmt, "Identifier {}", id),
+            Token::Operator(op) => write!(fmt, "{}", op),
+            Token::Punctuator(punc) => write!(fmt, "{}", punc),
+            Token::Requirement(req) => write!(fmt, "Requirement {}", req),
+            Token::EOF => write!(fmt, "End of file"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum PunctuationType {
     Dash,
@@ -74,6 +87,20 @@ pub enum RequirementType {
     Equality
 }
 
+impl fmt::Display for RequirementType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let requirement = match self {
+            RequirementType::MethodPreconditions => ":method-preconditions",
+            RequirementType::Hierarchy => ":hierarchy",
+            RequirementType::TypedObjects => ":typing",
+            RequirementType::NegativePreconditions => ":negative-preconditions",
+            RequirementType::UniversalPreconditions => ":universal-preconditions",
+            RequirementType::Equality => ":equality",
+        };
+        write!(f, "{}", requirement)
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum KeywordName {
     Define,
@@ -97,4 +124,33 @@ pub enum KeywordName {
     Ordering,
     Constraints,
     Goal
+}
+
+impl fmt::Display for KeywordName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let keyword = match self {
+            KeywordName::Define => ":define",
+            KeywordName::Domain => ":domain",
+            KeywordName::Problem => ":problem",
+            KeywordName::Requirements => ":requirements",
+            KeywordName::Objects => ":objects",
+            KeywordName::Types => ":types",
+            KeywordName::Task => ":task",
+            KeywordName::Constants => ":constants",
+            KeywordName::Predicates => ":predicates",
+            KeywordName::Init => ":init",
+            KeywordName::HTN => ":htn",
+            KeywordName::Action => ":action",
+            KeywordName::Parameters => ":parameters",
+            KeywordName::Method => ":method",
+            KeywordName::Precondition => ":precondition",
+            KeywordName::Effect => ":effect",
+            KeywordName::Subtasks => ":(sub)tasks", // Note: Could be ":tasks" in some systems
+            KeywordName::OrderedSubtasks => ":ordered-(sub)tasks", // Note: Could be ":ordered-tasks" in some systems
+            KeywordName::Ordering => ":ordering",
+            KeywordName::Constraints => ":constraints",
+            KeywordName::Goal => ":goal",
+        };
+        write!(f, "{}", keyword)
+    }
 }
