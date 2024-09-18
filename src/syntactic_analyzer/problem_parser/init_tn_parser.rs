@@ -494,7 +494,31 @@ impl<'a> Parser<'a> {
                                     Token::Identifier(t1) => {
                                         match self.tokenizer.get_token()? {
                                             Token::Identifier(t2) => {
-                                                return Ok(Constraint::NotEqual(t1, t2));
+                                                match self.tokenizer.get_token()? {
+                                                    Token::Punctuator(PunctuationType::RParentheses) => {
+                                                        match self.tokenizer.get_token()? {
+                                                            Token::Punctuator(PunctuationType::RParentheses) => {
+                                                                return Ok(Constraint::NotEqual(t1, t2));
+                                                            }
+                                                            token => {
+                                                                let error = SyntacticError{
+                                                                    expected: format!(") to close the inequality constraint").to_string(),
+                                                                    found: token,
+                                                                    position: self.tokenizer.get_last_token_position(),
+                                                                };
+                                                                return Err(ParsingError::Syntactic(error));
+                                                            }
+                                                        }
+                                                    }
+                                                    token => {
+                                                        let error = SyntacticError{
+                                                            expected: format!(") to close the inequality constraint").to_string(),
+                                                            found: token,
+                                                            position: self.tokenizer.get_last_token_position(),
+                                                        };
+                                                        return Err(ParsingError::Syntactic(error));
+                                                    }
+                                                }
                                             }
                                             token => {
                                                 let error = SyntacticError{
@@ -541,7 +565,19 @@ impl<'a> Parser<'a> {
                     Token::Identifier(t1) => {
                         match self.tokenizer.get_token()? {
                             Token::Identifier(t2) => {
-                                return Ok(Constraint::Equal(t1, t2));
+                                match self.tokenizer.get_token()? {
+                                    Token::Punctuator(PunctuationType::RParentheses) => {
+                                        return Ok(Constraint::Equal(t1, t2));
+                                    }
+                                    token => {
+                                        let error = SyntacticError{
+                                            expected: format!(") to close the equality constraint").to_string(),
+                                            found: token,
+                                            position: self.tokenizer.get_last_token_position(),
+                                        };
+                                        return Err(ParsingError::Syntactic(error));
+                                    }
+                                }
                             }
                             token => {
                                 let error = SyntacticError{

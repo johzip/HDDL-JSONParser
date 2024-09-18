@@ -2,6 +2,7 @@ use crate::TokenPosition;
 
 use super::*;
 
+#[derive(Debug)]
 pub struct SyntaxTree<'a> {
     pub objects: Vec<Symbol<'a>>,
     pub types: Option<Vec<Symbol<'a>>>,

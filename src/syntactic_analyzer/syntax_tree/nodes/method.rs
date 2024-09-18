@@ -2,6 +2,8 @@ use crate::TokenPosition;
 
 use super::*;
 
+
+#[derive(Debug)]
 pub struct Method<'a> {
     pub name: &'a str,
     pub name_pos: TokenPosition,

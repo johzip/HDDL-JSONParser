@@ -299,19 +299,19 @@ impl<'a> Formula<'a> {
                     match *f {
                         Formula::Empty => {}
                         Formula::Atom(predicate) => {
-                            if !literal_ids.contains_key(predicate.name) {
-                                literal_ids.insert(predicate.name, count);
+                            if !literal_ids.contains_key(&predicate.to_string()) {
+                                literal_ids.insert(predicate.to_string(), count);
                                 count+=1;
                             }
-                            clause.push(*literal_ids.get(predicate.name).unwrap());
+                            clause.push(*literal_ids.get(&predicate.to_string()).unwrap());
                         }
                         Formula::Not(pred_box) => {
                             if let Formula::Atom(predicate) = *pred_box {
-                                if !literal_ids.contains_key(predicate.name) {
-                                    literal_ids.insert(predicate.name, count);
+                                if !literal_ids.contains_key(&predicate.to_string()) {
+                                    literal_ids.insert(predicate.to_string(), count);
                                     count+=1;
                                 }
-                                clause.push(-1 * literal_ids.get(predicate.name).unwrap().clone());
+                                clause.push(-1 * literal_ids.get(&predicate.to_string()).unwrap().clone());
                             } else {
                                 panic!("not simplified")
                             }
@@ -320,19 +320,19 @@ impl<'a> Formula<'a> {
                             for disjunct in disjuncts {
                                 match *disjunct {
                                     Formula::Atom(predicate) => {
-                                        if !literal_ids.contains_key(predicate.name) {
-                                            literal_ids.insert(predicate.name, count);
+                                        if !literal_ids.contains_key(&predicate.to_string()) {
+                                            literal_ids.insert(predicate.to_string(), count);
                                             count+=1;
                                         }
-                                        clause.push(*literal_ids.get(predicate.name).unwrap());
+                                        clause.push(*literal_ids.get(&predicate.to_string()).unwrap());
                                     },
                                     Formula::Not(pred_box) => {
                                         if let Formula::Atom(predicate) = *pred_box {
-                                            if !literal_ids.contains_key(predicate.name) {
-                                                literal_ids.insert(predicate.name, count);
+                                            if !literal_ids.contains_key(&predicate.to_string()) {
+                                                literal_ids.insert(predicate.to_string(), count);
                                                 count+=1;
                                             }
-                                            clause.push(-1 * literal_ids.get(predicate.name).unwrap().clone());
+                                            clause.push(-1 * literal_ids.get(&predicate.to_string()).unwrap().clone());
                                         } else {
                                             panic!("not simplified: {:?}", *pred_box)
                                         }
@@ -352,18 +352,18 @@ impl<'a> Formula<'a> {
                     let mut clause = vec![];
                     match &**disjunct {
                         Formula::Atom(predicate) => {
-                            if !literal_ids.contains_key(predicate.name) {
-                                literal_ids.insert(predicate.name, count);
+                            if !literal_ids.contains_key(&predicate.to_string()) {
+                                literal_ids.insert(predicate.to_string(), count);
                                 count+=1;
                             }
                         },
                         Formula::Not(pred_box) => {
                             if let Formula::Atom(predicate) = &**pred_box {
-                                if !literal_ids.contains_key(predicate.name) {
-                                    literal_ids.insert(predicate.name, count);
+                                if !literal_ids.contains_key(&predicate.to_string()) {
+                                    literal_ids.insert(predicate.to_string(), count);
                                     count+=1;
                                 }
-                                clause.push(-1 * literal_ids.get(predicate.name).unwrap());
+                                clause.push(-1 * literal_ids.get(&predicate.to_string()).unwrap());
                             } else {
                                 panic!("not simplified")
                             }
@@ -375,22 +375,22 @@ impl<'a> Formula<'a> {
             }
             Formula::Not(p) => {
                 if let Formula::Atom(predicate) = *p {
-                    if !literal_ids.contains_key(predicate.name) {
-                        literal_ids.insert(predicate.name, count);
+                    if !literal_ids.contains_key(&predicate.to_string()) {
+                        literal_ids.insert(predicate.to_string(), count);
                         count+=1;
                     }
-                    let clause = vec![-1 * literal_ids.get(predicate.name).unwrap()];
+                    let clause = vec![-1 * literal_ids.get(&predicate.to_string()).unwrap()];
                     clauses.push(clause);
                 } else {
                     panic!("not simplified")
                 }
             }
             Formula::Atom(predicate) => {
-                if !literal_ids.contains_key(predicate.name) {
-                    literal_ids.insert(predicate.name, count);
+                if !literal_ids.contains_key(&predicate.to_string()) {
+                    literal_ids.insert(predicate.to_string(), count);
                     count+=1;
                 }
-                let clause = vec![literal_ids.get(predicate.name).unwrap().clone()];
+                let clause = vec![literal_ids.get(&predicate.to_string()).unwrap().clone()];
                 clauses.push(clause);
             }
             token => panic!("unexpected {:?}", token)

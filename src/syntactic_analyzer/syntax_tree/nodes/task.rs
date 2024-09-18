@@ -4,6 +4,7 @@ use crate::TokenPosition;
 
 use super::*;
 
+#[derive(Debug)]
 pub struct Task<'a> {
     pub name: &'a str,
     pub name_pos: TokenPosition,

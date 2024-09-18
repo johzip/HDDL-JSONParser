@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use std::{fmt::format, hash::Hash};
 
 use crate::TokenPosition;
 
@@ -39,5 +39,18 @@ impl <'a> Eq for Predicate<'a> {}
 impl <'a> Hash for Predicate<'a> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.name.hash(state)
+    }
+}
+
+impl <'a> ToString for Predicate<'a> {
+    fn to_string(&self) -> String {
+        let mut s = String::from(self.name);
+        s.push('(');
+        for var in self.variables.iter() {
+            s.push_str(var.name);
+            s.push(',');
+        }
+        s.push(')');
+        s
     }
 }

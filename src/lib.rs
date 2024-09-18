@@ -18,7 +18,7 @@ pub fn analyze(program: &Vec<u8>) -> Result<(), String> {
                 token => panic!("{:?}", token)
             }
         }
-        _ => panic!("wrong program")
+        token => panic!("wrong program {:?}", token)
     }
     
 }

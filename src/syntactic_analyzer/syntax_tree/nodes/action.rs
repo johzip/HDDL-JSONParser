@@ -2,6 +2,8 @@ use std::hash::Hash;
 
 use super::*;
 
+
+#[derive(Debug)]
 pub struct Action<'a> {
     pub name: &'a str,
     pub parameters: Vec<Symbol<'a>>,
