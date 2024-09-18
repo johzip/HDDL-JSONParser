@@ -44,7 +44,7 @@ pub fn cyclic_method_ordering_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::CyclicOrderingDeclaration(x) => {
+                SemanticErrorType::CyclicOrderingDeclaration(x) => {
                     assert_eq!(x, "t4")
                     // TODO: assert locality in future
                 }
@@ -79,7 +79,7 @@ pub fn cyclic_types_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::CyclicTypeDeclaration(x) => {
+                SemanticErrorType::CyclicTypeDeclaration(x) => {
                     assert_eq!(x, "t7")
                     // TODO: assert locality in future
                 }

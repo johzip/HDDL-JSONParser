@@ -29,7 +29,7 @@ pub fn undefined_predicate_action_precondition_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedPredicate(x) => {
+                SemanticErrorType::UndefinedPredicate(x) => {
                     assert_eq!(x, "pred_5")
                     // TODO: assert locality in future
                 }
@@ -68,7 +68,7 @@ pub fn inconsistent_predicate_action_effect_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::InconsistentPredicateArity(x) => {
+                SemanticErrorType::InconsistentPredicateArity(x) => {
                     assert_eq!(x, "hold")
                     // TODO: assert locality in future
                 }
@@ -112,7 +112,7 @@ pub fn undefined_predicate_method_precondition_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedPredicate(x) => {
+                SemanticErrorType::UndefinedPredicate(x) => {
                     assert_eq!(x, "pred_5")
                     // TODO: assert locality in future
                 }
@@ -160,7 +160,7 @@ pub fn undefined_method_parameters_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedParameter(x) => {
+                SemanticErrorType::UndefinedParameter(x) => {
                     assert_eq!(x, "p5")
                     // TODO: assert locality in future
                 }
@@ -210,7 +210,7 @@ pub fn undefined_subtask_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedSubtask(x) => {
+                SemanticErrorType::UndefinedSubtask(x) => {
                     assert_eq!(x, "c_3")
                     // TODO: assert locality in future
                 }
@@ -260,7 +260,7 @@ pub fn inconsistent_subtask_arity_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::InconsistentTaskArity(x) => {
+                SemanticErrorType::InconsistentTaskArity(x) => {
                     assert_eq!(x, "c_2")
                     // TODO: assert locality in future
                 }
@@ -298,7 +298,7 @@ pub fn undefined_type_compound_task_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedType(x) => {
+                SemanticErrorType::UndefinedType(x) => {
                     assert_eq!(x, "t5")
                     // TODO: assert locality in future
                 }
@@ -335,7 +335,7 @@ pub fn undefined_type_predicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedType(x) => {
+                SemanticErrorType::UndefinedType(x) => {
                     assert_eq!(x, "t2")
                     // TODO: assert locality in future
                 }
@@ -384,7 +384,7 @@ pub fn undefined_predicate_forall_quantification_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedPredicate(x) => {
+                SemanticErrorType::UndefinedPredicate(x) => {
                     assert_eq!(x, "wro")
                     // TODO: assert locality in future
                 }
@@ -430,7 +430,7 @@ pub fn undefined_method_task_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::UndefinedTask(x) => {
+                SemanticErrorType::UndefinedTask(x) => {
                     assert_eq!(x, "deliver_abs")
                     // TODO: assert locality in future
                 }

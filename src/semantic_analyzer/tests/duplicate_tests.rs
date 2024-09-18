@@ -20,7 +20,7 @@ pub fn objects_duplicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::DuplicateObjectDeclaration(x) => {
+                SemanticErrorType::DuplicateObjectDeclaration(x) => {
                     assert_eq!(x, "b");
                     // TODO: assert locality in future
                 }
@@ -51,7 +51,7 @@ pub fn requirements_duplicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::DuplicateRequirementDeclaration(x) => {
+                SemanticErrorType::DuplicateRequirementDeclaration(x) => {
                     assert!(matches!(x, RequirementType::Hierarchy))
                     // TODO: assert locality in future
                 }
@@ -86,7 +86,7 @@ pub fn predicates_duplicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::DuplicatePredicateDeclaration(x) => {
+                SemanticErrorType::DuplicatePredicateDeclaration(x) => {
                     assert_eq!(x, "pred_1")
                     // TODO: assert locality in future
                 }
@@ -135,7 +135,7 @@ pub fn action_duplicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::DuplicateActionDeclaration(x) => {
+                SemanticErrorType::DuplicateActionDeclaration(x) => {
                     assert_eq!(x, "a_1")
                     // TODO: assert locality in future
                 }
@@ -173,7 +173,7 @@ pub fn compound_task_duplicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::DuplicateCompoundTaskDeclaration(x) => {
+                SemanticErrorType::DuplicateCompoundTaskDeclaration(x) => {
                     assert_eq!(x, "c_1")
                     // TODO: assert locality in future
                 }
@@ -229,7 +229,7 @@ pub fn method_duplicate_test() {
         }
         Err(error) => {
             match error {
-                SemanticError::DuplicateMethodDeclaration(x) => {
+                SemanticErrorType::DuplicateMethodDeclaration(x) => {
                     assert_eq!(x, "m_1")
                     // TODO: assert locality in future
                 }

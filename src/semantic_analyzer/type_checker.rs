@@ -39,12 +39,12 @@ impl<'a> TypeChecker<'a> {
         }
     }
 
-    pub fn check_acyclicity(&self) -> Option<SemanticError<'a>> {
+    pub fn check_acyclicity(&self) -> Option<SemanticErrorType<'a>> {
         match toposort(&self.type_hierarchy, None) {
             Ok(_) => None,
             Err(cycle_item) => {
                 let node = cycle_item.node_id();
-                return Some(SemanticError::CyclicTypeDeclaration(node));
+                return Some(SemanticErrorType::CyclicTypeDeclaration(node));
             }
         }
     }
@@ -52,11 +52,11 @@ impl<'a> TypeChecker<'a> {
     pub fn check_type_declarations(
         &self,
         parameters: &Vec<Symbol<'a>>,
-    ) -> Option<SemanticError<'a>> {
+    ) -> Option<SemanticErrorType<'a>> {
         for parameter in parameters.iter() {
             if let Some(t) = parameter.symbol_type {
                 if !self.type_hierarchy.contains_node(t) {
-                    return Some(SemanticError::UndefinedType(t));
+                    return Some(SemanticErrorType::UndefinedType(t));
                 }
             }
         }
@@ -70,7 +70,7 @@ impl<'a> TypeChecker<'a> {
         parameters: &Vec<Symbol<'a>>,
         declared_constants: &HashSet<&Symbol<'a>>,
         declared_predicates: &HashSet<&'a Predicate<'a>>,
-    ) -> Result<(), SemanticError<'a>> {
+    ) -> Result<(), SemanticErrorType<'a>> {
         // Assert all types are declared
         if let Some(undeclared_type) = self.check_type_declarations(parameters) {
             return Err(undeclared_type);
@@ -90,7 +90,7 @@ impl<'a> TypeChecker<'a> {
                             }
                             None => {
                                 if !declared_constants.contains(&var.name) {
-                                    return Err(SemanticError::UndefinedParameter(&var.name));
+                                    return Err(SemanticErrorType::UndefinedParameter(&var.name));
                                 } else {
                                     found_list.push((var.name, &declared_constants.get(&var.name).unwrap().symbol_type))
                                 }
@@ -104,14 +104,14 @@ impl<'a> TypeChecker<'a> {
                         .collect();
                     // Assert args have the same arity
                     if &found_list.len() != &expected_list.len() {
-                        return Err(SemanticError::InconsistentPredicateArity(
+                        return Err(SemanticErrorType::InconsistentPredicateArity(
                             &used_predicate.name,
                         ));
                     }
                     for ((var_name, f), e) in found_list.into_iter().zip(expected_list.into_iter())
                     {
                         if !self.is_var_type_consistent(*f, *e) {
-                            return Err(SemanticError::InconsistentPredicateArgType(TypeError {
+                            return Err(SemanticErrorType::InconsistentPredicateArgType(TypeError {
                                 expected: *e,
                                 found: *f,
                                 var_name: var_name,
@@ -120,7 +120,7 @@ impl<'a> TypeChecker<'a> {
                     }
                 }
                 None => {
-                    return Err(SemanticError::UndefinedPredicate(&used_predicate.name));
+                    return Err(SemanticErrorType::UndefinedPredicate(&used_predicate.name));
                 }
             }
         }
@@ -159,7 +159,7 @@ impl<'a> TypeChecker<'a> {
         declared_constants: &HashSet<&Symbol<'a>>,
         declared_tasks: &HashSet<&Task<'a>>,
         declared_actions: &HashSet<&Action<'a>>,
-    ) -> Result<(), SemanticError<'a>> {
+    ) -> Result<(), SemanticErrorType<'a>> {
         // Store parameter types
         let par_types: HashMap<&str, Option<&str>> =
             HashMap::from_iter(parameters.iter().map(|par| {
@@ -173,7 +173,7 @@ impl<'a> TypeChecker<'a> {
                 }
                 None => {
                     if !declared_constants.contains(term) {
-                        return Err(SemanticError::UndefinedParameter(&term));
+                        return Err(SemanticErrorType::UndefinedParameter(&term));
                     } else {
                         found.push((term, &declared_constants.get(term).unwrap().symbol_type))
                     }
@@ -185,11 +185,11 @@ impl<'a> TypeChecker<'a> {
                 let expected: Vec<Option<&str>> =
                     definition.parameters.iter().map(|x| x.symbol_type).collect();
                 if found.len() != expected.len() {
-                    return Err(SemanticError::InconsistentTaskArity(&task_name));
+                    return Err(SemanticErrorType::InconsistentTaskArity(&task_name));
                 }
                 for ((name, f), e) in found.iter().zip(expected.iter()) {
                     if !self.is_var_type_consistent(**f, *e) {
-                        return Err(SemanticError::InconsistentTaskArgType(TypeError {
+                        return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
                             expected: *e,
                             found: **f,
                             var_name: &name,
@@ -203,11 +203,11 @@ impl<'a> TypeChecker<'a> {
                     let expected: Vec<Option<&str>> =
                         definition.parameters.iter().map(|x| x.symbol_type).collect();
                     if found.len() != expected.len() {
-                        return Err(SemanticError::InconsistentTaskArity(&task_name));
+                        return Err(SemanticErrorType::InconsistentTaskArity(&task_name));
                     }
                     for ((name, f), e) in found.iter().zip(expected.iter()) {
                         if !self.is_var_type_consistent(**f, *e) {
-                            return Err(SemanticError::InconsistentTaskArgType(TypeError {
+                            return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
                                 expected: *e,
                                 found: **f,
                                 var_name: &name,
@@ -217,7 +217,7 @@ impl<'a> TypeChecker<'a> {
                     return Ok(());
                 }
                 None => {
-                    return Err(SemanticError::UndefinedSubtask(&task_name));
+                    return Err(SemanticErrorType::UndefinedSubtask(&task_name));
                 }
             },
         }

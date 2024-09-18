@@ -5,7 +5,7 @@ use super::*;
 pub fn check_predicate_declarations<'a>(
     formula: &Formula<'a>,
     declared_predicates: &Vec<Predicate<'a>>,
-) -> Result<(), SemanticError<'a>> {
+) -> Result<(), SemanticErrorType<'a>> {
     match &*formula {
         Formula::Empty => {}
         Formula::Atom(predicate) => {
@@ -16,11 +16,11 @@ pub fn check_predicate_declarations<'a>(
                     if predicate.variables.len() == declared_predicate.variables.len() {
                         return Ok(());
                     } else {
-                        return Err(SemanticError::InconsistentPredicateArity(predicate.name));
+                        return Err(SemanticErrorType::InconsistentPredicateArity(predicate.name));
                     }
                 }
             }
-            return Err(SemanticError::UndefinedPredicate(&predicate.name));
+            return Err(SemanticErrorType::UndefinedPredicate(&predicate.name));
         }
         Formula::Not(new_formula) => {
             return check_predicate_declarations(&*new_formula, declared_predicates);

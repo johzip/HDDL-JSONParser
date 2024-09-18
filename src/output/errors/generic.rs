@@ -4,7 +4,7 @@ use super::*;
 pub enum ParsingError<'a>{
     Lexiacal(LexicalError<'a>),
     Syntactic(SyntacticError<'a>),
-    Semantic(SemanticError<'a>)
+    Semantic(SemanticErrorType<'a>)
 }
 
 impl <'a> From<LexicalError<'a>> for ParsingError<'a> {
@@ -19,8 +19,18 @@ impl <'a> From<SyntacticError<'a>> for ParsingError<'a> {
     }
 }
 
-impl <'a> From<SemanticError<'a>> for ParsingError<'a> {
-    fn from(value: SemanticError<'a>) -> Self {
+impl <'a> From<SemanticErrorType<'a>> for ParsingError<'a> {
+    fn from(value: SemanticErrorType<'a>) -> Self {
         ParsingError::Semantic(value)
+    }
+}
+
+impl <'a> std::fmt::Display for ParsingError<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Lexiacal(error) => write!(f, "{}", error.to_string()),
+            Self::Syntactic(error) => write!(f, "{}", error.to_string()),
+            Self::Semantic(error) => write!(f, "{}", error.to_string())
+        }
     }
 }

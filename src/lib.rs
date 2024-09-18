@@ -15,9 +15,9 @@ pub fn analyze(program: &Vec<u8>) -> Result<(), String> {
                 Ok(_) => {
                     return Ok(());
                 },
-                token => panic!("{:?}", token)
+                Err(semantic_error) => Err(semantic_error.to_string())
             }
         }
-        token => panic!("wrong program {:?}", token)
+        Err(parsing_error) => Err(parsing_error.to_string())
     }
 }

@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 use cycle_detection::check_ordering_acyclic;
-use petgraph::{algo::toposort, prelude::GraphMap, Directed};
 
 use super::*;
 
@@ -18,7 +17,7 @@ impl<'a> SemanticAnalyzer<'a> {
         }
     }
 
-    pub fn verify_ast(&'a self) -> Result<(), SemanticError<'a>> {
+    pub fn verify_ast(&'a self) -> Result<Vec<Warning<'a>>, SemanticErrorType<'a>> {
         // Assert there are no duplicate objects
         if let Some(duplicate) = check_duplicate_objects(&self.ast.objects) {
             return Err(duplicate);
@@ -29,7 +28,7 @@ impl<'a> SemanticAnalyzer<'a> {
         } else if let Some(cycle) = self.type_checker.check_acyclicity() {
             return Err(cycle);
         }
-
+        let mut warnings = vec![];
         // Domain declarations
         let declared_predicates = self.verify_predicates()?;
         let declared_tasks = self.verify_compound_tasks()?;
@@ -47,7 +46,7 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_actions = HashSet::new();
         for action in self.ast.actions.iter() {
             if !declared_actions.insert(action) {
-                return Err(SemanticError::DuplicateActionDeclaration(action.name));
+                return Err(SemanticErrorType::DuplicateActionDeclaration(action.name));
             }
             // assert precondition predicates are declared
             match &action.preconditions {
@@ -61,9 +60,7 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        return Err(
-                            SemanticError::UnsatisfiableActionPrecondition(&action.name)
-                        );
+                        warnings.push(Warning::UnsatisfiableActionPrecondition(&action.name));
                     }
                 }
                 _ => {}
@@ -88,7 +85,7 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_methods = HashSet::new();
         for method in self.ast.methods.iter() {
             if !declared_methods.insert(method.name) {
-                return Err(SemanticError::DuplicateMethodDeclaration(method.name));
+                return Err(SemanticErrorType::DuplicateMethodDeclaration(method.name));
             }
             // Assert preconditions are valid
             match &method.precondition {
@@ -102,22 +99,20 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        return Err(
-                            SemanticError::UnsatisfiableMethodPrecondition(&method.name)
-                        );
+                        warnings.push(Warning::UnsatisfiableMethodPrecondition(&method.name));
                     }
                 }
                 _ => {}
             }
             // Assert task is defined
             if !declared_tasks.contains(method.task_name) {
-                return Err(SemanticError::UndefinedTask(&method.task_name));
+                return Err(SemanticErrorType::UndefinedTask(&method.task_name));
             } else {
                 // Assert task arity is consistent
                 for declared_compound_task in self.ast.compound_tasks.iter() {
                     if method.task_name == declared_compound_task.name {
                         if method.task_terms.len() != declared_compound_task.parameters.len() {
-                            return Err(SemanticError::InconsistentTaskArity(&method.task_name));
+                            return Err(SemanticErrorType::InconsistentTaskArity(&method.task_name));
                         } else {
                             break;
                         }
@@ -136,8 +131,8 @@ impl<'a> SemanticAnalyzer<'a> {
                 &declared_tasks,
                 &HashSet::new(),
             ) {
-                Err(SemanticError::UndefinedSubtask(task_name)) => {
-                    return Err(SemanticError::UndefinedTask(task_name));
+                Err(SemanticErrorType::UndefinedSubtask(task_name)) => {
+                    return Err(SemanticErrorType::UndefinedTask(task_name));
                 }
                 _ => {}
             }
@@ -156,15 +151,15 @@ impl<'a> SemanticAnalyzer<'a> {
             // Assert orderings are acyclic
             check_ordering_acyclic(&method.tn)?;
         }
-        Ok(())
+        Ok(warnings)
     }
 
     // returns declared predicates (if there is no error)
-    fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticError<'a>> {
+    fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticErrorType<'a>> {
         let mut declared_predicates = HashSet::new();
         for predicate in self.ast.predicates.iter() {
             if !declared_predicates.insert(predicate) {
-                return Err(SemanticError::DuplicatePredicateDeclaration(
+                return Err(SemanticErrorType::DuplicatePredicateDeclaration(
                     &predicate.name,
                 ));
             }
@@ -179,11 +174,11 @@ impl<'a> SemanticAnalyzer<'a> {
     }
 
     // returns declared compound tasks (if there is no error)
-    fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticError<'a>> {
+    fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticErrorType<'a>> {
         let mut declared_tasks = HashSet::new();
         for task in self.ast.compound_tasks.iter() {
             if !declared_tasks.insert(task) {
-                return Err(SemanticError::DuplicateCompoundTaskDeclaration(task.name));
+                return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(task.name));
             }
             // assert parameter types are declared
             if let Some(error) = self.type_checker.check_type_declarations(&task.parameters) {
