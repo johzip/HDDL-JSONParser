@@ -17,7 +17,7 @@ impl<'a> SemanticAnalyzer<'a> {
         }
     }
 
-    pub fn verify_ast(&'a self) -> Result<Vec<Warning<'a>>, SemanticErrorType<'a>> {
+    pub fn verify_ast(&'a self) -> Result<Vec<WarningType<'a>>, SemanticErrorType<'a>> {
         // Assert there are no duplicate objects
         if let Some(duplicate) = check_duplicate_objects(&self.ast.objects) {
             return Err(duplicate);
@@ -60,7 +60,7 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(Warning::UnsatisfiableActionPrecondition(&action.name));
+                        warnings.push(WarningType::UnsatisfiableActionPrecondition(&action.name));
                     }
                 }
                 _ => {}
@@ -99,7 +99,7 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(Warning::UnsatisfiableMethodPrecondition(&method.name));
+                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(&method.name));
                     }
                 }
                 _ => {}

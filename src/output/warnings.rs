@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub enum Warning<'a> {
+pub enum WarningType<'a> {
     // Action Errors
     UnsatisfiableActionPrecondition(&'a str),
     // TODO: test
@@ -20,7 +20,7 @@ pub enum Warning<'a> {
     RedundantEffect
 }
 
-impl <'a> std::fmt::Display for Warning<'a> {
+impl <'a> std::fmt::Display for WarningType<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             Self::UnsatisfiableActionPrecondition(action) => {

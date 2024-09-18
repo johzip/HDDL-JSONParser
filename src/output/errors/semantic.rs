@@ -1,4 +1,4 @@
-use crate::RequirementType;
+use crate::lexical_analyzer::RequirementType;
 use std::fmt;
 
 #[derive(Debug)]

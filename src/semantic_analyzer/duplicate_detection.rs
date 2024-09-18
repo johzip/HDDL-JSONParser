@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::RequirementType;
+use crate::lexical_analyzer::RequirementType;
 
 use super::*;
 
