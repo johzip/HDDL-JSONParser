@@ -1,31 +1,31 @@
 use super::*;
 
 #[derive(Debug)]
-pub enum ParsingError<'a>{
+pub enum ParsingError{
     Lexiacal(LexicalError),
-    Syntactic(SyntacticError<'a>),
-    Semantic(SemanticErrorType<'a>)
+    Syntactic(SyntacticError),
+    Semantic(SemanticErrorType)
 }
 
-impl <'a> From<LexicalError> for ParsingError<'a> {
+impl  From<LexicalError> for ParsingError {
     fn from(value: LexicalError) -> Self {
         ParsingError::Lexiacal(value)
     }
 }
 
-impl <'a> From<SyntacticError<'a>> for ParsingError<'a> {
-    fn from(value: SyntacticError<'a>) -> Self {
+impl  From<SyntacticError> for ParsingError {
+    fn from(value: SyntacticError) -> Self {
         ParsingError::Syntactic(value)
     }
 }
 
-impl <'a> From<SemanticErrorType<'a>> for ParsingError<'a> {
-    fn from(value: SemanticErrorType<'a>) -> Self {
+impl  From<SemanticErrorType> for ParsingError {
+    fn from(value: SemanticErrorType) -> Self {
         ParsingError::Semantic(value)
     }
 }
 
-impl <'a> std::fmt::Display for ParsingError<'a> {
+impl  std::fmt::Display for ParsingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Lexiacal(error) => write!(f, "{}", error),

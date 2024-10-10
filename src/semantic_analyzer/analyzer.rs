@@ -17,7 +17,7 @@ impl<'a> SemanticAnalyzer<'a> {
         }
     }
 
-    pub fn verify_ast(&'a self) -> Result<Vec<WarningType<'a>>, SemanticErrorType<'a>> {
+    pub fn verify_ast(&'a self) -> Result<Vec<WarningType>, SemanticErrorType> {
         // Assert there are no duplicate objects
         if let Some(duplicate) = check_duplicate_objects(&self.ast.objects) {
             return Err(duplicate);
@@ -46,7 +46,7 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_actions = HashSet::new();
         for action in self.ast.actions.iter() {
             if !declared_actions.insert(action) {
-                return Err(SemanticErrorType::DuplicateActionDeclaration(action.name));
+                return Err(SemanticErrorType::DuplicateActionDeclaration(action.name.to_string()));
             }
             // assert precondition predicates are declared
             match &action.preconditions {
@@ -60,7 +60,7 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableActionPrecondition(&action.name));
+                        warnings.push(WarningType::UnsatisfiableActionPrecondition(action.name.to_string()));
                     }
                 }
                 _ => {}
@@ -85,7 +85,7 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_methods = HashSet::new();
         for method in self.ast.methods.iter() {
             if !declared_methods.insert(method.name) {
-                return Err(SemanticErrorType::DuplicateMethodDeclaration(method.name));
+                return Err(SemanticErrorType::DuplicateMethodDeclaration(method.name.to_string()));
             }
             // Assert preconditions are valid
             match &method.precondition {
@@ -99,20 +99,20 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(&method.name));
+                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(method.name.to_string()));
                     }
                 }
                 _ => {}
             }
             // Assert task is defined
             if !declared_tasks.contains(method.task_name) {
-                return Err(SemanticErrorType::UndefinedTask(&method.task_name));
+                return Err(SemanticErrorType::UndefinedTask(method.task_name.to_string()));
             } else {
                 // Assert task arity is consistent
                 for declared_compound_task in self.ast.compound_tasks.iter() {
                     if method.task_name == declared_compound_task.name {
                         if method.task_terms.len() != declared_compound_task.parameters.len() {
-                            return Err(SemanticErrorType::InconsistentTaskArity(&method.task_name));
+                            return Err(SemanticErrorType::InconsistentTaskArity(method.task_name.to_string()));
                         } else {
                             break;
                         }
@@ -155,12 +155,12 @@ impl<'a> SemanticAnalyzer<'a> {
     }
 
     // returns declared predicates (if there is no error)
-    fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticErrorType<'a>> {
+    fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticErrorType> {
         let mut declared_predicates = HashSet::new();
         for predicate in self.ast.predicates.iter() {
             if !declared_predicates.insert(predicate) {
                 return Err(SemanticErrorType::DuplicatePredicateDeclaration(
-                    &predicate.name,
+                    predicate.name.to_string(),
                 ));
             }
             if let Some(error) = self
@@ -174,11 +174,11 @@ impl<'a> SemanticAnalyzer<'a> {
     }
 
     // returns declared compound tasks (if there is no error)
-    fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticErrorType<'a>> {
+    fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticErrorType> {
         let mut declared_tasks = HashSet::new();
         for task in self.ast.compound_tasks.iter() {
             if !declared_tasks.insert(task) {
-                return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(task.name));
+                return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(task.name.to_string()));
             }
             // assert parameter types are declared
             if let Some(error) = self.type_checker.check_type_declarations(&task.parameters) {

@@ -4,7 +4,7 @@ use petgraph::{algo::{toposort, Cycle}, prelude::GraphMap, Directed};
 
 use super::*;
 
-pub fn check_ordering_acyclic<'a>(tn: &'a HTN<'a>) -> Result<(), SemanticErrorType<'a>> {
+pub fn check_ordering_acyclic<'a>(tn: &'a HTN<'a>) -> Result<(), SemanticErrorType> {
     match &tn.orderings {
         TaskOrdering::Total => {
             return Ok(());
@@ -16,7 +16,7 @@ pub fn check_ordering_acyclic<'a>(tn: &'a HTN<'a>) -> Result<(), SemanticErrorTy
                     return Ok(());
                 }
                 Err(cycle_item) => {
-                    return Err(SemanticErrorType::CyclicOrderingDeclaration(cycle_item.node_id()));
+                    return Err(SemanticErrorType::CyclicOrderingDeclaration(cycle_item.node_id().to_string()));
                 }
             }
         }

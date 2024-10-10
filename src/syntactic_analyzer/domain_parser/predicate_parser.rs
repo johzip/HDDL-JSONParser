@@ -1,7 +1,7 @@
 use super::*;
 
 impl<'a> Parser<'a> {
-    pub fn parse_predicates(&'a self) -> Result<Vec<Predicate<'a>>, ParsingError<'a>> {
+    pub fn parse_predicates(&'a self) -> Result<Vec<Predicate<'a>>, ParsingError> {
         let mut finished = false;
         let mut predicates = vec![];
         while !finished {
@@ -16,7 +16,7 @@ impl<'a> Parser<'a> {
                 token  => {
                     let error = SyntacticError {
                         expected: "predicate definition".to_string(),
-                        found: token,
+                        found: token.to_string(),
                         position: self.tokenizer.get_last_token_position(),
                     };
                     return Err(ParsingError::Syntactic(error));
@@ -27,7 +27,7 @@ impl<'a> Parser<'a> {
     }
 
     // parses a SINGLE predicate definition
-    fn parse_predicate_definition(&'a self) -> Result<Predicate<'a>, ParsingError<'a>> {
+    fn parse_predicate_definition(&'a self) -> Result<Predicate<'a>, ParsingError> {
         match self.tokenizer.get_token()? {
             Token::Identifier(predicate_name) => {
                 return Ok(Predicate {
@@ -39,7 +39,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "a predicate name".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));

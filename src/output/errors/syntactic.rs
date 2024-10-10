@@ -2,13 +2,13 @@ use super::*;
 use std::fmt;
 
 #[derive(Debug)]
-pub struct SyntacticError<'a> {  
+pub struct SyntacticError {  
     pub expected: String,
-    pub found: Token<'a>,
+    pub found: String,
     pub position: TokenPosition,
 }
 
-impl<'a> fmt::Display for SyntacticError<'a> {
+impl fmt::Display for SyntacticError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // ANSI escape code for red text
         let red = "\x1b[31m";

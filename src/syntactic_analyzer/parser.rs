@@ -10,7 +10,7 @@ impl<'a> Parser<'a> {
     pub fn new(tokenizer: LexicalAnalyzer<'a>) -> Parser<'a> {
         Parser { tokenizer }
     }
-    pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError<'a>> {
+    pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError> {
         let mut syntax_tree = SyntaxTree::new();
         // match opening '('
         match self.tokenizer.get_token()? {
@@ -46,7 +46,7 @@ impl<'a> Parser<'a> {
                                                             task.name
                                                         )
                                                         .to_string(),
-                                                        found: token,
+                                                        found: token.to_string(),
                                                         position: self
                                                             .tokenizer
                                                             .get_last_token_position(),
@@ -89,7 +89,7 @@ impl<'a> Parser<'a> {
                                         token => {
                                             let error = SyntacticError {
                                                 expected: "a keyword".to_string(),
-                                                found: token,
+                                                found: token.to_string(),
                                                 position: self.tokenizer.get_last_token_position(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
@@ -102,7 +102,7 @@ impl<'a> Parser<'a> {
                                 token => {
                                     let error = SyntacticError {
                                         expected: format!("either ')' to close the definition of {}, or '(' to start defining new components", domain_name),
-                                        found: token,
+                                        found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
@@ -166,7 +166,7 @@ impl<'a> Parser<'a> {
                                             let error = SyntacticError {
                                                 expected: "a keyword for block definition"
                                                     .to_string(),
-                                                found: token,
+                                                found: token.to_string(),
                                                 position: self.tokenizer.get_last_token_position(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
@@ -188,7 +188,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "start of the file with '('".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -214,7 +214,7 @@ impl<'a> Parser<'a> {
                             token => {
                                 let error = SyntacticError {
                                     expected: "either keyword 'domain' or 'problem'".to_string(),
-                                    found: token,
+                                    found: token.to_string(),
                                     position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
@@ -224,7 +224,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError {
                             expected: "'(' after keyword 'define'".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -234,7 +234,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "keyword 'define'".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -253,7 +253,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError {
                             expected: "')'".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -263,7 +263,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "domain name".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -299,7 +299,7 @@ impl<'a> Parser<'a> {
                                                     token => {
                                                         let error = SyntacticError {
                                                             expected: format!("the block of the definition of problem '{}' is not closed with ')'", problem_name),
-                                                            found: token,
+                                                            found: token.to_string(),
                                                             position: self.tokenizer.get_last_token_position(),
                                                         };
                                                         return Err(ParsingError::Syntactic(error));
@@ -309,7 +309,7 @@ impl<'a> Parser<'a> {
                                             token => {
                                                 let error = SyntacticError {
                                                     expected: "domain name".to_string(),
-                                                    found: token,
+                                                    found: token.to_string(),
                                                     position: self
                                                         .tokenizer
                                                         .get_last_token_position(),
@@ -321,7 +321,7 @@ impl<'a> Parser<'a> {
                                     token => {
                                         let error = SyntacticError {
                                             expected: "keyword 'domain'".to_string(),
-                                            found: token,
+                                            found: token.to_string(),
                                             position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
@@ -331,7 +331,7 @@ impl<'a> Parser<'a> {
                             token => {
                                 let error = SyntacticError {
                                     expected: "'('".to_string(),
-                                    found: token,
+                                    found: token.to_string(),
                                     position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
@@ -341,7 +341,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError {
                             expected: "')'".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -351,7 +351,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "problem name".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -373,7 +373,7 @@ impl<'a> Parser<'a> {
                 token => {
                     let error = SyntacticError {
                         expected: "either a requirement or a ')'".to_string(),
-                        found: token,
+                        found: token.to_string(),
                         position: self.tokenizer.get_last_token_position(),
                     };
                     return Err(ParsingError::Syntactic(error));

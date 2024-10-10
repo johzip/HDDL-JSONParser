@@ -1,26 +1,26 @@
 #[derive(Debug)]
-pub enum WarningType<'a> {
+pub enum WarningType {
     // Action Errors
-    UnsatisfiableActionPrecondition(&'a str),
+    UnsatisfiableActionPrecondition(String),
     // TODO: test
-    UnsatisfiableMethodPrecondition(&'a str),
+    UnsatisfiableMethodPrecondition(String),
     // TODO: implement
-    ImmutablePredicate(&'a str),
+    ImmutablePredicate(String),
     // Compound Task errors
     // TODO: implement
-    NoPrimitiveRefinement(&'a str),
+    NoPrimitiveRefinement(String),
     // Redundant Elements
     // TODO: implement
-    UnusedType(&'a str),
+    UnusedType(String),
     // TODO: implement
-    UnusedPredicate(&'a str),
+    UnusedPredicate(String),
     // TODO: implement
-    UnusedParameter(&'a str),
+    UnusedParameter(String),
     // TODO: implement
     RedundantEffect
 }
 
-impl <'a> std::fmt::Display for WarningType<'a> {
+impl std::fmt::Display for WarningType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             Self::UnsatisfiableActionPrecondition(action) => {

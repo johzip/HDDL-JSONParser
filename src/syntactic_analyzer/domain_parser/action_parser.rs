@@ -1,7 +1,7 @@
 use super::*;
 
 impl <'a> Parser <'a> {
-    pub fn parse_action(&'a self) -> Result<Action, ParsingError<'a>> {
+    pub fn parse_action(&'a self) -> Result<Action, ParsingError> {
         let task = self.parse_task()?;
         let mut preconditions = None;
         let mut effects = None;
@@ -18,7 +18,7 @@ impl <'a> Parser <'a> {
             token => {
                 let error = SyntacticError{
                     expected: format!("(potentially empty) preconditions of {}", task.name).to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error))
@@ -36,7 +36,7 @@ impl <'a> Parser <'a> {
             token => {
                 let error = SyntacticError{
                     expected: format!("(potentially empty) effects of {}", task.name).to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error))
@@ -48,7 +48,7 @@ impl <'a> Parser <'a> {
             token => {
                 let error = SyntacticError {
                     expected: format!("closing the scope of {} using ')'", task.name).to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));

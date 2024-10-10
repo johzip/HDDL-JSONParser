@@ -30,7 +30,7 @@ impl<'a> Parser<'a> {
                         token => {
                             let error = SyntacticError {
                                 expected: format!("The type of objects"),
-                                found: token,
+                                found: token.to_string(),
                                 position: type_pos,
                             };
                             return Err(ParsingError::Syntactic(error));
@@ -47,7 +47,7 @@ impl<'a> Parser<'a> {
                 token => {
                     let error = SyntacticError {
                         expected: "an identifier".to_string(),
-                        found: token,
+                        found: token.to_string(),
                         position: self.tokenizer.get_last_token_position(),
                     };
                     return Err(ParsingError::Syntactic(error));

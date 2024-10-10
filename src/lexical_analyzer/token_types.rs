@@ -77,7 +77,7 @@ impl fmt::Display for OperationType {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum RequirementType {
     MethodPreconditions,
     Hierarchy,

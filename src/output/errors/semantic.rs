@@ -2,31 +2,31 @@ use crate::lexical_analyzer::RequirementType;
 use std::fmt;
 
 #[derive(Debug)]
-pub enum SemanticErrorType<'a>{
+pub enum SemanticErrorType{
     // Duplicate Errors
-    DuplicateObjectDeclaration(&'a str),
-    DuplicateRequirementDeclaration(&'a RequirementType),
-    DuplicatePredicateDeclaration(&'a str),
-    DuplicateActionDeclaration(&'a str),
-    DuplicateCompoundTaskDeclaration(&'a str),
-    DuplicateMethodDeclaration(&'a str),
+    DuplicateObjectDeclaration(String),
+    DuplicateRequirementDeclaration(RequirementType),
+    DuplicatePredicateDeclaration(String),
+    DuplicateActionDeclaration(String),
+    DuplicateCompoundTaskDeclaration(String),
+    DuplicateMethodDeclaration(String),
     // Undefined Entities
-    UndefinedPredicate(&'a str),
-    UndefinedType(&'a str),
-    UndefinedSubtask(&'a str),
-    UndefinedTask(&'a str),
-    UndefinedParameter(&'a str),
+    UndefinedPredicate(String),
+    UndefinedType(String),
+    UndefinedSubtask(String),
+    UndefinedTask(String),
+    UndefinedParameter(String),
     // Inconsistency Error
-    InconsistentPredicateArity(&'a str),
-    InconsistentTaskArity(&'a str),
-    InconsistentPredicateArgType(TypeError<'a>),
-    InconsistentTaskArgType(TypeError<'a>),
+    InconsistentPredicateArity(String),
+    InconsistentTaskArity(String),
+    InconsistentPredicateArgType(TypeError),
+    InconsistentTaskArgType(TypeError),
     // Ordering Errors
-    CyclicTypeDeclaration(&'a str),
-    CyclicOrderingDeclaration(&'a str),
+    CyclicTypeDeclaration(String),
+    CyclicOrderingDeclaration(String),
 }
 
-impl<'a> fmt::Display for SemanticErrorType<'a> {
+impl fmt::Display for SemanticErrorType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             // Duplicate Errors
@@ -56,13 +56,13 @@ impl<'a> fmt::Display for SemanticErrorType<'a> {
 
 
 #[derive(Debug)]
-pub struct TypeError<'a> {
-    pub expected: Option<&'a str>,
-    pub found: Option<&'a str>,
-    pub var_name: &'a str
+pub struct TypeError {
+    pub expected: Option<String>,
+    pub found: Option<String>,
+    pub var_name: String
 } 
 
-impl<'a> fmt::Display for TypeError<'a> {
+impl fmt::Display for TypeError{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Type error for variable {}. ", self.var_name)?;
         match (&self.expected, &self.found) {

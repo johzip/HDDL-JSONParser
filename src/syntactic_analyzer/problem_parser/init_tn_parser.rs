@@ -16,7 +16,7 @@ impl<'a> Parser<'a> {
                         token => {
                             let error = SyntacticError {
                                 expected: "'(' afer keyword :parameters".to_string(),
-                                found: token,
+                                found: token.to_string(),
                                 position: self.tokenizer.get_last_token_position(),
                             };
                             return Err(ParsingError::Syntactic(error));
@@ -33,7 +33,7 @@ impl<'a> Parser<'a> {
                 token => {
                     let error = SyntacticError {
                         expected: "expected the definition of the initial task network".to_string(),
-                        found: token,
+                        found: token.to_string(),
                         position: self.tokenizer.get_last_token_position(),
                     };
                     return Err(ParsingError::Syntactic(error));
@@ -72,7 +72,7 @@ impl<'a> Parser<'a> {
                                                 token => {
                                                     let error = SyntacticError {
                                                         expected: "'('".to_string(),
-                                                        found: token,
+                                                        found: token.to_string(),
                                                         position: self.tokenizer.get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
@@ -95,7 +95,7 @@ impl<'a> Parser<'a> {
                                                             token => {
                                                                 let error = SyntacticError {
                                                                     expected: format!("another task id after {}", t1).to_string(),
-                                                                    found: token,
+                                                                    found: token.to_string(),
                                                                      position: self.tokenizer.get_last_token_position(),
                                                                 };
                                                                 return Err(ParsingError::Syntactic(error));
@@ -106,7 +106,7 @@ impl<'a> Parser<'a> {
                                                 token => {
                                                     let error = SyntacticError {
                                                         expected: "expected a task identifier".to_string(),
-                                                        found: token,
+                                                        found: token.to_string(),
                                                         position: self.tokenizer.get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
@@ -118,7 +118,7 @@ impl<'a> Parser<'a> {
                                         token => {
                                             let error = SyntacticError{
                                                 expected: "ordering constraints".to_string(),
-                                                found: token,
+                                                found: token.to_string(),
                                                 position: self.tokenizer.get_last_token_position(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
@@ -128,7 +128,7 @@ impl<'a> Parser<'a> {
                                 token => {
                                     let error = SyntacticError {
                                         expected: "'('".to_string(),
-                                        found: token,
+                                        found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
@@ -148,7 +148,7 @@ impl<'a> Parser<'a> {
                         token => {
                             let error = SyntacticError {
                                 expected: "the (potentially empty) ordering constraints of the task network".to_string(),
-                                found: token,
+                                found: token.to_string(),
                                 position: self.tokenizer.get_last_token_position(),
                             };
                             return Err(ParsingError::Syntactic(error));
@@ -177,7 +177,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError {
                             expected: "closing ')' after task network definition".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -187,7 +187,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "subtask definitions".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -213,7 +213,7 @@ impl<'a> Parser<'a> {
                                 token => {
                                     let error = SyntacticError {
                                         expected: format!("the task ids that come after {}", t1).to_string(),
-                                        found: token,
+                                        found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
@@ -224,7 +224,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError {
                             expected: "task identifier".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -234,7 +234,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "character '<' to start an ordering constraint".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -261,7 +261,7 @@ impl<'a> Parser<'a> {
                                 token => {
                                     let error = SyntacticError {
                                         expected: "subtask declarations".to_string(),
-                                        found: token,
+                                        found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
@@ -282,7 +282,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError {
                             expected: "subtask declarations".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -292,7 +292,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError {
                     expected: "'('".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -301,7 +301,7 @@ impl<'a> Parser<'a> {
     }
 
     // parses a single subtask
-    fn parse_subtask(&'a self) -> Result<Subtask, ParsingError<'a>> {
+    fn parse_subtask(&'a self) -> Result<Subtask, ParsingError> {
         match self.tokenizer.get_token()? {
             Token::Identifier(id) => {
                 let id_pos = self.tokenizer.get_last_token_position();
@@ -333,7 +333,7 @@ impl<'a> Parser<'a> {
                                                 token => {
                                                     let error = SyntacticError{
                                                         expected: format!("')' to close the block of {}", task).to_string(),
-                                                        found: token,
+                                                        found: token.to_string(),
                                                         position: self.tokenizer.get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
@@ -343,7 +343,7 @@ impl<'a> Parser<'a> {
                                         token => {
                                             let error = SyntacticError{
                                                 expected: "either a ')' or an identifier".to_string(),
-                                                found: token,
+                                                found: token.to_string(),
                                                 position: self.tokenizer.get_last_token_position(),
                                             };
                                             return Err(ParsingError::Syntactic(error));
@@ -354,7 +354,7 @@ impl<'a> Parser<'a> {
                             token => {
                                 let error = SyntacticError{
                                     expected: format!("a subtask name for {}!=...", id).to_string(),
-                                    found: token,
+                                    found: token.to_string(),
                                     position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
@@ -383,7 +383,7 @@ impl<'a> Parser<'a> {
                                 token => {
                                     let error = SyntacticError{
                                         expected: format!("either a term for {}, or ')'", term).to_string(),
-                                        found: token,
+                                        found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
@@ -404,7 +404,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError{
                             expected: "subtask definition".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -414,7 +414,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError{
                     expected: "task id".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -448,7 +448,7 @@ impl<'a> Parser<'a> {
                                 token => {
                                     let error = SyntacticError{
                                         expected: "a constraint definition".to_string(),
-                                        found: token,
+                                        found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
                                     return Err(ParsingError::Syntactic(error));
@@ -465,7 +465,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError{
                             expected: "constraint declerations".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -475,7 +475,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError{
                     expected: "'('".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
@@ -503,7 +503,7 @@ impl<'a> Parser<'a> {
                                                             token => {
                                                                 let error = SyntacticError{
                                                                     expected: format!(") to close the inequality constraint").to_string(),
-                                                                    found: token,
+                                                                    found: token.to_string(),
                                                                     position: self.tokenizer.get_last_token_position(),
                                                                 };
                                                                 return Err(ParsingError::Syntactic(error));
@@ -513,7 +513,7 @@ impl<'a> Parser<'a> {
                                                     token => {
                                                         let error = SyntacticError{
                                                             expected: format!(") to close the inequality constraint").to_string(),
-                                                            found: token,
+                                                            found: token.to_string(),
                                                             position: self.tokenizer.get_last_token_position(),
                                                         };
                                                         return Err(ParsingError::Syntactic(error));
@@ -523,7 +523,7 @@ impl<'a> Parser<'a> {
                                             token => {
                                                 let error = SyntacticError{
                                                     expected: format!("right hand side of {}!=...", t1).to_string(),
-                                                    found: token,
+                                                    found: token.to_string(),
                                                     position: self.tokenizer.get_last_token_position(),
                                                 };
                                                 return Err(ParsingError::Syntactic(error));
@@ -533,7 +533,7 @@ impl<'a> Parser<'a> {
                                     token => {
                                         let error = SyntacticError{
                                             expected: "task identifier".to_string(),
-                                            found: token,
+                                            found: token.to_string(),
                                             position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
@@ -543,7 +543,7 @@ impl<'a> Parser<'a> {
                             token => {
                                 let error = SyntacticError{
                                     expected: "equality keyword '='".to_string(),
-                                    found: token,
+                                    found: token.to_string(),
                                     position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
@@ -553,7 +553,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError{
                             expected: "'(' after keyword 'not'".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -572,7 +572,7 @@ impl<'a> Parser<'a> {
                                     token => {
                                         let error = SyntacticError{
                                             expected: format!(") to close the equality constraint").to_string(),
-                                            found: token,
+                                            found: token.to_string(),
                                             position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
@@ -582,7 +582,7 @@ impl<'a> Parser<'a> {
                             token => {
                                 let error = SyntacticError{
                                     expected: format!("right hand side of {}=...", t1).to_string(),
-                                    found: token,
+                                    found: token.to_string(),
                                     position: self.tokenizer.get_last_token_position(),
                                 };
                                 return Err(ParsingError::Syntactic(error));
@@ -592,7 +592,7 @@ impl<'a> Parser<'a> {
                     token => {
                         let error = SyntacticError{
                             expected: "a task identifier".to_string(),
-                            found: token,
+                            found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
@@ -602,7 +602,7 @@ impl<'a> Parser<'a> {
             token => {
                 let error = SyntacticError{
                     expected: "either an equalilty or non-equality constraint".to_string(),
-                    found: token,
+                    found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
                 return Err(ParsingError::Syntactic(error));
