@@ -108,7 +108,7 @@ impl <'a> LexicalAnalyzer <'a> {
                         "problem" => return Ok(Token::Keyword(KeywordName::Problem)),
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,
-                            lexeme: lexeme,
+                            lexeme: lexeme.to_string(),
                             position: self.last_token_pos.get()
                         }),
                     }
@@ -148,7 +148,7 @@ impl <'a> LexicalAnalyzer <'a> {
                                     } else {
                                         Err(LexicalError {
                                             error_type: LexicalErrorType::InvalidIdentifier,
-                                            lexeme: lexeme,
+                                            lexeme: lexeme.to_string(),
                                             position: self.last_token_pos.get()
                                         })
                                     }
@@ -193,7 +193,7 @@ impl <'a> LexicalAnalyzer <'a> {
         if is_invalid {
             return Err(LexicalError {
                 error_type: LexicalErrorType::InvalidIdentifier,
-                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(),
+                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap().to_string(),
                 position: self.last_token_pos.get()
             })
         } else {

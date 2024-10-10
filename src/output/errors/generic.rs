@@ -2,13 +2,13 @@ use super::*;
 
 #[derive(Debug)]
 pub enum ParsingError<'a>{
-    Lexiacal(LexicalError<'a>),
+    Lexiacal(LexicalError),
     Syntactic(SyntacticError<'a>),
     Semantic(SemanticErrorType<'a>)
 }
 
-impl <'a> From<LexicalError<'a>> for ParsingError<'a> {
-    fn from(value: LexicalError<'a>) -> Self {
+impl <'a> From<LexicalError> for ParsingError<'a> {
+    fn from(value: LexicalError) -> Self {
         ParsingError::Lexiacal(value)
     }
 }
@@ -28,7 +28,7 @@ impl <'a> From<SemanticErrorType<'a>> for ParsingError<'a> {
 impl <'a> std::fmt::Display for ParsingError<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Lexiacal(error) => write!(f, "{}", error.to_string()),
+            Self::Lexiacal(error) => write!(f, "{}", error),
             Self::Syntactic(error) => write!(f, "{}", error.to_string()),
             Self::Semantic(error) => write!(f, "{}", error.to_string())
         }

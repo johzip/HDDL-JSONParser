@@ -8,13 +8,13 @@ pub enum LexicalErrorType {
 }
 
 #[derive(Debug)]
-pub struct LexicalError<'a> {
+pub struct LexicalError {
     pub error_type: LexicalErrorType,
-    pub lexeme: &'a str,
+    pub lexeme: String,
     pub position: TokenPosition,
 }
 
-impl<'a> fmt::Display for LexicalError<'a> {
+impl fmt::Display for LexicalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // ANSI escape code for red text
         let red = "\x1b[31m";
