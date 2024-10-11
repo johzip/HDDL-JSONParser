@@ -1,4 +1,3 @@
-use analyzer::*;
 use super::*;
 
 #[test]
@@ -37,22 +36,27 @@ pub fn cyclic_method_ordering_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::CyclicOrderingDeclaration(x) => {
-                    assert_eq!(x, "t4")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::CyclicOrderingDeclaration(x) => {
+                            assert_eq!(x, "t4")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!(),
     }
 }
 
@@ -72,21 +76,26 @@ pub fn cyclic_types_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::CyclicTypeDeclaration(x) => {
-                    assert_eq!(x, "t7")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::CyclicTypeDeclaration(x) => {
+                            assert_eq!(x, "t7")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => {}
     }
 }

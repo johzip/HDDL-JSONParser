@@ -10,8 +10,7 @@ impl<'a> Parser<'a> {
     pub fn new(tokenizer: LexicalAnalyzer<'a>) -> Parser<'a> {
         Parser { tokenizer }
     }
-    pub fn parse(&'a self) -> Result<SyntaxTree<'a>, ParsingError> {
-        let mut syntax_tree = SyntaxTree::new();
+    pub fn parse(&'a self) -> Result<AbstractSyntaxTree<'a>, ParsingError> {
         // match opening '('
         match self.tokenizer.get_token()? {
             Token::Punctuator(PunctuationType::LParentheses) => {
@@ -19,169 +18,11 @@ impl<'a> Parser<'a> {
                 match self.parse_document_type()? {
                     // Domain Definition
                     DefinitionType::Domain(domain_name) => {
-                        loop {
-                            match self.tokenizer.get_token()? {
-                                Token::Punctuator(PunctuationType::LParentheses) => {
-                                    match self.tokenizer.get_token()? {
-                                        // predicate definition
-                                        Token::Keyword(KeywordName::Predicates) => {
-                                            let predicates = self.parse_predicates()?;
-                                            for predicate in predicates {
-                                                syntax_tree.add_predicate(predicate);
-                                            }
-                                        }
-                                        // compund task definition
-                                        Token::Keyword(KeywordName::Task) => {
-                                            let task = self.parse_task()?;
-                                            match self.tokenizer.get_token()? {
-                                                Token::Punctuator(
-                                                    PunctuationType::RParentheses,
-                                                ) => {
-                                                    syntax_tree.add_compound_task(task);
-                                                }
-                                                token => {
-                                                    let error = SyntacticError {
-                                                        expected: format!(
-                                                            "')' after definition of {}",
-                                                            task.name
-                                                        )
-                                                        .to_string(),
-                                                        found: token.to_string(),
-                                                        position: self
-                                                            .tokenizer
-                                                            .get_last_token_position(),
-                                                    };
-                                                    return Err(ParsingError::Syntactic(error));
-                                                }
-                                            }
-                                        }
-                                        // method definition
-                                        Token::Keyword(KeywordName::Method) => {
-                                            let method = self.parse_method()?;
-                                            syntax_tree.add_method(method);
-                                        }
-                                        // action definition
-                                        Token::Keyword(KeywordName::Action) => {
-                                            let action = self.parse_action()?;
-                                            syntax_tree.add_action(action);
-                                        }
-                                        // requirement declaration
-                                        Token::Keyword(KeywordName::Requirements) => {
-                                            let requirements = self.parse_requirements()?;
-                                            for requirement in requirements {
-                                                syntax_tree.add_requirement(requirement);
-                                            }
-                                        }
-                                        // type hierarchy declaration
-                                        Token::Keyword(KeywordName::Types) => {
-                                            let var_types = self.parse_args()?;
-                                            for var_type in var_types {
-                                                syntax_tree.add_var_type(var_type);
-                                            }
-                                        }
-                                        // constants declaration
-                                        Token::Keyword(KeywordName::Constants) => {
-                                            let constants = self.parse_args()?;
-                                            for constant in constants {
-                                                syntax_tree.add_constant(constant);
-                                            }
-                                        }
-                                        token => {
-                                            let error = SyntacticError {
-                                                expected: "a keyword".to_string(),
-                                                found: token.to_string(),
-                                                position: self.tokenizer.get_last_token_position(),
-                                            };
-                                            return Err(ParsingError::Syntactic(error));
-                                        }
-                                    }
-                                }
-                                Token::Punctuator(PunctuationType::RParentheses) => {
-                                    break;
-                                }
-                                token => {
-                                    let error = SyntacticError {
-                                        expected: format!("either ')' to close the definition of {}, or '(' to start defining new components", domain_name),
-                                        found: token.to_string(),
-                                        position: self.tokenizer.get_last_token_position(),
-                                    };
-                                    return Err(ParsingError::Syntactic(error));
-                                }
-                            }
-                        }
-                        return Ok(syntax_tree);
+                        Ok(self.parse_domain(domain_name)?.into())
                     }
                     // Problem Definition
-                    DefinitionType::Problem(problem_name) => {
-                        loop {
-                            match self.tokenizer.get_token()? {
-                                Token::Punctuator(PunctuationType::LParentheses) => {
-                                    // match declaration type
-                                    match self.tokenizer.get_token()? {
-                                        // requirement declaration
-                                        Token::Keyword(KeywordName::Requirements) => {
-                                            let requirements = self.parse_requirements()?;
-                                            for requirement in requirements {
-                                                syntax_tree.add_requirement(requirement);
-                                            }
-                                        }
-                                        // objects declaration
-                                        Token::Keyword(KeywordName::Objects) => {
-                                            let objects = self.parse_args()?;
-                                            for object in objects {
-                                                match object.symbol_type {
-                                                    Some(t) => {
-                                                        syntax_tree.add_typed_object(
-                                                            object.name,
-                                                            object.name_pos,
-                                                            t,
-                                                            object.type_pos.unwrap(),
-                                                        );
-                                                    }
-                                                    None => {
-                                                        syntax_tree.add_object(
-                                                            object.name,
-                                                            object.name_pos,
-                                                        );
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        // initial task network declaration
-                                        Token::Keyword(KeywordName::HTN) => {
-                                            let init_tn = self.parse_initial_tn()?;
-                                            syntax_tree.add_init_tn(init_tn);
-                                        }
-                                        // goal state (optional)
-                                        Token::Keyword(KeywordName::Goal) => {
-                                            let goal = self.parse_formula()?;
-                                            syntax_tree.add_goal(goal)
-                                        }
-                                        // initial state
-                                        Token::Keyword(KeywordName::Init) => {
-                                            let init_state = self.parse_predicates()?;
-                                            syntax_tree.add_init_state(init_state)
-                                        }
-                                        token => {
-                                            let error = SyntacticError {
-                                                expected: "a keyword for block definition"
-                                                    .to_string(),
-                                                found: token.to_string(),
-                                                position: self.tokenizer.get_last_token_position(),
-                                            };
-                                            return Err(ParsingError::Syntactic(error));
-                                        }
-                                    }
-                                }
-                                Token::EOF | Token::Punctuator(PunctuationType::RParentheses) => {
-                                    break;
-                                }
-                                err => {
-                                    panic!("unexpected token {:?}", err)
-                                }
-                            }
-                        }
-                        Ok(syntax_tree)
+                    DefinitionType::Problem(problem_definition) => {
+                        Ok(self.parse_problem(problem_definition)?.into())
                     }
                 }
             }
@@ -290,10 +131,7 @@ impl<'a> Parser<'a> {
                                                         PunctuationType::RParentheses,
                                                     ) => {
                                                         return Ok(DefinitionType::Problem(
-                                                            ProblemDefinition {
-                                                                domain_name: domain_name,
-                                                                problem_name: problem_name,
-                                                            },
+                                                            ProblemDefinition{domain_name, problem_name},
                                                         ));
                                                     }
                                                     token => {
@@ -359,7 +197,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_requirements(&self) -> Result<Vec<RequirementType>, ParsingError> {
+    pub fn parse_requirements(&self) -> Result<Vec<RequirementType>, ParsingError> {
         let mut requirements = vec![];
         let mut finished = false;
         while !finished {

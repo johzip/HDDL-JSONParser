@@ -5,24 +5,27 @@ use cycle_detection::check_ordering_acyclic;
 use super::*;
 
 pub struct SemanticAnalyzer<'a> {
-    ast: &'a SyntaxTree<'a>,
+    domain: &'a DomainAST<'a>,
     type_checker: TypeChecker<'a>,
 }
 
 impl<'a> SemanticAnalyzer<'a> {
-    pub fn new(ast: &'a SyntaxTree<'a>) -> SemanticAnalyzer<'a> {
+    pub fn new(domain: &'a DomainAST<'a>) -> SemanticAnalyzer<'a> {
         SemanticAnalyzer {
-            ast,
-            type_checker: TypeChecker::new(&ast.types),
+            domain,
+            type_checker: TypeChecker::new(&domain.types),
         }
     }
 
     pub fn verify_ast(&'a self) -> Result<Vec<WarningType>, SemanticErrorType> {
-        // Assert there are no duplicate objects
-        if let Some(duplicate) = check_duplicate_objects(&self.ast.objects) {
-            return Err(duplicate);
+        // TODO: add problem verification
+        // // Assert there are no duplicate objects
+        // if let Some(duplicate) = check_duplicate_objects(&self.domain.objects) {
+        //     return Err(duplicate);
+        // } else
+        
         // Assert there are no duplicate requirements
-        } else if let Some(duplicate) = check_duplicate_requirements(&self.ast.requirements) {
+        if let Some(duplicate) = check_duplicate_requirements(&self.domain.requirements) {
             return Err(duplicate);
         // Assert type hierarchy is acyclic
         } else if let Some(cycle) = self.type_checker.check_acyclicity() {
@@ -33,7 +36,7 @@ impl<'a> SemanticAnalyzer<'a> {
         let declared_predicates = self.verify_predicates()?;
         let declared_tasks = self.verify_compound_tasks()?;
         let mut declared_constants = HashSet::new();
-        match &self.ast.constants {
+        match &self.domain.constants {
             Some(constants) => {
                 for c in constants {
                     declared_constants.insert(c);
@@ -44,14 +47,14 @@ impl<'a> SemanticAnalyzer<'a> {
 
         // assert actions are correct
         let mut declared_actions = HashSet::new();
-        for action in self.ast.actions.iter() {
+        for action in self.domain.actions.iter() {
             if !declared_actions.insert(action) {
                 return Err(SemanticErrorType::DuplicateActionDeclaration(action.name.to_string()));
             }
             // assert precondition predicates are declared
             match &action.preconditions {
                 Some(precondition) => {
-                    check_predicate_declarations(precondition, &self.ast.predicates)?;
+                    check_predicate_declarations(precondition, &self.domain.predicates)?;
                     let precond_predicates = precondition.get_propositional_predicates();
                     self.type_checker.check_formula(
                         &precond_predicates,
@@ -68,7 +71,7 @@ impl<'a> SemanticAnalyzer<'a> {
             // assert effect predicates are declared
             match &action.effects {
                 Some(effect) => {
-                    check_predicate_declarations(effect, &self.ast.predicates)?;
+                    check_predicate_declarations(effect, &self.domain.predicates)?;
                     let eff_predicates = effect.get_propositional_predicates();
                     self.type_checker.check_formula(
                         &eff_predicates,
@@ -83,14 +86,14 @@ impl<'a> SemanticAnalyzer<'a> {
 
         // assert methods are correct
         let mut declared_methods = HashSet::new();
-        for method in self.ast.methods.iter() {
+        for method in self.domain.methods.iter() {
             if !declared_methods.insert(method.name) {
                 return Err(SemanticErrorType::DuplicateMethodDeclaration(method.name.to_string()));
             }
             // Assert preconditions are valid
             match &method.precondition {
                 Some(precondition) => {
-                    check_predicate_declarations(precondition, &self.ast.predicates)?;
+                    check_predicate_declarations(precondition, &self.domain.predicates)?;
                     let precond_predicates = precondition.get_propositional_predicates();
                     self.type_checker.check_formula(
                         &precond_predicates,
@@ -109,7 +112,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 return Err(SemanticErrorType::UndefinedTask(method.task_name.to_string()));
             } else {
                 // Assert task arity is consistent
-                for declared_compound_task in self.ast.compound_tasks.iter() {
+                for declared_compound_task in self.domain.compound_tasks.iter() {
                     if method.task_name == declared_compound_task.name {
                         if method.task_terms.len() != declared_compound_task.parameters.len() {
                             return Err(SemanticErrorType::InconsistentTaskArity(method.task_name.to_string()));
@@ -157,7 +160,7 @@ impl<'a> SemanticAnalyzer<'a> {
     // returns declared predicates (if there is no error)
     fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticErrorType> {
         let mut declared_predicates = HashSet::new();
-        for predicate in self.ast.predicates.iter() {
+        for predicate in self.domain.predicates.iter() {
             if !declared_predicates.insert(predicate) {
                 return Err(SemanticErrorType::DuplicatePredicateDeclaration(
                     predicate.name.to_string(),
@@ -176,7 +179,7 @@ impl<'a> SemanticAnalyzer<'a> {
     // returns declared compound tasks (if there is no error)
     fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticErrorType> {
         let mut declared_tasks = HashSet::new();
-        for task in self.ast.compound_tasks.iter() {
+        for task in self.domain.compound_tasks.iter() {
             if !declared_tasks.insert(task) {
                 return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(task.name.to_string()));
             }

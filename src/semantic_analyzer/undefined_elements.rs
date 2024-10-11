@@ -1,5 +1,3 @@
-use std::{collections::HashSet, ops::Sub};
-use petgraph::{prelude::GraphMap, Directed};
 use super::*;
 
 pub fn check_predicate_declarations<'a>(

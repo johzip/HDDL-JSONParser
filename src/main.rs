@@ -11,14 +11,14 @@ pub fn main() {
     // ANSI escape code to reset text color
     let reset = "\x1b[0m";
     match file {
-        Ok(program) => match HDDLAnalyzer::verify(&program) {
+        Ok(program) => match HDDLAnalyzer::verify_domain(&program) {
             Ok(_) => {
                 println!("{}OK!{} {} has been successfully parsed.", green, reset, args[1])
             }
             Err(s) => eprintln!("{}", s),
         },
         Err(read_error) => {
-            eprintln!("{}ERR{} Unable to read file, {}", red, reset, read_error)
+            eprintln!("{}ERR!{} Unable to read file, {}", red, reset, read_error)
         }
     }
 }

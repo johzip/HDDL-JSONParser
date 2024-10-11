@@ -5,15 +5,20 @@ mod output;
 
 use crate::lexical_analyzer::TokenPosition;
 use lexical_analyzer::LexicalAnalyzer;
+use syntactic_analyzer::AbstractSyntaxTree;
 
 pub struct HDDLAnalyzer {}
 
 impl HDDLAnalyzer {
-    pub fn verify(program: &Vec<u8>) -> Result<Vec<output::WarningType>, output::ParsingError> {
-        let lexer = LexicalAnalyzer::new(&program);
+    pub fn verify_domain(domain: &Vec<u8>) -> Result<Vec<output::WarningType>, output::ParsingError> {
+        let lexer = LexicalAnalyzer::new(&domain);
         let parser = syntactic_analyzer::Parser::new(lexer);
         let ast = parser.parse()?;
-        let semantic_verifier = semantic_analyzer::SemanticAnalyzer::new(&ast);
-        Ok(semantic_verifier.verify_ast()?)
+        if let AbstractSyntaxTree::Domain(d) = ast {
+            let semantic_verifier = semantic_analyzer::SemanticAnalyzer::new(&d);
+            Ok(semantic_verifier.verify_ast()?)
+        } else {
+            panic!("expected domain, found problem")
+        }
     }
 }

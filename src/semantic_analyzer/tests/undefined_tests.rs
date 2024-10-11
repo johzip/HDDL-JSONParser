@@ -22,22 +22,27 @@ pub fn undefined_predicate_action_precondition_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedPredicate(x) => {
-                    assert_eq!(x, "pred_5")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                token => {
-                    panic!("{:?}", token)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedPredicate(x) => {
+                            assert_eq!(x, "pred_5")
+                            // TODO: assert locality in future
+                        }
+                        token => {
+                            panic!("{:?}", token)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
 }
 
@@ -61,23 +66,29 @@ pub fn inconsistent_predicate_action_effect_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::InconsistentPredicateArity(x) => {
-                    assert_eq!(x, "hold")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                token => {
-                    panic!("{:?}", token)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::InconsistentPredicateArity(x) => {
+                            assert_eq!(x, "hold")
+                            // TODO: assert locality in future
+                        }
+                        token => {
+                            panic!("{:?}", token)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 
@@ -105,22 +116,27 @@ pub fn undefined_predicate_method_precondition_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedPredicate(x) => {
-                    assert_eq!(x, "pred_5")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedPredicate(x) => {
+                            assert_eq!(x, "pred_5")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
 }
 
@@ -153,23 +169,29 @@ pub fn undefined_method_parameters_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedParameter(x) => {
-                    assert_eq!(x, "p5")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                x => {
-                    panic!("{:?}", x)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedParameter(x) => {
+                            assert_eq!(x, "p5")
+                            // TODO: assert locality in future
+                        }
+                        x => {
+                            panic!("{:?}", x)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 #[test]
@@ -203,23 +225,29 @@ pub fn undefined_subtask_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedSubtask(x) => {
-                    assert_eq!(x, "c_3")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                error => {
-                    panic!("{:?}", error)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedSubtask(x) => {
+                            assert_eq!(x, "c_3")
+                            // TODO: assert locality in future
+                        }
+                        error => {
+                            panic!("{:?}", error)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 
@@ -253,23 +281,29 @@ pub fn inconsistent_subtask_arity_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::InconsistentTaskArity(x) => {
-                    assert_eq!(x, "c_2")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                error => {
-                    panic!("{:?}", error)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::InconsistentTaskArity(x) => {
+                            assert_eq!(x, "c_2")
+                            // TODO: assert locality in future
+                        }
+                        error => {
+                            panic!("{:?}", error)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 #[test]
@@ -291,23 +325,29 @@ pub fn undefined_type_compound_task_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedType(x) => {
-                    assert_eq!(x, "t5")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedType(x) => {
+                            assert_eq!(x, "t5")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 
@@ -328,23 +368,29 @@ pub fn undefined_type_predicate_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedType(x) => {
-                    assert_eq!(x, "t2")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedType(x) => {
+                            assert_eq!(x, "t2")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 
@@ -378,22 +424,29 @@ pub fn undefined_predicate_forall_quantification_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedPredicate(x) => {
-                    assert_eq!(x, "wro")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                error => {
-                    panic!("{:?}", error)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedPredicate(x) => {
+                            assert_eq!(x, "wro")
+                            // TODO: assert locality in future
+                        }
+                        error => {
+                            panic!("{:?}", error)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+      
 }
 
 
@@ -423,21 +476,27 @@ pub fn undefined_method_task_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::UndefinedTask(x) => {
-                    assert_eq!(x, "deliver_abs")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::UndefinedTask(x) => {
+                            assert_eq!(x, "deliver_abs")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }

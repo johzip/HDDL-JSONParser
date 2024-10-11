@@ -36,7 +36,7 @@ mod tests {
                 .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(symbols) => {
+            Ok(AbstractSyntaxTree::Problem(symbols)) => {
                 assert_eq!(symbols.objects[0].name, "a");
                 assert_eq!(symbols.objects[0].name_pos.line, 2);
                 assert_eq!(symbols.objects[0].symbol_type.unwrap(), "d");
@@ -58,7 +58,7 @@ mod tests {
                 assert_eq!(symbols.objects[4].symbol_type.is_none(), true);
                 assert_eq!(symbols.objects[4].type_pos.is_none(), true);
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -71,7 +71,7 @@ mod tests {
             c) )").into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(symbols) => {
+            Ok(AbstractSyntaxTree::Problem(symbols)) => {
                 assert_eq!(symbols.objects[0].name, "a");
                 assert_eq!(symbols.objects[0].name_pos.line, 3);
                 assert_eq!(symbols.objects[1].name, "b");
@@ -79,7 +79,7 @@ mod tests {
                 assert_eq!(symbols.objects[2].name, "c");
                 assert_eq!(symbols.objects[2].name_pos.line, 4);
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -94,7 +94,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(symbols) => {
+            Ok(AbstractSyntaxTree::Problem(symbols)) => {
                 assert_eq!(symbols.requirements.len(), 4);
                 assert_eq!(
                     symbols.requirements.contains(&RequirementType::Hierarchy),
@@ -119,7 +119,7 @@ mod tests {
                     true
                 );
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -137,7 +137,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(symbols) => {
+            Ok(AbstractSyntaxTree::Domain(symbols)) => {
                 assert_eq!(symbols.predicates.len(), 3);
                 for predicate in symbols.predicates {
                     let items: Vec<(&str, Option<&str>)> = predicate
@@ -171,7 +171,7 @@ mod tests {
                     }
                 }
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -192,7 +192,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
@@ -245,7 +245,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
@@ -337,7 +337,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.methods.len(), 1);
                 let method = &ast.methods[0];
                 assert_eq!(method.name, "m_1");
@@ -401,7 +401,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Problem(ast)) => {
                 assert_eq!(ast.init_state.len(), 2);
                 let pred1 = &ast.init_state[0];
                 let pred2 = &ast.init_state[1];
@@ -442,7 +442,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => match ast.init_tn {
+            Ok(AbstractSyntaxTree::Problem(ast)) => match ast.init_tn {
                 Some(tn) => {
                     match tn.parameters {
                         Some(p) => {
@@ -521,7 +521,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => match ast.init_tn {
+            Ok(AbstractSyntaxTree::Problem(ast)) => match ast.init_tn {
                 Some(tn) => {
                     assert_eq!(tn.parameters.is_none(), true);
                     match tn.tn.orderings {
@@ -562,7 +562,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.compound_tasks.len(), 1);
                 let c_1 = &ast.compound_tasks[0];
                 assert_eq!(c_1.name, "c_1");
@@ -578,7 +578,7 @@ mod tests {
                 assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
                 assert_eq!(c_1.parameters[0].type_pos.unwrap().line, 4);
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -597,7 +597,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.actions.len(), 1);
                 let action = &ast.actions[0];
                 assert_eq!(action.name, "a_1");
@@ -649,7 +649,7 @@ mod tests {
                     _ => panic!("wrong formula"),
                 }
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -667,7 +667,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.actions.len(), 1);
                 let action = &ast.actions[0];
                 assert_eq!(action.name, "a_1");
@@ -706,7 +706,7 @@ mod tests {
                     _ => panic!("wrong formula"),
                 }
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -724,7 +724,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 let types = ast.types.unwrap();
                 assert_eq!(types.len(), 8);
                 assert_eq!(types[0].name, "Port");
@@ -764,7 +764,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 assert_eq!(ast.compound_tasks.len(), 1);
                 let c_1 = &ast.compound_tasks[0];
                 assert_eq!(c_1.name, "c_1");
@@ -778,7 +778,7 @@ mod tests {
                 assert_eq!(c1_term_names, vec!["p_1", "p_2", "p_3"]);
                 assert_eq!(c1_term_types, vec!["t1", "t1", "t2"]);
             }
-            Err(_) => panic!("parsing errors"),
+            _ => panic!("parsing errors"),
         }
     }
 
@@ -796,7 +796,7 @@ mod tests {
         .into_bytes();
         let lexer = LexicalAnalyzer::new(&program);
         match Parser::new(lexer).parse() {
-            Ok(ast) => {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
                 let constants = ast.constants.unwrap();
                 assert_eq!(constants.len(), 8);
                 assert_eq!(constants[0].name, "Port");

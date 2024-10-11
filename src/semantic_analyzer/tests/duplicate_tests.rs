@@ -1,41 +1,41 @@
-use analyzer::*;
-
 use super::*;
 
-#[test]
-pub fn objects_duplicate_test() {
-    let program = String::from(
-        "(define (problem p1) (domain bal)
-                            (:objects a b c - d b - f t)
-                          )",
-    )
-    .into_bytes();
-    let lexer = LexicalAnalyzer::new(&program);
-    let parser = Parser::new(lexer);
-    let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::DuplicateObjectDeclaration(x) => {
-                    assert_eq!(x, "b");
-                    // TODO: assert locality in future
-                }
-                _ => {
-                    panic!("caught wrong error")
-                }
-            }
-        }
-    }
-}
+
+// TODO: Create the interface
+// #[test]
+// pub fn objects_duplicate_test() {
+//     let program = String::from(
+//         "(define (problem p1) (domain bal)
+//                             (:objects a b c - d b - f t)
+//                           )",
+//     )
+//     .into_bytes();
+//     let lexer = LexicalAnalyzer::new(&program);
+//     let parser = Parser::new(lexer);
+//     let ast = parser.parse().unwrap();
+//     let semantic_parser = SemanticAnalyzer::new(&ast);
+//     match semantic_parser.verify_ast() {
+//         Ok(_) => {
+//             panic!("errors are not caught")
+//         }
+//         Err(error) => {
+//             match error {
+//                 SemanticErrorType::DuplicateObjectDeclaration(x) => {
+//                     assert_eq!(x, "b");
+//                     // TODO: assert locality in future
+//                 }
+//                 _ => {
+//                     panic!("caught wrong error")
+//                 }
+//             }
+//         }
+//     }
+// }
 
 #[test]
 pub fn requirements_duplicate_test() {
     let program = String::from(
-        "(define (problem p1) (domain bal)
+        "(define (domain bal)
             (:requirements :hierarchy :method-preconditions :hierarchy :negative-preconditions)
 
          ) ",
@@ -44,23 +44,29 @@ pub fn requirements_duplicate_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::DuplicateRequirementDeclaration(x) => {
-                    assert!(matches!(x, RequirementType::Hierarchy))
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::DuplicateRequirementDeclaration(x) => {
+                            assert!(matches!(x, RequirementType::Hierarchy))
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 #[test]
@@ -79,22 +85,27 @@ pub fn predicates_duplicate_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::DuplicatePredicateDeclaration(x) => {
-                    assert_eq!(x, "pred_1")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::DuplicatePredicateDeclaration(x) => {
+                            assert_eq!(x, "pred_1")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
 }
 
@@ -128,22 +139,27 @@ pub fn action_duplicate_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::DuplicateActionDeclaration(x) => {
-                    assert_eq!(x, "a_1")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                token => {
-                    panic!("{:?}", token)
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::DuplicateActionDeclaration(x) => {
+                            assert_eq!(x, "a_1")
+                            // TODO: assert locality in future
+                        }
+                        token => {
+                            panic!("{:?}", token)
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
 }
 
@@ -166,23 +182,29 @@ pub fn compound_task_duplicate_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::DuplicateCompoundTaskDeclaration(x) => {
-                    assert_eq!(x, "c_1")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::DuplicateCompoundTaskDeclaration(x) => {
+                            assert_eq!(x, "c_1")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
+    
 }
 
 #[test]
@@ -222,21 +244,26 @@ pub fn method_duplicate_test() {
     let lexer = LexicalAnalyzer::new(&program);
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
-    let semantic_parser = SemanticAnalyzer::new(&ast);
-    match semantic_parser.verify_ast() {
-        Ok(_) => {
-            panic!("errors are not caught")
-        }
-        Err(error) => {
-            match error {
-                SemanticErrorType::DuplicateMethodDeclaration(x) => {
-                    assert_eq!(x, "m_1")
-                    // TODO: assert locality in future
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = SemanticAnalyzer::new(&d);
+            match semantic_parser.verify_ast() {
+                Ok(_) => {
+                    panic!("errors are not caught")
                 }
-                _ => {
-                    panic!("caught wrong error")
+                Err(error) => {
+                    match error {
+                        SemanticErrorType::DuplicateMethodDeclaration(x) => {
+                            assert_eq!(x, "m_1")
+                            // TODO: assert locality in future
+                        }
+                        _ => {
+                            panic!("caught wrong error")
+                        }
+                    }
                 }
             }
         }
+        _ => panic!()
     }
 }
