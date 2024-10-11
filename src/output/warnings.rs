@@ -22,6 +22,11 @@ pub enum WarningType {
 
 impl std::fmt::Display for WarningType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        // ANSI escape code for yellow
+        let yellow = "\x1b[33m";
+        // ANSI escape code to reset text color
+        let reset = "\x1b[0m";
+        write!(f, "{}Warning: {}", yellow, reset)?;
         match self {
             Self::UnsatisfiableActionPrecondition(action) => {
                 writeln!(f, "The precondition of action {} cannot be satisfied", action)

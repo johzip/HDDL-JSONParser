@@ -9,7 +9,7 @@ pub fn domains_integration_test() {
     for path in domain_paths {
         let domain = fs::read(path.unwrap().path());
         if let Ok(program) = domain {
-            let result = HDDLAnalyzer::verify_domain(&program);
+            let result = HDDLAnalyzer::verify(&program, None);
             if result.is_err() {
                 result.inspect_err(|x| {
                     eprintln!("{}", x);

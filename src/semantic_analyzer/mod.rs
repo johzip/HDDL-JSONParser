@@ -4,6 +4,7 @@ mod undefined_elements;
 mod cycle_detection;
 mod type_checker;
 mod tests;
+mod problem_analyzer;
 
 use crate::syntactic_analyzer::*;
 use crate::output::*;

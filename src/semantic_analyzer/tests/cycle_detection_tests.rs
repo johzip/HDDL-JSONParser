@@ -39,7 +39,7 @@ pub fn cyclic_method_ordering_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
@@ -79,7 +79,7 @@ pub fn cyclic_types_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }

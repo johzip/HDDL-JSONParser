@@ -29,8 +29,8 @@ impl  std::fmt::Display for ParsingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Lexiacal(error) => write!(f, "{}", error),
-            Self::Syntactic(error) => write!(f, "{}", error.to_string()),
-            Self::Semantic(error) => write!(f, "{}", error.to_string())
+            Self::Syntactic(error) => write!(f, "{}", error),
+            Self::Semantic(error) => write!(f, "{}", error)
         }
     }
 }

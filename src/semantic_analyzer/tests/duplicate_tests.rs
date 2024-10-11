@@ -47,7 +47,7 @@ pub fn requirements_duplicate_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
@@ -88,7 +88,7 @@ pub fn predicates_duplicate_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
@@ -142,7 +142,7 @@ pub fn action_duplicate_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
@@ -185,7 +185,7 @@ pub fn compound_task_duplicate_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
@@ -247,7 +247,7 @@ pub fn method_duplicate_test() {
     match ast {
         AbstractSyntaxTree::Domain(d) => {
             let semantic_parser = SemanticAnalyzer::new(&d);
-            match semantic_parser.verify_ast() {
+            match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }

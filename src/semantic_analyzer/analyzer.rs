@@ -17,13 +17,7 @@ impl<'a> SemanticAnalyzer<'a> {
         }
     }
 
-    pub fn verify_ast(&'a self) -> Result<Vec<WarningType>, SemanticErrorType> {
-        // TODO: add problem verification
-        // // Assert there are no duplicate objects
-        // if let Some(duplicate) = check_duplicate_objects(&self.domain.objects) {
-        //     return Err(duplicate);
-        // } else
-        
+    pub fn verify_domain(&'a self) -> Result<Vec<WarningType>, SemanticErrorType> {        
         // Assert there are no duplicate requirements
         if let Some(duplicate) = check_duplicate_requirements(&self.domain.requirements) {
             return Err(duplicate);
