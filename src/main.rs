@@ -23,6 +23,10 @@ pub fn main() {
                         Ok(problem_content) => {
                             match HDDLAnalyzer::verify(&domain_content, Some(&problem_content)) {
                                 Ok(warnings) => {
+                                    for warning in warnings {
+                                        println!("{}", warning);
+                                    }
+                                    println!("");
                                     println!(
                                         "{}OK!{} {} has been successfully parsed.",
                                         green, reset, args[1]
