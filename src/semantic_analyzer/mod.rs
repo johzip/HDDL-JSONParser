@@ -5,6 +5,7 @@ mod cycle_detection;
 mod type_checker;
 mod tests;
 mod problem_analyzer;
+mod tdg;
 
 use crate::syntactic_analyzer::*;
 use crate::output::*;

@@ -9,14 +9,14 @@ pub struct InitialTaskNetwork<'a> {
     pub tn: HTN<'a>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HTN<'a> {
     pub subtasks: Vec<Subtask<'a>>,
     pub orderings: TaskOrdering<'a>,
     pub constraints: Option<Vec<Constraint<'a>>>, 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Subtask<'a> {
     pub id: Option<&'a str>,
     pub id_pos: Option<TokenPosition>,
@@ -27,13 +27,13 @@ pub struct Subtask<'a> {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Constraint<'a> {
     Equal(&'a str, &'a str),
     NotEqual(&'a str, &'a str)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TaskOrdering<'a> {
     Total,
     Partial(Vec<(&'a str, &'a str)>)

@@ -1,6 +1,4 @@
-use std::collections::HashSet;
-
-use petgraph::{algo::{toposort, Cycle}, prelude::GraphMap, Directed};
+use petgraph::{algo::{toposort}, prelude::GraphMap, Directed};
 
 use super::*;
 
