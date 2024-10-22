@@ -3,41 +3,43 @@ use std::collections::{HashMap, HashSet};
 use super::*;
 
 pub struct TDG<'a> {
-    // index 0 is reserved for the initial task network
-    tasks: Vec<&'a str>,
-    // index 0 is reserved for the initial task decomposition
+    tasks: Vec<(&'a str, TaskType)>,
     methods: Vec<HTN<'a>>,
     edges_from_tasks: HashMap<usize, HashSet<usize>>,
     edges_to_tasks: HashMap<usize, HashSet<usize>>,
 }
 
 impl<'a> TDG<'a> {
-    pub fn new(domain: &'a DomainAST<'a>, init_tn: HTN<'a>) -> TDG<'a> {
+    pub fn new(domain: &'a DomainAST<'a>) -> TDG<'a> {
         // collect task names
-        let mut tasks: Vec<&str> = vec!["tdg_init"];
-        tasks.extend(domain.compound_tasks.iter().map(|x| x.name));
-        tasks.extend(domain.actions.iter().map(|x| x.name));
+        let mut tasks: Vec<(&str, TaskType)> = vec![];
+        tasks.extend(
+            domain
+                .compound_tasks
+                .iter()
+                .map(|x| (x.name, TaskType::Compound)),
+        );
+        tasks.extend(domain.actions.iter().map(|x| (x.name, TaskType::Primitive)));
 
         // edges
-        let mut from_task_edges = HashMap::new();
-        let mut to_task_edges = HashMap::new();
+        let mut to_methods = HashMap::new();
+        let mut to_tasks = HashMap::new();
 
         // compute index of tasks and methods for efficiency
         let mut task_indices = HashMap::new();
-        for (index, task) in tasks.iter().enumerate() {
+        for (index, (task, _)) in tasks.iter().enumerate() {
             task_indices.insert(*task, index);
-            from_task_edges.insert(index, HashSet::new());
+            to_methods.insert(index, HashSet::new());
         }
 
-        let mut methods = vec![init_tn.clone()];
-        // collect "from task" edges
+        let mut methods = vec![];
+        // collect "task to method" edges
         for (method_index, method) in domain.methods.iter().enumerate() {
-            // TODO: remove the clone part
             methods.push(method.tn.clone());
             match task_indices.get(method.task_name) {
-                Some(task_index) => match from_task_edges.get_mut(task_index) {
+                Some(task_index) => match to_methods.get_mut(task_index) {
                     Some(set) => {
-                        set.insert(method_index + 1);
+                        set.insert(method_index);
                     }
                     None => panic!("{} not found", task_index),
                 },
@@ -45,23 +47,23 @@ impl<'a> TDG<'a> {
             }
         }
 
-        // collect "to task" edges
+        // collect "method to task" edges
         for (method_index, method) in methods.iter().enumerate() {
             let tasks: HashSet<usize> = method
                 .subtasks
                 .iter()
                 .map(|x| match task_indices.get(x.task_symbol) {
                     Some(id) => *id,
-                    None => panic!(),
+                    None => panic!("{} not found", x.task_symbol),
                 })
                 .collect();
-            to_task_edges.insert(method_index, tasks);
+            to_tasks.insert(method_index, tasks);
         }
         TDG {
             tasks: tasks,
             methods: methods,
-            edges_from_tasks: from_task_edges,
-            edges_to_tasks: to_task_edges,
+            edges_from_tasks: to_methods,
+            edges_to_tasks: to_tasks,
         }
     }
 
@@ -71,7 +73,7 @@ impl<'a> TDG<'a> {
             .tasks
             .iter()
             .enumerate()
-            .filter(|(index, name)| **name == task_name)
+            .filter(|(index, (name, t_type))| *name == task_name)
             .next()
             .unwrap()
             .0;
@@ -90,13 +92,14 @@ impl<'a> TDG<'a> {
             .iter()
             .enumerate()
             .filter(|(index, _)| reach_t.contains(index))
-            .map(|(_, name)| *name)
+            .map(|(_, (name, t_type))| *name)
             .collect()
     }
 
     pub fn get_recursion_type(&self) -> RecursionType {
-        // TODO: fix nullables
-        let nullables: HashSet<usize> = HashSet::new();
+        let nullables: HashSet<usize> = self.compute_nullables().iter().map(|x| {
+            self.get_task_index(&x)
+        }).collect();
         let mut recursion_type = RecursionType::NonRecursive;
         // DFS over TDG
         let mut stack = vec![vec![(0, 0)]];
@@ -128,9 +131,7 @@ impl<'a> TDG<'a> {
                             })
                         };
                         if epsilon_prefix == false {
-                            recursion_type = RecursionType::Recursive;
-                        } else {
-                            recursion_type = RecursionType::EmptyPrefixRecursion;
+                            return RecursionType::Recursive;
                         }
                         let mut suffix: Vec<usize> = vec![];
                         for (t, m) in new_path {
@@ -140,9 +141,9 @@ impl<'a> TDG<'a> {
                             recursion_type = RecursionType::EmptyRecursion;
                         } else {
                             if suffix.iter().all(|sym| nullables.contains(sym)) {
-                                recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
-                            } else {
                                 recursion_type = RecursionType::GrowAndShrinkRecursion;
+                            } else {
+                                recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
                             }
                         }
                     }
@@ -154,24 +155,21 @@ impl<'a> TDG<'a> {
 
     fn get_prefix(&self, task_index: usize, method_index: usize) -> Vec<usize> {
         let method = &self.methods[method_index];
-        let task = self.tasks[task_index];
+        let (task, _) = &self.tasks[task_index];
         let mut prefix = vec![];
         match &method.orderings {
             TaskOrdering::Total => {
-                let first_occurance = method
-                    .subtasks
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, name)| name.task_symbol == task)
-                    .map(|(index, _)| index)
-                    .next()
-                    .unwrap();
                 for (index, subtask) in method.subtasks.iter().enumerate() {
-                    if index == first_occurance {
-                        break;
+                    if subtask.task_symbol == *task {
+                        return method
+                            .subtasks
+                            .iter()
+                            .take(index)
+                            .map(|x| self.get_task_index(&x.task_symbol))
+                            .collect();
                     }
-                    prefix.push(self.get_task_index(&subtask.task_symbol));
                 }
+                panic!("{} does not exist in {:?}", task, method)
             }
             TaskOrdering::Partial(orderings) => {
                 // TODO: test
@@ -184,14 +182,14 @@ impl<'a> TDG<'a> {
                         adjacency.insert(e1, HashSet::from([*e2]));
                     }
                 }
-                let mut suffix: HashSet<&str>= HashSet::new();
+                let mut suffix: HashSet<&str> = HashSet::new();
                 let mut stack = vec![task];
                 while let Some(t) = stack.pop() {
-                    match adjacency.get(&t) {
+                    match adjacency.get(t) {
                         Some(outgoing) => {
                             stack.extend(outgoing.iter());
                             suffix.extend(outgoing.iter());
-                        },
+                        }
                         None => {}
                     }
                 }
@@ -207,58 +205,179 @@ impl<'a> TDG<'a> {
 
     fn get_suffix(&self, task_index: usize, method_index: usize) -> Vec<usize> {
         let method = &self.methods[method_index];
-        let task = self.tasks[task_index];
-        let mut suffix = vec![];
+        let (task, _) = &self.tasks[task_index];
         match &method.orderings {
             TaskOrdering::Total => {
-                let first_occurance = method
-                    .subtasks
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, name)| name.task_symbol == task)
-                    .map(|(index, _)| index)
-                    .next()
-                    .unwrap();
                 for (index, subtask) in method.subtasks.iter().enumerate() {
-                    if (index <= first_occurance) {
-                        continue;
+                    if subtask.task_symbol == *task {
+                        return method
+                            .subtasks
+                            .iter()
+                            .skip(index + 1)
+                            .map(|x| self.get_task_index(&x.task_symbol))
+                            .collect();
                     }
-                    suffix.push(self.get_task_index(&subtask.task_symbol));
                 }
+                panic!("{} does not exist in {:?}", task, method)
             }
             TaskOrdering::Partial(orderings) => {
                 // TODO: test
-                let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
-                for (e1, e2) in orderings {
-                    if adjacency.contains_key(e1) {
-                        let neighbors: &mut HashSet<&str> = adjacency.get_mut(e1).unwrap();
-                        neighbors.insert(e2);
-                    } else {
-                        adjacency.insert(e1, HashSet::from([*e2]));
-                    }
-                }
-                let mut suffix: HashSet<&str>= HashSet::new();
-                let mut stack = vec![task];
-                while let Some(t) = stack.pop() {
-                    match adjacency.get(&t) {
-                        Some(outgoing) => {
-                            stack.extend(outgoing.iter());
-                            suffix.extend(outgoing.iter());
-                        },
-                        None => {}
-                    }
-                }
+                todo!()
+                // let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
+                // for (e1, e2) in orderings {
+                //     if adjacency.contains_key(e1) {
+                //         let neighbors: &mut HashSet<&str> = adjacency.get_mut(e1).unwrap();
+                //         neighbors.insert(e2);
+                //     } else {
+                //         adjacency.insert(e1, HashSet::from([*e2]));
+                //     }
+                // }
+                // let mut suffix: HashSet<&str> = HashSet::new();
+                // let mut stack = vec![task];
+                // while let Some(t) = stack.pop() {
+                //     match adjacency.get(t) {
+                //         Some(outgoing) => {
+                //             stack.extend(outgoing.iter());
+                //             suffix.extend(outgoing.iter());
+                //         }
+                //         None => {}
+                //     }
+                // }
+                // return suffix;
             }
         }
-        return suffix;
     }
 
     fn get_task_index(&self, task_name: &str) -> usize {
         self.tasks
             .iter()
             .enumerate()
-            .find(|(index, name)| **name == task_name)
+            .find(|(_, (name, t_type))| *name == task_name)
             .unwrap()
             .0
     }
+
+    pub fn compute_nullables(&self) -> HashSet<&'a str> {
+        // TODO: test
+        // nullable base case
+        let mut nullables: HashSet<usize> = self
+            .edges_from_tasks
+            .iter()
+            .filter_map(|(task, methods)| {
+                for method in methods.iter() {
+                    let tasks = self.edges_to_tasks.get(method).unwrap();
+                    if tasks.len() == 0 {
+                        return Some(*task);
+                    }
+                }
+                None
+            })
+            .collect();
+
+        // unit reachability base case
+        let mut unit_reachability: HashMap<usize, HashSet<usize>> = HashMap::new();
+        for (t, t_type) in self.tasks.iter() {
+            match *t_type {
+                TaskType::Primitive => {}
+                TaskType::Compound => {
+                    let task_index = self.get_task_index(t);
+                    let mut value = HashSet::from([task_index]);
+                    if let Some(methods) = self.edges_from_tasks.get(&task_index) {
+                        for method in methods {
+                            let tasks = self.edges_to_tasks.get(method).unwrap();
+                            if tasks.len() == 1 {
+                                value.insert(*tasks.iter().next().unwrap());
+                            }
+                        }
+                    }
+
+                    unit_reachability.insert(task_index, value);
+                }
+            }
+        }
+        let mut changed_nullables = true;
+        let mut changed_unit_reachability = true;
+        let mut new_nullables = HashSet::new();
+        let mut new_unit_reachable: HashMap<usize, HashSet<usize>> = HashMap::new();
+        while changed_nullables || changed_unit_reachability {
+            // nullables induction step
+            for (t, methods) in self.edges_from_tasks.iter() {
+                for method in methods {
+                    if let Some(tasks) = self.edges_to_tasks.get(method) {
+                        if tasks.iter().all(|x| match unit_reachability.get(x) {
+                            Some(set) => {
+                                let intersection: HashSet<&usize> =
+                                    set.intersection(&nullables).collect();
+                                intersection.len() != 0
+                            }
+                            None => false,
+                        }) {
+                            new_nullables.insert(*t);
+                        }
+                    }
+                }
+            }
+
+            // unit reachability induction step
+            for (c, previous_reachables) in unit_reachability.iter() {
+                let mut change = previous_reachables.clone();
+                for previous_reachable in previous_reachables {
+                    match unit_reachability.get(previous_reachable) {
+                        Some(tasks) => {
+                            change = change.union(tasks).cloned().collect();
+                        }
+                        None => { }
+                    }
+                }
+                for method in self.edges_from_tasks.get(c).unwrap() {
+                    if let Some(tasks) = self.edges_to_tasks.get(method) {
+                        let mut not_nullable = None;
+                        for task in tasks {
+                            if !nullables.contains(task) {
+                                if not_nullable.is_none() {
+                                    not_nullable = Some(*task)
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        if let Some(val) = not_nullable {
+                            change.insert(val);
+                        }
+                    }
+                }
+                if change == *previous_reachables {
+                    changed_unit_reachability = false;
+                } else {
+                    new_unit_reachable.insert(*c, change);
+                }
+            }
+
+            // commit to changes
+            //// nullables
+            if new_nullables.len() == nullables.len() {
+                changed_nullables = false;
+            } else {
+                for n in new_nullables.iter() {
+                    nullables.insert(*n);
+                }
+            }
+            //// unit reachability
+            for (task, new_reachable) in new_unit_reachable.iter() {
+                let prev = unit_reachability.get_mut(&task).unwrap();
+                prev.extend(new_reachable);
+            }
+        }
+        let mut result = HashSet::new();
+        for task_index in nullables {
+            result.insert(self.tasks[task_index].0);
+        }
+        result
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+enum TaskType {
+    Primitive,
+    Compound,
 }
