@@ -97,55 +97,79 @@ impl<'a> TDG<'a> {
     }
 
     pub fn get_recursion_type(&self) -> RecursionType {
-        let nullables: HashSet<usize> = self.compute_nullables().iter().map(|x| {
-            self.get_task_index(&x)
-        }).collect();
+        let nullables: HashSet<usize> = self
+            .compute_nullables()
+            .iter()
+            .map(|x| self.get_task_index(&x))
+            .collect();
         let mut recursion_type = RecursionType::NonRecursive;
         // DFS over TDG
-        let mut stack = vec![vec![(0, 0)]];
+        let mut stack = vec![];
+        // initiating the stack
+        // TODO: restrict to those reachable from inital task network
+        for (t, methods) in self.edges_from_tasks.iter() {
+            for method in methods {
+                stack.push(vec![(*t, *method)]);
+            }
+        }
+        // induction
         while let Some(path) = stack.pop() {
-            let (_, method_index) = path.iter().last().unwrap();
-            for reachable_task_index in self.edges_to_tasks.get(method_index).unwrap() {
-                for reachable_method_index in
-                    self.edges_from_tasks.get(reachable_task_index).unwrap()
-                {
-                    let new_item = (*reachable_task_index, *reachable_method_index);
-                    let mut new_path = path.clone();
-                    new_path.push(new_item);
-                    if !path.contains(&new_item) {
-                        stack.push(new_path);
-                    } else {
-                        let epsilon_prefix = {
-                            new_path.iter().all(|(t, m)| {
-                                let prefix = self.get_prefix(*t, *m);
-                                if prefix.len() == 0 {
-                                    return true;
-                                } else {
-                                    for symbol in prefix {
-                                        if !nullables.contains(&symbol) {
-                                            return false;
-                                        }
-                                    }
-                                    return true;
-                                }
-                            })
-                        };
-                        if epsilon_prefix == false {
-                            return RecursionType::Recursive;
-                        }
-                        let mut suffix: Vec<usize> = vec![];
-                        for (t, m) in new_path {
-                            suffix.extend(self.get_suffix(t, m).iter());
-                        }
-                        if suffix.len() == 0 {
-                            recursion_type = RecursionType::EmptyRecursion;
-                        } else {
-                            if suffix.iter().all(|sym| nullables.contains(sym)) {
-                                recursion_type = RecursionType::GrowAndShrinkRecursion;
-                            } else {
-                                recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+            let (_, current_method) = path.iter().last().unwrap();
+            for new_task in self.edges_to_tasks.get(current_method).unwrap() {
+                let is_cycle = path.iter().map(|(t, _)| t).any(|t| t == new_task);
+                if is_cycle {
+                    let mut epsilon_prefix = true;
+                    // direct recursion
+                    if path.len() == 1 {
+                        let prefix = self.get_prefix(path[0].0, path[0].1);
+                        if prefix.len() != 0 {
+                            if prefix.iter().any(|t| !nullables.contains(t)) {
+                                epsilon_prefix = false;
                             }
                         }
+                    } else {
+                        // indirect recursion
+                        for i in 1..path.len() - 1 {
+                            let (task, _) = &path[i];
+                            let (_, method) = &path[i - 1];
+                            let prefix = self.get_prefix(*task, *method);
+                            if prefix.len() != 0 {
+                                if prefix.iter().any(|t| !nullables.contains(t)) {
+                                    epsilon_prefix = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if epsilon_prefix == false {
+                        return RecursionType::Recursive;
+                    }
+                    let mut suffix: Vec<usize> = vec![];
+                    // direct recursion
+                    if path.len() == 1 {
+                        suffix = self.get_suffix(path[0].0, path[0].1);
+                    } else {
+                        // indirect recursion
+                        for i in 1..path.len() - 1 {
+                            let (task, _) = &path[i];
+                            let (_, method) = &path[i - 1];
+                            suffix.extend(self.get_suffix(*task, *method));
+                        }
+                    }
+                    if suffix.len() == 0 {
+                        recursion_type = RecursionType::EmptyRecursion;
+                    } else {
+                        if suffix.iter().all(|sym| nullables.contains(sym)) {
+                            recursion_type = RecursionType::GrowAndShrinkRecursion;
+                        } else {
+                            recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+                        }
+                    }
+                } else if let Some(methods) = self.edges_from_tasks.get(new_task) {
+                    for method in methods {
+                        let mut new_path = path.clone();
+                        new_path.push((*new_task, *method));
+                        stack.push(new_path);
                     }
                 }
             }
@@ -169,7 +193,7 @@ impl<'a> TDG<'a> {
                             .collect();
                     }
                 }
-                panic!("{} does not exist in {:?}", task, method)
+                panic!("{} does not exist in {:?}", task, method.subtasks)
             }
             TaskOrdering::Partial(orderings) => {
                 // TODO: test
@@ -258,7 +282,6 @@ impl<'a> TDG<'a> {
     }
 
     pub fn compute_nullables(&self) -> HashSet<&'a str> {
-        // TODO: test
         // nullable base case
         let mut nullables: HashSet<usize> = self
             .edges_from_tasks
@@ -326,7 +349,7 @@ impl<'a> TDG<'a> {
                         Some(tasks) => {
                             change = change.union(tasks).cloned().collect();
                         }
-                        None => { }
+                        None => {}
                     }
                 }
                 for method in self.edges_from_tasks.get(c).unwrap() {

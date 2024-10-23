@@ -6,6 +6,7 @@ mod output;
 use crate::lexical_analyzer::TokenPosition;
 use lexical_analyzer::LexicalAnalyzer;
 use output::{MetaData, ParsingError};
+use semantic_analyzer::TDG;
 use syntactic_analyzer::AbstractSyntaxTree;
 
 pub struct HDDLAnalyzer {}
@@ -43,26 +44,11 @@ impl HDDLAnalyzer {
         let domain_ast = domain_parser.parse()?;
         match domain_ast {
             AbstractSyntaxTree::Domain(d) => {
-                let mut initial_network = None; 
-                match problem {
-                    Some(p_description) => {
-                        let p_lexer = LexicalAnalyzer::new(p_description);
-                        let p_parser = syntactic_analyzer::Parser::new(p_lexer);
-                        match p_parser.parse()? {
-                            AbstractSyntaxTree::Problem(p) => {
-                                match p.init_tn {
-                                    Some(tn) => {
-                                        initial_network = Some(tn.tn);
-                                    }
-                                    None => {}
-                                }
-                            }
-                            _ => panic!("expected problem, found domain")
-                        }
-                    }
-                    None => {}
-                }
-                todo!()
+                let tdg = TDG::new(&d);
+                Ok(MetaData {
+                    recursion: tdg.get_recursion_type(),
+                    domain_name: String::new()
+                })
             }
             _ => panic!("expected domain, found problem")
         }

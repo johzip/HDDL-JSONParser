@@ -16,3 +16,4 @@ use type_checker::TypeChecker;
 extern crate petgraph;
 
 pub use analyzer::SemanticAnalyzer;
+pub use tdg::TDG;
