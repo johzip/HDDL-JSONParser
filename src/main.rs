@@ -20,7 +20,7 @@ pub fn main() {
             match domain {
                 Ok(domain_content) => match HDDLAnalyzer::get_metadata(&domain_content, None) {
                     Ok(result) => {
-                        println!("{}", result)
+                        print!("{}", result)
                     }
                     Err(error) => {
                         eprintln!("{}", error)

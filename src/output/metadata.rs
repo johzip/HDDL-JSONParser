@@ -14,9 +14,9 @@ impl Display for RecursionType {
         match self {
             RecursionType::NonRecursive => write!(f, "Non-Recursive"),
             RecursionType::Recursive => write!(f, "Recursive"),
-            RecursionType::EmptyRecursion => write!(f, "Empty Recursion"),
-            RecursionType::GrowingEmptyPrefixRecursion => write!(f, "Growing Empty Prefix Recursion"),
-            RecursionType::GrowAndShrinkRecursion => write!(f, "Grow and Shrink Recursion")
+            RecursionType::EmptyRecursion => write!(f, "Empty Cycle"),
+            RecursionType::GrowingEmptyPrefixRecursion => write!(f, "Growing Empty Prefix Cycle"),
+            RecursionType::GrowAndShrinkRecursion => write!(f, "Grow and Shrink Cycle")
         }
     }
 }
