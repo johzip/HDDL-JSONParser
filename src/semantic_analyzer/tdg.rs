@@ -96,9 +96,8 @@ impl<'a> TDG<'a> {
             .collect()
     }
 
-    pub fn get_recursion_type(&self) -> RecursionType {
-        let nullables: HashSet<usize> = self
-            .compute_nullables()
+    pub fn get_recursion_type(&self, nullable_symbols: &HashSet<&'a str>) -> RecursionType {
+        let nullables: HashSet<usize> = nullable_symbols
             .iter()
             .map(|x| self.get_task_index(&x))
             .collect();

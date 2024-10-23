@@ -24,12 +24,22 @@ impl Display for RecursionType {
 
 pub struct MetaData {
     pub recursion: RecursionType,
+    pub nullables: Vec<String>,
     pub domain_name: String,
 }
 
 impl Display for MetaData {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         writeln!(f, "{} Description:", self.domain_name)?;
-        writeln!(f, "\tHierarchy type: {}", self.recursion)
+        writeln!(f, "\tHierarchy type: {}", self.recursion)?;
+        if self.nullables.len() == 0 {
+            writeln!(f, "\tNullable Tasks: None")?;
+        } else {
+            writeln!(f, "\tNullable Tasks:")?;
+            for nullable in self.nullables.iter() {
+                writeln!(f, "\t\t{}", nullable)?
+            }
+        }
+        Ok(())
     }
 }

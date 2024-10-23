@@ -128,7 +128,8 @@ pub fn tdg_non_recursive_test () {
             match p_ast {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
-                    assert_eq!(tdg.get_recursion_type(), RecursionType::NonRecursive)
+                    let nullables = tdg.compute_nullables();
+                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::NonRecursive)
                 }
                 _ => panic!()
             }
@@ -191,7 +192,8 @@ pub fn tdg_recursive_test () {
             match p_ast {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
-                    assert_eq!(tdg.get_recursion_type(), RecursionType::Recursive)
+                    let nullables = tdg.compute_nullables();
+                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::Recursive)
                 }
                 _ => panic!()
             }
@@ -259,7 +261,8 @@ pub fn tdg_grow_and_shrink_cycle_test () {
             match p_ast {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
-                    assert_eq!(tdg.get_recursion_type(), RecursionType::GrowAndShrinkRecursion)
+                    let nullables = tdg.compute_nullables();
+                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::GrowAndShrinkRecursion)
                 }
                 _ => panic!()
             }
@@ -331,7 +334,8 @@ pub fn tdg_growing_cycle_test () {
             match p_ast {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
-                    assert_eq!(tdg.get_recursion_type(), RecursionType::GrowingEmptyPrefixRecursion)
+                    let nullables = tdg.compute_nullables();
+                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::GrowingEmptyPrefixRecursion)
                 }
                 _ => panic!()
             }

@@ -45,8 +45,10 @@ impl HDDLAnalyzer {
         match domain_ast {
             AbstractSyntaxTree::Domain(d) => {
                 let tdg = TDG::new(&d);
+                let nullables = tdg.compute_nullables();
                 Ok(MetaData {
-                    recursion: tdg.get_recursion_type(),
+                    recursion: tdg.get_recursion_type(&nullables),
+                    nullables: nullables.iter().map(|x| x.to_string()).collect(),
                     domain_name: String::new()
                 })
             }
