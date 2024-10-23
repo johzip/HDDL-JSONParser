@@ -140,10 +140,6 @@ impl<'a> TDG<'a> {
                             }
                         }
                     }
-
-                    if epsilon_prefix == false {
-                        return RecursionType::Recursive;
-                    }
                     let mut suffix: Vec<usize> = vec![];
                     // direct recursion
                     if path.len() == 1 {
@@ -156,15 +152,36 @@ impl<'a> TDG<'a> {
                             suffix.extend(self.get_suffix(*task, *method));
                         }
                     }
-                    if suffix.len() == 0 {
-                        recursion_type = RecursionType::EmptyRecursion;
-                    } else {
-                        if suffix.iter().all(|sym| nullables.contains(sym)) {
-                            recursion_type = RecursionType::GrowAndShrinkRecursion;
+                    if epsilon_prefix == true {
+                        if suffix.len() == 0 {
+                            match recursion_type {
+                                RecursionType::GrowAndShrinkRecursion => {}
+                                _ => {
+                                    recursion_type = RecursionType::EmptyRecursion;
+                                }
+                            }
                         } else {
-                            recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+                            let nullable_suffix = suffix.iter().all(|sym| nullables.contains(sym));
+                            match recursion_type {
+                                RecursionType::GrowAndShrinkRecursion | RecursionType::EmptyRecursion => {},
+                                _ => {
+                                    if nullable_suffix {
+                                        recursion_type = RecursionType::GrowAndShrinkRecursion;
+                                    } else {
+                                        recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        match recursion_type {
+                            RecursionType::NonRecursive => {
+                                recursion_type = RecursionType::Recursive;
+                            }
+                            _ => {}
                         }
                     }
+                    
                 } else if let Some(methods) = self.edges_from_tasks.get(new_task) {
                     for method in methods {
                         let mut new_path = path.clone();

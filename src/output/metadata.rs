@@ -4,7 +4,6 @@ use std::fmt::{Display, Formatter, Error};
 pub enum RecursionType {
     NonRecursive,
     Recursive,
-    EmptyPrefixRecursion,
     EmptyRecursion,
     GrowingEmptyPrefixRecursion,
     GrowAndShrinkRecursion
@@ -15,7 +14,6 @@ impl Display for RecursionType {
         match self {
             RecursionType::NonRecursive => write!(f, "Non-Recursive"),
             RecursionType::Recursive => write!(f, "Recursive"),
-            RecursionType::EmptyPrefixRecursion => write!(f, "Empty Prefix Recursion"),
             RecursionType::EmptyRecursion => write!(f, "Empty Recursion"),
             RecursionType::GrowingEmptyPrefixRecursion => write!(f, "Growing Empty Prefix Recursion"),
             RecursionType::GrowAndShrinkRecursion => write!(f, "Grow and Shrink Recursion")
