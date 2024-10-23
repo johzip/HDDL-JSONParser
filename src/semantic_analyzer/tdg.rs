@@ -116,77 +116,83 @@ impl<'a> TDG<'a> {
         while let Some(path) = stack.pop() {
             let (_, current_method) = path.iter().last().unwrap();
             for new_task in self.edges_to_tasks.get(current_method).unwrap() {
-                let is_cycle = path.iter().map(|(t, _)| t).any(|t| t == new_task);
-                if is_cycle {
-                    let mut epsilon_prefix = true;
-                    // direct recursion
-                    if path.len() == 1 {
-                        let prefix = self.get_prefix(path[0].0, path[0].1);
-                        if prefix.len() != 0 {
-                            if prefix.iter().any(|t| !nullables.contains(t)) {
-                                epsilon_prefix = false;
-                            }
-                        }
-                    } else {
-                        // indirect recursion
-                        for i in 1..path.len() - 1 {
-                            let (task, _) = &path[i];
-                            let (_, method) = &path[i - 1];
-                            let prefix = self.get_prefix(*task, *method);
-                            if prefix.len() != 0 {
-                                if prefix.iter().any(|t| !nullables.contains(t)) {
-                                    epsilon_prefix = false;
-                                }
-                            }
-                        }
+                let mut cycle: Option<Vec<_>> = None; 
+                for (index, (t, _)) in path.iter().enumerate() {
+                    if t == new_task {
+                        cycle = Some(path.iter().skip(index).collect());
+                        break;
                     }
-                    let mut suffix: Vec<usize> = vec![];
-                    // direct recursion
-                    if path.len() == 1 {
-                        suffix = self.get_suffix(path[0].0, path[0].1);
-                    } else {
-                        // indirect recursion
-                        for i in 1..path.len() - 1 {
-                            let (task, _) = &path[i];
-                            let (_, method) = &path[i - 1];
-                            suffix.extend(self.get_suffix(*task, *method));
-                        }
-                    }
-                    if epsilon_prefix == true {
-                        if suffix.len() == 0 {
-                            match recursion_type {
-                                RecursionType::GrowAndShrinkRecursion => {}
-                                _ => {
-                                    recursion_type = RecursionType::EmptyRecursion;
-                                }
-                            }
+                }
+                match cycle {
+                    Some(cyclic_path) => {
+                        // compute cycle prefix
+                        let mut prefix: HashSet<usize> = HashSet::new();
+                        if cyclic_path.len() == 1 {
+                            prefix.extend(self.get_prefix(cyclic_path[0].0, cyclic_path[0].1));
                         } else {
-                            let nullable_suffix = suffix.iter().all(|sym| nullables.contains(sym));
-                            match recursion_type {
-                                RecursionType::GrowAndShrinkRecursion | RecursionType::EmptyRecursion => {},
-                                _ => {
-                                    if nullable_suffix {
-                                        recursion_type = RecursionType::GrowAndShrinkRecursion;
-                                    } else {
-                                        recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+                            for i in 1..cyclic_path.len() - 1 {
+                                let (task, _) = &cyclic_path[i];
+                                let (_, method) = &cyclic_path[i - 1];
+                                prefix.extend(self.get_prefix(*task, *method));
+                            }
+                        }
+                        // compute cycle suffix
+                        let mut suffix: Vec<usize> = vec![];
+                        if cyclic_path.len() == 1 {
+                            suffix.extend(self.get_suffix(cyclic_path[0].0, cyclic_path[0].1));
+                        } else {
+                            for i in 1..cyclic_path.len() - 1 {
+                                let (task, _) = &cyclic_path[i];
+                                let (_, method) = &cyclic_path[i - 1];
+                                suffix.extend(self.get_suffix(*task, *method));
+                            }
+                        }
+                        let mut is_epsilon_prefix = true;
+                        if prefix.len() > 0 {
+                            for x in prefix.iter() {
+                                if !nullables.contains(x) {
+                                    is_epsilon_prefix = false;
+                                }
+                            }
+                        }
+                        if is_epsilon_prefix == true {
+                            if suffix.len() == 0 {
+                                match recursion_type {
+                                    RecursionType::GrowAndShrinkRecursion => {}
+                                    _ => {
+                                        recursion_type = RecursionType::EmptyRecursion;
+                                    }
+                                }
+                            } else {
+                                let nullable_suffix = suffix.iter().all(|sym| nullables.contains(sym));
+                                match recursion_type {
+                                    RecursionType::GrowAndShrinkRecursion | RecursionType::EmptyRecursion => {},
+                                    _ => {
+                                        if nullable_suffix {
+                                            recursion_type = RecursionType::GrowAndShrinkRecursion;
+                                        } else {
+                                            recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+                                        }
                                     }
                                 }
                             }
-                        }
-                    } else {
-                        match recursion_type {
-                            RecursionType::NonRecursive => {
-                                recursion_type = RecursionType::Recursive;
+                        } else {
+                            match recursion_type {
+                                RecursionType::NonRecursive => {
+                                    recursion_type = RecursionType::Recursive;
+                                }
+                                _ => {}
                             }
-                            _ => {}
                         }
                     }
-                    
-                } else if let Some(methods) = self.edges_from_tasks.get(new_task) {
-                    for method in methods {
-                        let mut new_path = path.clone();
-                        new_path.push((*new_task, *method));
-                        stack.push(new_path);
+                    None => {
+                        if let Some(methods) = self.edges_from_tasks.get(new_task) {
+                            for method in methods {
+                                let mut new_path = path.clone();
+                                new_path.push((*new_task, *method));
+                                stack.push(new_path);
+                            }
+                        }
                     }
                 }
             }
