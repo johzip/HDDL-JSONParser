@@ -273,6 +273,81 @@ pub fn tdg_grow_and_shrink_cycle_test () {
 
 
 #[test]
+pub fn tdg_grow_and_shrink_cycle_partial_order_1_test () {
+    let program = String::from(
+        "(define (domain bal)
+            (:predicates 
+                (at ?l)
+            )
+            (:action p_1
+            :parameters(?l1)
+            :precondition (at ?l1)
+            )
+            (:action p_2
+            :parameters(?l1)
+            :precondition (at ?l1)
+            )
+            (:task abs_1 :parameters(?a))
+            (:task abs_2 :parameters(?a))
+            (:task abs_3 :parameters(?a))
+
+            (:method m_1
+                :parameters (?p1) 
+                :task (abs_1 ?p1)
+                :subtasks (and
+                    (t0 (abs_3 ?p1))
+                    (t1 (abs_1 ?p1))
+                    (t2 (abs_3 ?p1))
+                    (t3 (abs_3 ?p1))
+                )
+                :ordering (and
+                    (< t0 t1)
+                    (< t1 t2)
+                    (< t2 t3)
+                )
+            )
+
+            (:method m_2
+                :parameters (?p1) 
+                :task (abs_3 ?p1)
+                :subtasks ()
+            )
+        ) ",
+    )
+    .into_bytes();
+    let problem = String::from("
+        (define (problem p-1-2-2)
+            (:domain barman_htn)
+            (:htn
+                :parameters ()
+                :ordered-subtasks (and
+                    (abs_1)
+                )
+            )
+    ").into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let ast = parser.parse().unwrap();
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let p_lexer = LexicalAnalyzer::new(&problem);
+            let p_parser = Parser::new(p_lexer);
+            let p_ast = p_parser.parse().unwrap();
+            match p_ast {
+                AbstractSyntaxTree::Problem(p_ast) => {
+                    let tdg = TDG::new(&d);
+                    let nullables = tdg.compute_nullables();
+                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::GrowAndShrinkRecursion)
+                }
+                _ => panic!()
+            }
+        }
+        AbstractSyntaxTree::Problem(_) => panic!()
+    }
+}
+
+
+#[test]
 pub fn tdg_growing_cycle_test () {
     let program = String::from(
         "(define (domain bal)

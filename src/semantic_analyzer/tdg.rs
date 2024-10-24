@@ -115,7 +115,7 @@ impl<'a> TDG<'a> {
         while let Some(path) = stack.pop() {
             let (_, current_method) = path.iter().last().unwrap();
             for new_task in self.edges_to_tasks.get(current_method).unwrap() {
-                let mut cycle: Option<Vec<_>> = None; 
+                let mut cycle: Option<Vec<_>> = None;
                 for (index, (t, _)) in path.iter().enumerate() {
                     if t == new_task {
                         cycle = Some(path.iter().skip(index).collect());
@@ -127,7 +127,7 @@ impl<'a> TDG<'a> {
                         // compute cycle prefix
                         let mut prefix: HashSet<usize> = HashSet::new();
                         let mut suffix: Vec<usize> = vec![];
-                        for (index, (t,m)) in cyclic_path.iter().enumerate() {
+                        for (index, (t, m)) in cyclic_path.iter().enumerate() {
                             if index == 0 {
                                 if cyclic_path.len() == 1 {
                                     prefix.extend(self.get_prefix(*t, *m));
@@ -158,14 +158,17 @@ impl<'a> TDG<'a> {
                                     }
                                 }
                             } else {
-                                let nullable_suffix = suffix.iter().all(|sym| nullables.contains(sym));
+                                let nullable_suffix =
+                                    suffix.iter().all(|sym| nullables.contains(sym));
                                 match recursion_type {
-                                    RecursionType::GrowAndShrinkRecursion | RecursionType::EmptyRecursion => {},
+                                    RecursionType::GrowAndShrinkRecursion
+                                    | RecursionType::EmptyRecursion => {}
                                     _ => {
                                         if nullable_suffix {
                                             recursion_type = RecursionType::GrowAndShrinkRecursion;
                                         } else {
-                                            recursion_type = RecursionType::GrowingEmptyPrefixRecursion;
+                                            recursion_type =
+                                                RecursionType::GrowingEmptyPrefixRecursion;
                                         }
                                     }
                                 }
@@ -197,7 +200,6 @@ impl<'a> TDG<'a> {
     fn get_prefix(&self, task_index: usize, method_index: usize) -> Vec<usize> {
         let method = &self.methods[method_index];
         let (task, _) = &self.tasks[task_index];
-        let mut prefix = vec![];
         match &method.orderings {
             TaskOrdering::Total => {
                 for (index, subtask) in method.subtasks.iter().enumerate() {
@@ -213,35 +215,50 @@ impl<'a> TDG<'a> {
                 panic!("{} does not exist in {:?}", task, method.subtasks)
             }
             TaskOrdering::Partial(orderings) => {
-                // TODO: test
-                let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
-                for (e1, e2) in orderings {
-                    if adjacency.contains_key(e1) {
-                        let neighbors: &mut HashSet<&str> = adjacency.get_mut(e1).unwrap();
-                        neighbors.insert(e2);
-                    } else {
-                        adjacency.insert(e1, HashSet::from([*e2]));
-                    }
-                }
-                let mut suffix: HashSet<&str> = HashSet::new();
-                let mut stack = vec![task];
-                while let Some(t) = stack.pop() {
-                    match adjacency.get(t) {
-                        Some(outgoing) => {
-                            stack.extend(outgoing.iter());
-                            suffix.extend(outgoing.iter());
+                // TODO: generalize to unordered tasks
+                assert_eq!(orderings.len(), method.subtasks.len() - 1);
+                // construct task id mappings
+                let mut id_to_task_mapping: HashMap<&str, &str> = HashMap::new();
+                let mut task_occurances: HashSet<&str> = HashSet::new();
+                for subtask in method.subtasks.iter() {
+                    match subtask.id {
+                        Some(id) => {
+                            id_to_task_mapping.insert(id, subtask.task_symbol);
+                            if subtask.task_symbol == *task {
+                                task_occurances.insert(&id);
+                            }
                         }
                         None => {}
                     }
                 }
-                for subtask in &method.subtasks {
-                    if !suffix.contains(subtask.task_symbol) {
-                        prefix.push(self.get_task_index(subtask.task_symbol));
+                // construct *REVERSE* ordering graph
+                let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
+                for (e1, e2) in orderings {
+                    if adjacency.contains_key(e2) {
+                        let neighbors: &mut HashSet<&str> = adjacency.get_mut(e2).unwrap();
+                        neighbors.insert(&e1);
+                    } else {
+                        adjacency.insert(&e2, HashSet::from([*e1]));
                     }
                 }
+                // find tasks that are explicitly ordered after "task"
+                let mut prefix: Vec<&str> = Vec::new();
+                let mut stack = Vec::from_iter(task_occurances.iter());
+                while let Some(t) = stack.pop() {
+                    match adjacency.get(t) {
+                        Some(incoming) => {
+                            stack.extend(incoming.iter());
+                            prefix.extend(incoming.iter());
+                        }
+                        None => {}
+                    }
+                }
+                return prefix.iter().map(|id| {
+                    let task_name = id_to_task_mapping.get(id).unwrap();
+                    self.get_task_index(&task_name)
+                }).collect();
             }
         }
-        return prefix;
     }
 
     fn get_suffix(&self, task_index: usize, method_index: usize) -> Vec<usize> {
@@ -262,29 +279,48 @@ impl<'a> TDG<'a> {
                 panic!("{} does not exist in {:?}", task, method)
             }
             TaskOrdering::Partial(orderings) => {
-                // TODO: test
-                todo!()
-                // let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
-                // for (e1, e2) in orderings {
-                //     if adjacency.contains_key(e1) {
-                //         let neighbors: &mut HashSet<&str> = adjacency.get_mut(e1).unwrap();
-                //         neighbors.insert(e2);
-                //     } else {
-                //         adjacency.insert(e1, HashSet::from([*e2]));
-                //     }
-                // }
-                // let mut suffix: HashSet<&str> = HashSet::new();
-                // let mut stack = vec![task];
-                // while let Some(t) = stack.pop() {
-                //     match adjacency.get(t) {
-                //         Some(outgoing) => {
-                //             stack.extend(outgoing.iter());
-                //             suffix.extend(outgoing.iter());
-                //         }
-                //         None => {}
-                //     }
-                // }
-                // return suffix;
+                // TODO: generalize to unordered tasks
+                assert_eq!(orderings.len(), method.subtasks.len() - 1);
+                // construct task id mappings
+                let mut id_to_task_mapping: HashMap<&str, &str> = HashMap::new();
+                let mut task_occurances: HashSet<&str> = HashSet::new();
+                for subtask in method.subtasks.iter() {
+                    match subtask.id {
+                        Some(id) => {
+                            id_to_task_mapping.insert(id, subtask.task_symbol);
+                            if subtask.task_symbol == *task {
+                                task_occurances.insert(&id);
+                            }
+                        }
+                        None => {}
+                    }
+                }
+                // construct ordering graph
+                let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
+                for (e1, e2) in orderings {
+                    if adjacency.contains_key(e1) {
+                        let neighbors: &mut HashSet<&str> = adjacency.get_mut(e1).unwrap();
+                        neighbors.insert(e2);
+                    } else {
+                        adjacency.insert(e1, HashSet::from([*e2]));
+                    }
+                }
+                // find tasks that are explicitly ordered after "task"
+                let mut suffix: Vec<&str> = Vec::new();
+                let mut stack = Vec::from_iter(task_occurances.iter());
+                while let Some(t) = stack.pop() {
+                    match adjacency.get(t) {
+                        Some(outgoing) => {
+                            stack.extend(outgoing.iter());
+                            suffix.extend(outgoing.iter());
+                        }
+                        None => {}
+                    }
+                }
+                suffix.iter().map(|id| {
+                    let task_name = id_to_task_mapping.get(id).unwrap();
+                    self.get_task_index(&task_name)
+                }).collect()
             }
         }
     }
