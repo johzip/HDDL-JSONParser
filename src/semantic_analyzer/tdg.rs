@@ -126,24 +126,19 @@ impl<'a> TDG<'a> {
                     Some(cyclic_path) => {
                         // compute cycle prefix
                         let mut prefix: HashSet<usize> = HashSet::new();
-                        if cyclic_path.len() == 1 {
-                            prefix.extend(self.get_prefix(cyclic_path[0].0, cyclic_path[0].1));
-                        } else {
-                            for i in 1..cyclic_path.len() - 1 {
-                                let (task, _) = &cyclic_path[i];
-                                let (_, method) = &cyclic_path[i - 1];
-                                prefix.extend(self.get_prefix(*task, *method));
-                            }
-                        }
-                        // compute cycle suffix
                         let mut suffix: Vec<usize> = vec![];
-                        if cyclic_path.len() == 1 {
-                            suffix.extend(self.get_suffix(cyclic_path[0].0, cyclic_path[0].1));
-                        } else {
-                            for i in 1..cyclic_path.len() - 1 {
-                                let (task, _) = &cyclic_path[i];
-                                let (_, method) = &cyclic_path[i - 1];
-                                suffix.extend(self.get_suffix(*task, *method));
+                        for (index, (t,m)) in cyclic_path.iter().enumerate() {
+                            if index == 0 {
+                                if cyclic_path.len() == 1 {
+                                    prefix.extend(self.get_prefix(*t, *m));
+                                    suffix.extend(self.get_suffix(*t, *m));
+                                } else {
+                                    continue;
+                                }
+                            } else {
+                                let (_, method) = &cyclic_path[index - 1];
+                                prefix.extend(self.get_prefix(*t, *method));
+                                suffix.extend(self.get_suffix(*t, *method));
                             }
                         }
                         let mut is_epsilon_prefix = true;
