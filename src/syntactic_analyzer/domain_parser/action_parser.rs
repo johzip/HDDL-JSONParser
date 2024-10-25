@@ -13,7 +13,7 @@ impl <'a> Parser <'a> {
                 preconditions = Some(self.parse_formula()?);
             },
             // the action has no precondition
-            Token::Keyword(KeywordName::Effect) => {}
+            Token::Keyword(KeywordName::Effect) | Token::Punctuator(PunctuationType::RParentheses) => {}
             // undefined sequenec 
             token => {
                 let error = SyntacticError{

@@ -508,6 +508,25 @@ mod tests {
     }
 
     #[test]
+    pub fn no_op_test() {
+        let program = String::from(
+            "(define (domain bal)
+                (:action a1
+                    :parameters (?p1 - p ?l1 ?l2 ?l3 - loc)
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(&program);
+        match Parser::new(lexer).parse() {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
+                assert_eq!(ast.actions.len(), 1);
+            }
+            _ => panic!()
+        }
+    }
+
+    #[test]
     pub fn init_total_order_tn_parsing_test() {
         let program = String::from(
             "(define (problem p1) (domain bal)
