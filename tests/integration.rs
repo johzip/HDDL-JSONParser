@@ -11,9 +11,6 @@ pub fn domains_integration_test() {
         if let Ok(program) = domain {
             let result = HDDLAnalyzer::verify(&program, None);
             if result.is_err() {
-                result.inspect_err(|x| {
-                    eprintln!("{}", x);
-                });
                 panic!("code has errors");
             }
         } else {
@@ -22,7 +19,7 @@ pub fn domains_integration_test() {
     }
 }
 
-// TODO: fix
+// // TODO: fix
 // #[test]
 // pub fn problems_integration_test() {
 //     let problem_paths = fs::read_dir("tests/problems").unwrap();
