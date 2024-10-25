@@ -193,7 +193,10 @@ pub fn tdg_recursive_test () {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
                     let nullables = tdg.compute_nullables();
-                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::Recursive)
+                    match tdg.get_recursion_type(&nullables) {
+                        RecursionType::Recursive(_) => {}
+                        _ => panic!()
+                    }
                 }
                 _ => panic!()
             }
@@ -262,7 +265,10 @@ pub fn tdg_grow_and_shrink_cycle_test () {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
                     let nullables = tdg.compute_nullables();
-                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::GrowAndShrinkRecursion)
+                    match tdg.get_recursion_type(&nullables) {
+                        RecursionType::GrowAndShrinkRecursion(_) => {}
+                        _ => panic!()
+                    }
                 }
                 _ => panic!()
             }
@@ -337,7 +343,10 @@ pub fn tdg_grow_and_shrink_cycle_partial_order_1_test () {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
                     let nullables = tdg.compute_nullables();
-                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::GrowAndShrinkRecursion)
+                    match tdg.get_recursion_type(&nullables) {
+                        RecursionType::GrowAndShrinkRecursion(_) => {}
+                        _ => panic!()
+                    }
                 }
                 _ => panic!()
             }
@@ -410,7 +419,97 @@ pub fn tdg_growing_cycle_test () {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
                     let nullables = tdg.compute_nullables();
-                    assert_eq!(tdg.get_recursion_type(&nullables), RecursionType::GrowingEmptyPrefixRecursion)
+                    match tdg.get_recursion_type(&nullables) {
+                        RecursionType::GrowingEmptyPrefixRecursion(_) => {}
+                        _ => panic!()
+                    }
+                }
+                _ => panic!()
+            }
+        }
+        AbstractSyntaxTree::Problem(_) => panic!()
+    }
+}
+
+#[test]
+pub fn satelite_domain_cycle_test () {
+    let program = String::from(
+        "(define (domain bal)
+            (:predicates 
+                (at ?l)
+            )
+            (:action p_1
+            :parameters(?l1)
+            :precondition (at ?l1)
+            )
+            (:action p_2
+            :parameters(?l1)
+            :precondition (at ?l1)
+            )
+
+            (:task do_prepare :parameters (?s - satellite ?i - instrument ?d - direction) )
+            (:task do_switching :parameters (?s - satellite ?i - instrument) )
+            (:task do_calibration :parameters (?s - satellite ?i - instrument ?d - direction) )
+            (:task do_turning :parameters (?s - satellite ?d - direction) )
+
+            (:method m1_do_prepare
+                :parameters ( ?s - satellite  ?i - instrument  ?d - direction )
+                :task (do_prepare ?s ?i ?d)
+                :precondition ()
+                :ordered-subtasks(and (t1 (do_switching ?s ?i)) (t2 (do_turning ?s ?d)))
+            )
+            (:method m3_do_switching
+                :parameters ( ?s - satellite  ?i - instrument ?d - direction )
+                :task (do_switching ?s ?i)
+                :precondition (and (on_board ?i ?s) (power_avail ?s))
+                :ordered-subtasks(and (t1 (switch_on ?i ?s)) (t2 (do_calibration ?s ?i ?d)))
+            )
+            (:method m5_do_calibration
+                :parameters ( ?s - satellite  ?i - instrument  ?d - direction )
+                :task (do_calibration ?s ?i ?d)
+                :precondition (and (not(calibrated ?i)))
+                :ordered-subtasks(and (t1 (do_prepare ?s ?i ?d)) (t2 (calibrate ?s ?i ?d)))
+            )
+
+            (:action switch_on
+                :parameters (?i - instrument ?s - satellite)
+                :precondition (and (on_board ?i ?s) (power_avail ?s))
+                :effect (and (power_on ?i) (not (calibrated ?i)) (not (power_avail ?s)))
+            )
+            (:action calibrate
+                :parameters (?s - satellite ?i - instrument ?d - direction)
+                :precondition (and (on_board ?i ?s) (calibration_target ?i ?d) (pointing ?s ?d) (power_on ?i))
+                :effect (calibrated ?i)
+            )
+        ) ",
+    )
+    .into_bytes();
+    let problem = String::from("
+        (define (problem p-1-2-2)
+            (:domain barman_htn)
+            (:htn
+                :parameters ()
+                :ordered-subtasks (and
+                    (abs_1)
+                )
+            )
+    ").into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let ast = parser.parse().unwrap();
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let p_lexer = LexicalAnalyzer::new(&problem);
+            let p_parser = Parser::new(p_lexer);
+            let p_ast = p_parser.parse().unwrap();
+            match p_ast {
+                AbstractSyntaxTree::Problem(p_ast) => {
+                    let tdg = TDG::new(&d);
+                    let nullables = tdg.compute_nullables();
+                    match tdg.get_recursion_type(&nullables) {
+                        RecursionType::Recursive(_) => {}
+                        _ => panic!()
+                    }
                 }
                 _ => panic!()
             }

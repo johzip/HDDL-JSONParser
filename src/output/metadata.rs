@@ -3,22 +3,50 @@ use std::fmt::{Display, Formatter, Error};
 #[derive(PartialEq, Eq, Debug)]
 pub enum RecursionType {
     NonRecursive,
-    Recursive,
-    EmptyRecursion,
-    GrowingEmptyPrefixRecursion,
-    GrowAndShrinkRecursion
+    Recursive(Vec<(String, String)>), // (task_name, method_name) 
+    EmptyRecursion(Vec<(String, String)>), // (task_name, method_name) 
+    GrowingEmptyPrefixRecursion(Vec<(String, String)>), // (task_name, method_name) 
+    GrowAndShrinkRecursion(Vec<(String, String)>), // (task_name, method_name) 
 }
 
 impl Display for RecursionType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            RecursionType::NonRecursive => write!(f, "Non-Recursive"),
-            RecursionType::Recursive => write!(f, "Recursive"),
-            RecursionType::EmptyRecursion => write!(f, "Empty Cycle"),
-            RecursionType::GrowingEmptyPrefixRecursion => write!(f, "Growing Empty Prefix Cycle"),
-            RecursionType::GrowAndShrinkRecursion => write!(f, "Grow and Shrink Cycle")
+            RecursionType::NonRecursive => write!(f, "Non-recursive"),
+            RecursionType::Recursive(pairs) => {
+                writeln!(f, "Recursive")?;
+                write!(f, "Cycle:")?;
+                format_task_pairs(pairs, f)
+            }
+            RecursionType::EmptyRecursion(pairs) => {
+                writeln!(f, "Empty recursion")?;
+                write!(f, "Cycle:")?;
+                format_task_pairs(pairs, f)
+            }
+            RecursionType::GrowingEmptyPrefixRecursion(pairs) => {
+                writeln!(f, "Growing empty prefix recursion")?;
+                write!(f, "\tCycle: ")?;
+                format_task_pairs(pairs, f)
+            }
+            RecursionType::GrowAndShrinkRecursion(pairs) => {
+                writeln!(f, "Grow and shrink recursion")?;
+                write!(f, "Cycle:")?;
+                format_task_pairs(pairs, f)
+            }
         }
     }
+}
+
+// Helper function to format the vector of task and method pairs
+fn format_task_pairs(pairs: &[(String, String)], f: &mut Formatter<'_>) -> std::fmt::Result {
+    write!(f, "[")?;
+    for (i, (task, method)) in pairs.iter().enumerate() {
+        if i > 0 {
+            write!(f, ", ")?;
+        }
+        write!(f, "{}: {}", task, method)?;
+    }
+    write!(f, "]")
 }
 
 

@@ -4,7 +4,7 @@ use super::*;
 
 pub struct TDG<'a> {
     tasks: Vec<(&'a str, TaskType)>,
-    methods: Vec<HTN<'a>>,
+    methods: Vec<(&'a str, HTN<'a>)>,
     edges_from_tasks: HashMap<usize, HashSet<usize>>,
     edges_to_tasks: HashMap<usize, HashSet<usize>>,
 }
@@ -35,7 +35,7 @@ impl<'a> TDG<'a> {
         let mut methods = vec![];
         // collect "task to method" edges
         for (method_index, method) in domain.methods.iter().enumerate() {
-            methods.push(method.tn.clone());
+            methods.push((method.name, method.tn.clone()));
             match task_indices.get(method.task_name) {
                 Some(task_index) => match to_methods.get_mut(task_index) {
                     Some(set) => {
@@ -50,6 +50,7 @@ impl<'a> TDG<'a> {
         // collect "method to task" edges
         for (method_index, method) in methods.iter().enumerate() {
             let tasks: HashSet<usize> = method
+                .1
                 .subtasks
                 .iter()
                 .map(|x| match task_indices.get(x.task_symbol) {
@@ -115,60 +116,70 @@ impl<'a> TDG<'a> {
         while let Some(path) = stack.pop() {
             let (_, current_method) = path.iter().last().unwrap();
             for new_task in self.edges_to_tasks.get(current_method).unwrap() {
-                let mut cycle: Option<Vec<_>> = None;
+                let mut cycle: Option<Vec<(usize, usize)>> = None;
                 for (index, (t, _)) in path.iter().enumerate() {
                     if t == new_task {
-                        cycle = Some(path.iter().skip(index).collect());
+                        let mut cycle_path: Vec<(usize, usize)> =
+                            path.iter().skip(index).cloned().collect();
+                        cycle_path.push((*new_task, *current_method));
+                        cycle = Some(cycle_path);
                         break;
                     }
                 }
                 match cycle {
                     Some(cyclic_path) => {
                         // compute cycle prefix
-                        let mut prefix: HashSet<usize> = HashSet::new();
-                        let mut suffix: Vec<usize> = vec![];
-                        for (index, (t, m)) in cyclic_path.iter().enumerate() {
-                            if index == 0 {
-                                if cyclic_path.len() == 1 {
-                                    prefix.extend(self.get_prefix(*t, *m));
-                                    suffix.extend(self.get_suffix(*t, *m));
-                                } else {
-                                    continue;
-                                }
-                            } else {
-                                let (_, method) = &cyclic_path[index - 1];
-                                prefix.extend(self.get_prefix(*t, *method));
-                                suffix.extend(self.get_suffix(*t, *method));
-                            }
-                        }
                         let mut is_epsilon_prefix = true;
-                        if prefix.len() > 0 {
-                            for x in prefix.iter() {
-                                if !nullables.contains(x) {
-                                    is_epsilon_prefix = false;
+                        let mut suffix: Vec<usize> = vec![];
+                        for (index, (t_id, _)) in cyclic_path.iter().skip(1).enumerate() {
+                            let (_, m_id) = cyclic_path[index];
+                            let prefix = self.get_prefix(*t_id, m_id);
+                            // check epsilon prefix
+                            if prefix.len() > 0 {
+                                if prefix[0] != *new_task {
+                                    for x in prefix.iter() {
+                                        if !nullables.contains(x) {
+                                            is_epsilon_prefix = false;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
+                            suffix.extend(self.get_suffix(*t_id, m_id));
                         }
+                        // convert cyclic path to names
+                        let cyclic_path = cyclic_path
+                            .iter()
+                            .map(|(task_id, method_id)| {
+                                (
+                                    self.tasks[*task_id].0.to_string(),
+                                    self.methods[*method_id].0.to_string(),
+                                )
+                            })
+                            .collect();
                         if is_epsilon_prefix == true {
                             if suffix.len() == 0 {
                                 match recursion_type {
-                                    RecursionType::GrowAndShrinkRecursion => {}
+                                    RecursionType::GrowAndShrinkRecursion(_) => {}
                                     _ => {
-                                        recursion_type = RecursionType::EmptyRecursion;
+                                        recursion_type = RecursionType::EmptyRecursion(cyclic_path);
                                     }
                                 }
                             } else {
                                 let nullable_suffix =
                                     suffix.iter().all(|sym| nullables.contains(sym));
                                 match recursion_type {
-                                    RecursionType::GrowAndShrinkRecursion
-                                    | RecursionType::EmptyRecursion => {}
+                                    RecursionType::GrowAndShrinkRecursion(_)
+                                    | RecursionType::EmptyRecursion(_) => {}
                                     _ => {
                                         if nullable_suffix {
-                                            recursion_type = RecursionType::GrowAndShrinkRecursion;
+                                            recursion_type =
+                                                RecursionType::GrowAndShrinkRecursion(cyclic_path);
                                         } else {
                                             recursion_type =
-                                                RecursionType::GrowingEmptyPrefixRecursion;
+                                                RecursionType::GrowingEmptyPrefixRecursion(
+                                                    cyclic_path,
+                                                );
                                         }
                                     }
                                 }
@@ -176,7 +187,7 @@ impl<'a> TDG<'a> {
                         } else {
                             match recursion_type {
                                 RecursionType::NonRecursive => {
-                                    recursion_type = RecursionType::Recursive;
+                                    recursion_type = RecursionType::Recursive(cyclic_path);
                                 }
                                 _ => {}
                             }
@@ -198,7 +209,7 @@ impl<'a> TDG<'a> {
     }
 
     fn get_prefix(&self, task_index: usize, method_index: usize) -> Vec<usize> {
-        let method = &self.methods[method_index];
+        let (_, method) = &self.methods[method_index];
         let (task, _) = &self.tasks[task_index];
         match &method.orderings {
             TaskOrdering::Total => {
@@ -231,14 +242,14 @@ impl<'a> TDG<'a> {
                         None => {}
                     }
                 }
-                // construct *REVERSE* ordering graph
+                // construct the ordering graph
                 let mut adjacency: HashMap<&str, HashSet<&str>> = HashMap::new();
                 for (e1, e2) in orderings {
-                    if adjacency.contains_key(e2) {
-                        let neighbors: &mut HashSet<&str> = adjacency.get_mut(e2).unwrap();
-                        neighbors.insert(&e1);
+                    if adjacency.contains_key(e1) {
+                        let neighbors: &mut HashSet<&str> = adjacency.get_mut(e1).unwrap();
+                        neighbors.insert(&e2);
                     } else {
-                        adjacency.insert(&e2, HashSet::from([*e1]));
+                        adjacency.insert(&e1, HashSet::from([*e2]));
                     }
                 }
                 // find tasks that are explicitly ordered after "task"
@@ -246,23 +257,30 @@ impl<'a> TDG<'a> {
                 let mut stack = Vec::from_iter(task_occurances.iter());
                 while let Some(t) = stack.pop() {
                     match adjacency.get(t) {
-                        Some(incoming) => {
-                            stack.extend(incoming.iter());
-                            prefix.extend(incoming.iter());
+                        Some(outgoings) => {
+                            for outgoing in outgoings {
+                                for occurance in task_occurances.iter() {
+                                    if outgoing.contains(occurance) {
+                                        prefix.push(id_to_task_mapping.get(t).unwrap());
+                                        stack.push(&t);
+                                    }
+                                }
+                            }
                         }
                         None => {}
                     }
+                    
                 }
                 return prefix.iter().map(|id| {
-                    let task_name = id_to_task_mapping.get(id).unwrap();
-                    self.get_task_index(&task_name)
-                }).collect();
+                        let task_name = id_to_task_mapping.get(id).unwrap();
+                        self.get_task_index(&task_name)
+                    }).collect();
             }
         }
     }
 
     fn get_suffix(&self, task_index: usize, method_index: usize) -> Vec<usize> {
-        let method = &self.methods[method_index];
+        let (_, method) = &self.methods[method_index];
         let (task, _) = &self.tasks[task_index];
         match &method.orderings {
             TaskOrdering::Total => {
@@ -317,10 +335,13 @@ impl<'a> TDG<'a> {
                         None => {}
                     }
                 }
-                suffix.iter().map(|id| {
-                    let task_name = id_to_task_mapping.get(id).unwrap();
-                    self.get_task_index(&task_name)
-                }).collect()
+                suffix
+                    .iter()
+                    .map(|id| {
+                        let task_name = id_to_task_mapping.get(id).unwrap();
+                        self.get_task_index(&task_name)
+                    })
+                    .collect()
             }
         }
     }
