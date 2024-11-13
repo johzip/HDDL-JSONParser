@@ -7,12 +7,13 @@ use std::fs;
 use cli_args::{CLIArgs, Commands};
 
 pub fn main() {
-    // ANSI escape code for green text
+    // ANSI escape color codes
+    let yellow = "\x1b[33m";
     let green = "\x1b[32m";
-    // ANSI escape code for red text
     let red = "\x1b[31m";
     // ANSI escape code to reset text color
     let reset = "\x1b[0m";
+
     let args = CLIArgs::parse();
     match args.command {
         Commands::Metadata(info) => {
@@ -23,15 +24,60 @@ pub fn main() {
                         print!("{}", result)
                     }
                     Err(error) => {
-                        eprintln!("{}", error)
+                        eprintln!("{}[Error]{} {}", red, reset, error)
                     }
                 },
                 Err(read_error) => {
-                    eprintln!("{}ERR!{} Unable to read file, {}", red, reset, read_error)
+                    eprintln!("{}[Error]{} {}", red, reset, read_error)
                 }
             }
         }
-        Commands::Verify(_) => todo!(),
+        Commands::Verify(input) => {
+            let domain = fs::read(input.domain_path);
+            match domain {
+                Ok(domain_content) => match input.problem_path {
+                    Some(problem_path) => {
+                        let problem = fs::read(problem_path);
+                        match problem {
+                            Ok(problem_content) => {
+                                let output = HDDLAnalyzer::verify(&domain_content, Some(&problem_content));
+                                match output {
+                                    Ok(warnings) => {
+                                        for warning in warnings {
+                                            println!("{}[Warning]{} {}", yellow, reset, warning);
+                                        }
+                                        println!("{}[Ok]{}", green, reset);
+                                    }
+                                    Err(parsing_error) => {
+                                        eprintln!("{}[Error]{} {}", red, reset, parsing_error)
+                                    }
+                                }
+                            }
+                            Err(read_error) => {
+                                eprintln!("{}[Error]{} {}", red, reset, read_error)
+                            }
+                        }
+                    }
+                    None => {
+                        let output = HDDLAnalyzer::verify(&domain_content, None);
+                        match output {
+                            Ok(warnings) => {
+                                for warning in warnings {
+                                    println!("{}[Warning]{} {}", yellow, reset, warning);
+                                }
+                                println!("{}[Ok]{}", green, reset);
+                            }
+                            Err(parsing_error) => {
+                                eprintln!("{}[Error]{} {}", red, reset, parsing_error)
+                            }
+                        }
+                    }
+                },
+                Err(read_error) => {
+                    eprintln!("{}[Error]{} {}", red, reset, read_error)
+                }
+            }
+        }
     }
 }
 

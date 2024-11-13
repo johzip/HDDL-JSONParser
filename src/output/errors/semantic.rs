@@ -67,10 +67,10 @@ impl fmt::Display for TypeError{
         write!(f, "Type error for variable {}. ", self.var_name)?;
         match (&self.expected, &self.found) {
             (Some(expected), Some(found)) => {
-                write!(f, "\nexpected: {}\n\tfound: {}", expected, found)
+                write!(f, "Expected object of type '{}', but found '{}'", expected, found)
             },
             (Some(expected), None) => {
-                write!(f, "Expected '{}', but found nothing", expected)
+                write!(f, "Expected object of type '{}', but found untyped", expected)
             },
             (None, Some(found)) => {
                 write!(f, "Expected no type, but found '{}'", found)

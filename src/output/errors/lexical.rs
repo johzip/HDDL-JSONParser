@@ -16,16 +16,12 @@ pub struct LexicalError {
 
 impl fmt::Display for LexicalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // ANSI escape code for red text
-        let red = "\x1b[31m";
-        // ANSI escape code to reset text color
-        let reset = "\x1b[0m";
         match self.error_type {
             LexicalErrorType::InvalidIdentifier => {
-                writeln!(f, "{}{} Invalid Identifier {}{}", self.position, red, reset, self.lexeme)
+                writeln!(f, "{} Identifier {}", self.position, self.lexeme)
             }
             LexicalErrorType::InvalidKeyword => {
-                writeln!(f, "{}{} Invalid Token {}{}", self.position, red, reset, self.lexeme)
+                writeln!(f, "{} Invalid Token {}", self.position, self.lexeme)
             }
         }
     }

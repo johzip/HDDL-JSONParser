@@ -17,5 +17,5 @@ pub struct HDDLInfo {
     #[arg(index = 1)]
     pub domain_path: String,
     #[arg(short, long)]
-    problem: Option<String>,
+    pub problem_path: Option<String>,
 }
