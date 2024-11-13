@@ -1,12 +1,11 @@
 use std::collections::HashSet;
 
-use cycle_detection::check_ordering_acyclic;
-
+use crate::lexical_analyzer::RequirementType;
 use super::*;
 
 pub struct SemanticAnalyzer<'a> {
     domain: &'a DomainAST<'a>,
-    type_checker: TypeChecker<'a>,
+    pub(super) type_checker: TypeChecker<'a>,
 }
 
 impl<'a> SemanticAnalyzer<'a> {
@@ -19,7 +18,7 @@ impl<'a> SemanticAnalyzer<'a> {
 
     pub fn verify_domain(&'a self) -> Result<Vec<WarningType>, SemanticErrorType> {        
         // Assert there are no duplicate requirements
-        if let Some(duplicate) = check_duplicate_requirements(&self.domain.requirements) {
+        if let Some(duplicate) = SemanticAnalyzer::check_duplicate_requirements(&self.domain.requirements) {
             return Err(duplicate);
         // Assert type hierarchy is acyclic
         } else if let Some(cycle) = self.type_checker.check_acyclicity() {
@@ -146,7 +145,9 @@ impl<'a> SemanticAnalyzer<'a> {
                 )?;
             }
             // Assert orderings are acyclic
-            check_ordering_acyclic(&method.tn)?;
+            if !method.tn.orderings.is_acyclic() {
+                return Err(SemanticErrorType::CyclicOrderingDeclaration);
+            }
         }
         Ok(warnings)
     }
@@ -183,6 +184,16 @@ impl<'a> SemanticAnalyzer<'a> {
             }
         }
         Ok(declared_tasks)
+    }
+
+    pub fn check_duplicate_requirements(requirements: &'a Vec<RequirementType>) -> Option<SemanticErrorType> {
+        let mut names = HashSet::new();
+        for req in requirements {
+            if !names.insert(req) {
+                return Some(SemanticErrorType::DuplicateRequirementDeclaration(*req));
+            }
+        }
+        None
     }
 
     // fn verify_formula(formula: &Formula<'a>, declared_predicates: HashSet<u>)

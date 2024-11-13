@@ -23,7 +23,7 @@ pub enum SemanticErrorType{
     InconsistentTaskArgType(TypeError),
     // Ordering Errors
     CyclicTypeDeclaration(String),
-    CyclicOrderingDeclaration(String),
+    CyclicOrderingDeclaration,
 }
 
 impl fmt::Display for SemanticErrorType {
@@ -49,7 +49,7 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::InconsistentTaskArgType(type_error) => write!(f, "Inconsistent task argument type: {}", type_error),
             // Ordering Errors
             SemanticErrorType::CyclicTypeDeclaration(typ) => write!(f, "Cyclic type declaration: {}", typ),
-            SemanticErrorType::CyclicOrderingDeclaration(order) => write!(f, "Cyclic ordering declaration: {}", order),
+            SemanticErrorType::CyclicOrderingDeclaration => write!(f, "Cyclic ordering declaration"),
         }
     }
 }

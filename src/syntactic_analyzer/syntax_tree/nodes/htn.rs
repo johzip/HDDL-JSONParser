@@ -1,7 +1,9 @@
+use petgraph::prelude::GraphMap;
+use petgraph::algo::toposort;
+use petgraph::Directed;
+
 use crate::TokenPosition;
-
 use super::*;
-
 
 #[derive(Debug)]
 pub struct InitialTaskNetwork<'a> {
@@ -37,4 +39,21 @@ pub enum Constraint<'a> {
 pub enum TaskOrdering<'a> {
     Total,
     Partial(Vec<(&'a str, &'a str)>)
+}
+
+impl <'a> TaskOrdering<'a> {
+    pub fn is_acyclic(&self) -> bool {
+        match &self {
+            TaskOrdering::Total => { true }
+            TaskOrdering::Partial(orderings) => {
+                let ordering_graph = GraphMap::<_, (), Directed>::from_edges(orderings);
+                match toposort(&ordering_graph, None) {
+                    Ok(_) => { true }
+                    Err(_) => {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
 }
