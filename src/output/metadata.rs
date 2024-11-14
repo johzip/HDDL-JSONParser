@@ -54,6 +54,9 @@ pub struct MetaData {
     pub recursion: RecursionType,
     pub nullables: Vec<String>,
     pub domain_name: String,
+    pub n_actions: u32,
+    pub n_tasks: u32,
+    pub n_methods: u32
 }
 
 impl Display for MetaData {
@@ -68,6 +71,9 @@ impl Display for MetaData {
                 writeln!(f, "\t\t{}", nullable)?
             }
         }
+        writeln!(f, "\tNumber of actions: {}", self.n_actions)?;
+        writeln!(f, "\tNumber of abstract tasks: {}", self.n_tasks)?;
+        writeln!(f, "\tNumber of n_methods: {}", self.n_methods)?;
         Ok(())
     }
 }

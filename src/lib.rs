@@ -60,7 +60,10 @@ impl HDDLAnalyzer {
                 Ok(MetaData {
                     recursion: tdg.get_recursion_type(&nullables),
                     nullables: nullables.iter().map(|x| x.to_string()).collect(),
-                    domain_name: String::new()
+                    domain_name: String::new(),
+                    n_actions: d.actions.len() as u32,
+                    n_tasks: d.compound_tasks.len() as u32,
+                    n_methods: d.methods.len() as u32
                 })
             }
             _ => panic!("expected domain, found problem")
