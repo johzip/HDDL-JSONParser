@@ -40,3 +40,9 @@ impl <'a> Borrow<str> for &Task<'a> {
         &self.name
     }
 }
+
+impl <'a> Borrow<&'a str> for &Task<'a> {
+    fn borrow(&self) -> &&'a str {
+        &self.name
+    }
+}

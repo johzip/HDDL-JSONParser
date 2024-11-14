@@ -16,6 +16,7 @@ pub enum SemanticErrorType{
     UndefinedSubtask(String),
     UndefinedTask(String),
     UndefinedParameter(String),
+    UndefinedObject(String),
     // Inconsistency Error
     InconsistentPredicateArity(String),
     InconsistentTaskArity(String),
@@ -42,6 +43,7 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::UndefinedSubtask(subtask) => write!(f, "Undefined subtask: {}", subtask),
             SemanticErrorType::UndefinedTask(task) => write!(f, "Undefined task: {}", task),
             SemanticErrorType::UndefinedParameter(param) => write!(f, "Undefined parameter: {}", param),
+            SemanticErrorType::UndefinedObject(object) => write!(f, "Undefined object: {}", object),
             // Inconsistency Error
             SemanticErrorType::InconsistentPredicateArity(pred) => write!(f, "Inconsistent predicate arity: {}", pred),
             SemanticErrorType::InconsistentTaskArity(task) => write!(f, "Inconsistent task arity: {}", task),

@@ -1,5 +1,5 @@
 use std::hash::Hash;
-
+use std::borrow::Borrow;
 use super::*;
 
 
@@ -24,3 +24,9 @@ impl <'a> PartialEq for Action<'a> {
 }
 
 impl <'a> Eq for Action<'a> {}
+
+impl <'a> Borrow<&'a str> for &Action<'a> {
+    fn borrow(&self) -> &&'a str {
+        &self.name
+    }
+}
