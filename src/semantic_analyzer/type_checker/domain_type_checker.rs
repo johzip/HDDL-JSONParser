@@ -1,66 +1,29 @@
 use std::collections::{HashMap, HashSet};
 
-use petgraph::algo::{has_path_connecting, toposort};
-use petgraph::{prelude::GraphMap, Directed};
-
 use super::*;
 
-pub struct TypeChecker<'a> {
-    type_hierarchy: GraphMap<&'a str, (), Directed>,
+#[derive(Clone)]
+pub struct DomainTypeChecker<'a> {
+    pub(super) generic_type_checker: TypeChecker<'a>,
 }
 
-impl<'a> TypeChecker<'a> {
-    pub fn new(types: &Option<Vec<Symbol<'a>>>) -> TypeChecker<'a> {
-        match &types {
-            None => TypeChecker {
-                type_hierarchy: GraphMap::new(),
-            },
-            Some(type_deps) => {
-                let mut type_graph: GraphMap<&str, (), Directed> =
-                    GraphMap::<_, (), Directed>::new();
-                for delcared_type in type_deps {
-                    if !type_graph.contains_node(delcared_type.name) {
-                        type_graph.add_node(delcared_type.name);
-                    }
-                    match &delcared_type.symbol_type {
-                        None => {}
-                        Some(parent) => {
-                            if !type_graph.contains_node(parent) {
-                                type_graph.add_node(parent);
-                            }
-                            type_graph.add_edge(delcared_type.name, parent, ());
-                        }
-                    }
-                }
-                TypeChecker {
-                    type_hierarchy: type_graph,
-                }
-            }
-        }
+impl<'a> DomainTypeChecker<'a> {
+    pub fn new(types: &Option<Vec<Symbol<'a>>>) -> DomainTypeChecker<'a> {
+        DomainTypeChecker { generic_type_checker: TypeChecker::new(types) }
     }
 
-    pub fn check_acyclicity(&self) -> Option<SemanticErrorType> {
-        match toposort(&self.type_hierarchy, None) {
-            Ok(_) => None,
-            Err(cycle_item) => {
-                let node = cycle_item.node_id();
-                return Some(SemanticErrorType::CyclicTypeDeclaration(node.to_string()));
-            }
-        }
+    pub fn get_type_hierarchy(&'a self) -> GraphMap<&'a str, (), Directed> {
+        self.generic_type_checker.type_hierarchy.clone()
     }
 
-    pub fn check_type_declarations(
-        &self,
+    pub fn check_type_declarations(&self,
         parameters: &Vec<Symbol<'a>>,
     ) -> Option<SemanticErrorType> {
-        for parameter in parameters.iter() {
-            if let Some(t) = parameter.symbol_type {
-                if !self.type_hierarchy.contains_node(t) {
-                    return Some(SemanticErrorType::UndefinedType(t.to_string()));
-                }
-            }
-        }
-        None
+        self.generic_type_checker.check_type_declarations(parameters)
+    }
+
+    pub fn verify_type_hierarchy(&self) -> Result<(), SemanticErrorType> {
+        self.generic_type_checker.verify_type_hierarchy()
     }
 
     // TODO: Add support for "universal qunatification" parameters
@@ -72,7 +35,7 @@ impl<'a> TypeChecker<'a> {
         declared_predicates: &HashSet<&'a Predicate<'a>>,
     ) -> Result<(), SemanticErrorType> {
         // Assert all types are declared
-        if let Some(undeclared_type) = self.check_type_declarations(parameters) {
+        if let Some(undeclared_type) = self.generic_type_checker.check_type_declarations(parameters) {
             return Err(undeclared_type);
         }
         // Store parameter types
@@ -110,7 +73,7 @@ impl<'a> TypeChecker<'a> {
                     }
                     for ((var_name, f), e) in found_list.into_iter().zip(expected_list.into_iter())
                     {
-                        if !self.is_var_type_consistent(*f, *e) {
+                        if !self.generic_type_checker.is_var_type_consistent(*f, *e) {
                             return Err(SemanticErrorType::InconsistentPredicateArgType(TypeError {
                                 expected: e.map(|inner| inner.to_string()),
                                 found: f.map(|inner| inner.to_string()),
@@ -127,29 +90,7 @@ impl<'a> TypeChecker<'a> {
         Ok(())
     }
 
-    fn is_var_type_consistent(&self, found: Option<&'a str>, expected: Option<&'a str>) -> bool {
-        match (found, expected) {
-            (Some(found_typing), Some(defined_typing)) => {
-                // type matches exactly
-                if found_typing == defined_typing {
-                    return true;
-                }
-                // search whether there is a path from current type to a super type
-                if !has_path_connecting(&self.type_hierarchy, found_typing, defined_typing, None) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-            (None, None) => {
-                return true;
-            }
-            (None, Some(_)) => return false,
-            (Some(_), None) => {
-                return false;
-            }
-        }
-    }
+    
 
     pub fn is_task_consistent(
         &self,
@@ -188,7 +129,7 @@ impl<'a> TypeChecker<'a> {
                     return Err(SemanticErrorType::InconsistentTaskArity(task_name.to_string()));
                 }
                 for ((name, f), e) in found.iter().zip(expected.iter()) {
-                    if !self.is_var_type_consistent(**f, *e) {
+                    if !self.generic_type_checker.is_var_type_consistent(**f, *e) {
                         return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
                             expected: e.map(|inner| inner.to_string()),
                             found: f.map(|inner| inner.to_string()),
@@ -206,7 +147,7 @@ impl<'a> TypeChecker<'a> {
                         return Err(SemanticErrorType::InconsistentTaskArity(task_name.to_string()));
                     }
                     for ((name, f), e) in found.iter().zip(expected.iter()) {
-                        if !self.is_var_type_consistent(**f, *e) {
+                        if !self.generic_type_checker.is_var_type_consistent(**f, *e) {
                             return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
                                 expected: e.map(|inner| inner.to_string()),
                                 found: f.map(|inner| inner.to_string()),

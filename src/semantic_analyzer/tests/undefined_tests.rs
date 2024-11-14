@@ -1,5 +1,3 @@
-use analyzer::*;
-
 use super::*;
 
 #[test]
@@ -24,7 +22,7 @@ pub fn undefined_predicate_action_precondition_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -68,7 +66,7 @@ pub fn inconsistent_predicate_action_effect_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -118,7 +116,7 @@ pub fn undefined_predicate_method_precondition_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -171,7 +169,7 @@ pub fn undefined_method_parameters_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -227,7 +225,7 @@ pub fn undefined_subtask_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -283,7 +281,7 @@ pub fn inconsistent_subtask_arity_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -327,7 +325,7 @@ pub fn undefined_type_compound_task_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -370,7 +368,7 @@ pub fn undefined_type_predicate_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -426,7 +424,7 @@ pub fn undefined_predicate_forall_quantification_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -478,7 +476,7 @@ pub fn undefined_method_task_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")

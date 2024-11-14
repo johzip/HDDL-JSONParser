@@ -1,16 +1,15 @@
-mod analyzer;
 mod undefined_elements;
 mod type_checker;
 mod tests;
-mod problem_analyzer;
+mod analyzers;
 mod tdg;
 
 use crate::syntactic_analyzer::*;
 use crate::output::*;
 use undefined_elements::*;
-use type_checker::TypeChecker;
+use type_checker::*;
 
 extern crate petgraph;
 
-pub use analyzer::SemanticAnalyzer;
+pub use analyzers::*;
 pub use tdg::TDG;

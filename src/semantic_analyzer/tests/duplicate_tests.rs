@@ -46,7 +46,7 @@ pub fn requirements_duplicate_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -87,7 +87,7 @@ pub fn predicates_duplicate_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -141,7 +141,7 @@ pub fn action_duplicate_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -184,7 +184,7 @@ pub fn compound_task_duplicate_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -246,7 +246,7 @@ pub fn method_duplicate_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")

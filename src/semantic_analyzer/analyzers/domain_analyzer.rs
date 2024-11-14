@@ -1,29 +1,30 @@
 use std::collections::HashSet;
 
-use crate::lexical_analyzer::RequirementType;
 use super::*;
+use crate::lexical_analyzer::RequirementType;
 
-pub struct SemanticAnalyzer<'a> {
+pub struct DomainSemanticAnalyzer<'a> {
     domain: &'a DomainAST<'a>,
-    pub(super) type_checker: TypeChecker<'a>,
+    pub type_checker: DomainTypeChecker<'a>,
 }
 
-impl<'a> SemanticAnalyzer<'a> {
-    pub fn new(domain: &'a DomainAST<'a>) -> SemanticAnalyzer<'a> {
-        SemanticAnalyzer {
+impl<'a> DomainSemanticAnalyzer<'a> {
+    pub fn new(domain: &'a DomainAST<'a>) -> DomainSemanticAnalyzer<'a> {
+        DomainSemanticAnalyzer {
             domain,
-            type_checker: TypeChecker::new(&domain.types),
+            type_checker: DomainTypeChecker::new(&domain.types),
         }
     }
 
-    pub fn verify_domain(&'a self) -> Result<Vec<WarningType>, SemanticErrorType> {        
+    pub fn verify_domain(&'a self) -> Result<SymbolTable<'a>, SemanticErrorType> {
         // Assert there are no duplicate requirements
-        if let Some(duplicate) = SemanticAnalyzer::check_duplicate_requirements(&self.domain.requirements) {
+        if let Some(duplicate) =
+            DomainSemanticAnalyzer::check_duplicate_requirements(&self.domain.requirements)
+        {
             return Err(duplicate);
-        // Assert type hierarchy is acyclic
-        } else if let Some(cycle) = self.type_checker.check_acyclicity() {
-            return Err(cycle);
         }
+        // Assert type hierarchy is acyclic
+        let _ = self.type_checker.verify_type_hierarchy()?;
         let mut warnings = vec![];
         // Domain declarations
         let declared_predicates = self.verify_predicates()?;
@@ -34,7 +35,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 for c in constants {
                     declared_constants.insert(c);
                 }
-            },
+            }
             None => {}
         }
 
@@ -42,7 +43,9 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_actions = HashSet::new();
         for action in self.domain.actions.iter() {
             if !declared_actions.insert(action) {
-                return Err(SemanticErrorType::DuplicateActionDeclaration(action.name.to_string()));
+                return Err(SemanticErrorType::DuplicateActionDeclaration(
+                    action.name.to_string(),
+                ));
             }
             // assert precondition predicates are declared
             match &action.preconditions {
@@ -56,7 +59,9 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableActionPrecondition(action.name.to_string()));
+                        warnings.push(WarningType::UnsatisfiableActionPrecondition(
+                            action.name.to_string(),
+                        ));
                     }
                 }
                 _ => {}
@@ -81,7 +86,9 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_methods = HashSet::new();
         for method in self.domain.methods.iter() {
             if !declared_methods.insert(method.name) {
-                return Err(SemanticErrorType::DuplicateMethodDeclaration(method.name.to_string()));
+                return Err(SemanticErrorType::DuplicateMethodDeclaration(
+                    method.name.to_string(),
+                ));
             }
             // Assert preconditions are valid
             match &method.precondition {
@@ -95,20 +102,26 @@ impl<'a> SemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(method.name.to_string()));
+                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(
+                            method.name.to_string(),
+                        ));
                     }
                 }
                 _ => {}
             }
             // Assert task is defined
             if !declared_tasks.contains(method.task_name) {
-                return Err(SemanticErrorType::UndefinedTask(method.task_name.to_string()));
+                return Err(SemanticErrorType::UndefinedTask(
+                    method.task_name.to_string(),
+                ));
             } else {
                 // Assert task arity is consistent
                 for declared_compound_task in self.domain.compound_tasks.iter() {
                     if method.task_name == declared_compound_task.name {
                         if method.task_terms.len() != declared_compound_task.parameters.len() {
-                            return Err(SemanticErrorType::InconsistentTaskArity(method.task_name.to_string()));
+                            return Err(SemanticErrorType::InconsistentTaskArity(
+                                method.task_name.to_string(),
+                            ));
                         } else {
                             break;
                         }
@@ -119,9 +132,7 @@ impl<'a> SemanticAnalyzer<'a> {
             // Assert task type is consistent
             match self.type_checker.is_task_consistent(
                 &method.task_name,
-                &method.task_terms.iter().map(|x| {
-                    x.name
-                }).collect(),
+                &method.task_terms.iter().map(|x| x.name).collect(),
                 &method.params,
                 &declared_constants,
                 &declared_tasks,
@@ -149,7 +160,15 @@ impl<'a> SemanticAnalyzer<'a> {
                 return Err(SemanticErrorType::CyclicOrderingDeclaration);
             }
         }
-        Ok(warnings)
+        let type_hierarchy = self.type_checker.get_type_hierarchy();
+        Ok(SymbolTable {
+            warnings: warnings,
+            constants: declared_constants,
+            predicates: declared_predicates,
+            tasks: declared_tasks,
+            actions: declared_actions,
+            type_hierarchy: type_hierarchy
+        })
     }
 
     // returns declared predicates (if there is no error)
@@ -176,7 +195,9 @@ impl<'a> SemanticAnalyzer<'a> {
         let mut declared_tasks = HashSet::new();
         for task in self.domain.compound_tasks.iter() {
             if !declared_tasks.insert(task) {
-                return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(task.name.to_string()));
+                return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(
+                    task.name.to_string(),
+                ));
             }
             // assert parameter types are declared
             if let Some(error) = self.type_checker.check_type_declarations(&task.parameters) {
@@ -186,7 +207,9 @@ impl<'a> SemanticAnalyzer<'a> {
         Ok(declared_tasks)
     }
 
-    pub fn check_duplicate_requirements(requirements: &'a Vec<RequirementType>) -> Option<SemanticErrorType> {
+    pub fn check_duplicate_requirements(
+        requirements: &'a Vec<RequirementType>,
+    ) -> Option<SemanticErrorType> {
         let mut names = HashSet::new();
         for req in requirements {
             if !names.insert(req) {

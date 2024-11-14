@@ -38,7 +38,7 @@ pub fn cyclic_method_ordering_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -77,15 +77,14 @@ pub fn cyclic_types_test() {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
                 Err(error) => {
                     match error {
-                        SemanticErrorType::CyclicTypeDeclaration(x) => {
-                            assert_eq!(x, "t7")
+                        SemanticErrorType::CyclicTypeDeclaration => {
                             // TODO: assert locality in future
                         }
                         _ => {

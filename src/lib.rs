@@ -6,7 +6,7 @@ mod output;
 use crate::lexical_analyzer::TokenPosition;
 use lexical_analyzer::LexicalAnalyzer;
 use output::{MetaData, ParsingError};
-use semantic_analyzer::TDG;
+use semantic_analyzer::*;
 use syntactic_analyzer::AbstractSyntaxTree;
 
 pub struct HDDLAnalyzer {}
@@ -17,20 +17,31 @@ impl HDDLAnalyzer {
         let domain_parser = syntactic_analyzer::Parser::new(lexer);
         let domain_ast = domain_parser.parse()?;
         if let AbstractSyntaxTree::Domain(d) = domain_ast {
-            let semantic_verifier = semantic_analyzer::SemanticAnalyzer::new(&d);
-            let warnings = semantic_verifier.verify_domain()?;
+            let domain_semantic_verifier = DomainSemanticAnalyzer::new(&d);
+            let symbol_table = domain_semantic_verifier.verify_domain()?;
             match problem {
                 Some(p) => {
                     let lexer = LexicalAnalyzer::new(p);
                     let problem_parser = syntactic_analyzer::Parser::new(lexer);
                     let problem_ast = problem_parser.parse()?;
-                    if let AbstractSyntaxTree::Problem(p_ast) = problem_ast {
-                        Ok(semantic_verifier.verify_problem(p_ast)?)
-                    } else {
-                        panic!("expected problem, found domain")
+                    match problem_ast {
+                        AbstractSyntaxTree::Problem(p_ast) => {
+                            let problem_semantic_verifier = ProblemSemanticAnalyzer::new(
+                                &p_ast,
+                                symbol_table
+                            );
+                            let warnings= problem_semantic_verifier.verify_problem()?;
+                            Ok(warnings)
+
+                        }
+                        _ => {
+                            panic!("expected problem, found domain")
+                        }
                     }
                 },
-                None => Ok(warnings)
+                None => Ok(
+                    symbol_table.warnings
+                )
             }
         } else {
             panic!("expected domain, found problem")

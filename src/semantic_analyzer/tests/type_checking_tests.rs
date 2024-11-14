@@ -24,7 +24,7 @@ pub fn basic_type_checking_test () {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("errors are not caught")
@@ -73,7 +73,7 @@ pub fn effect_type_checking_test () {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {        }
                 Err(error) => {
@@ -117,7 +117,7 @@ pub fn method_prec_type_checking_test () {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {        }
                 Err(error) => {
@@ -170,7 +170,7 @@ pub fn method_subtask_checking_test () {
     let ast = parser.parse().unwrap();
     match ast {
         AbstractSyntaxTree::Domain(d) => {
-            let semantic_parser = SemanticAnalyzer::new(&d);
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
             match semantic_parser.verify_domain() {
                 Ok(_) => {
                     panic!("error are not caught")
