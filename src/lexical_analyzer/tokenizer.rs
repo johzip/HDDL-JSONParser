@@ -120,7 +120,7 @@ impl <'a> LexicalAnalyzer <'a> {
                             self.cursor.set(self.cursor.get() + 1);
                             current = self.program[self.cursor.get()] as char;
                         }
-                        return self.get_token();
+                        return self.parse(peek);
                 }
                 // Other
                 _ => {

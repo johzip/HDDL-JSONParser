@@ -186,7 +186,7 @@ impl<'a> Parser<'a> {
             }
             token => {
                 let error = SyntacticError {
-                    expected: "subtask definitions".to_string(),
+                    expected: ":subtasks or :ordered-subtasks keyword".to_string(),
                     found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
                 };
