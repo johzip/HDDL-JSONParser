@@ -73,7 +73,7 @@ impl Display for MetaData {
         }
         writeln!(f, "\tNumber of actions: {}", self.n_actions)?;
         writeln!(f, "\tNumber of abstract tasks: {}", self.n_tasks)?;
-        writeln!(f, "\tNumber of n_methods: {}", self.n_methods)?;
+        writeln!(f, "\tNumber of methods: {}", self.n_methods)?;
         Ok(())
     }
 }

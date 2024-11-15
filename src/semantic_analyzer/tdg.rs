@@ -169,8 +169,13 @@ impl<'a> TDG<'a> {
                                 let nullable_suffix =
                                     suffix.iter().all(|sym| nullables.contains(sym));
                                 match recursion_type {
-                                    RecursionType::GrowAndShrinkRecursion(_)
-                                    | RecursionType::EmptyRecursion(_) => {}
+                                    RecursionType::GrowAndShrinkRecursion(_) => {}
+                                    RecursionType::EmptyRecursion(_) => {
+                                        if nullable_suffix {
+                                            recursion_type =
+                                                RecursionType::GrowAndShrinkRecursion(cyclic_path);
+                                        }
+                                    }
                                     _ => {
                                         if nullable_suffix {
                                             recursion_type =
@@ -269,12 +274,14 @@ impl<'a> TDG<'a> {
                         }
                         None => {}
                     }
-                    
                 }
-                return prefix.iter().map(|id| {
+                return prefix
+                    .iter()
+                    .map(|id| {
                         let task_name = id_to_task_mapping.get(id).unwrap();
                         self.get_task_index(&task_name)
-                    }).collect();
+                    })
+                    .collect();
             }
         }
     }
