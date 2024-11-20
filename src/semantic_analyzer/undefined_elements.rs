@@ -14,18 +14,22 @@ pub fn check_predicate_declarations<'a>(
                     if predicate.variables.len() == declared_predicate.variables.len() {
                         return Ok(());
                     } else {
-                        return Err(SemanticErrorType::InconsistentPredicateArity(predicate.name.to_string()));
+                        return Err(SemanticErrorType::InconsistentPredicateArity(ArityError {
+                            symbol: predicate.name.to_string(),
+                            expected_arity: declared_predicate.variables.len() as u32,
+                            found_arity: predicate.variables.len() as u32,
+                        }));
                     }
                 }
             }
-            return Err(SemanticErrorType::UndefinedPredicate(predicate.name.to_string()));
+            return Err(SemanticErrorType::UndefinedPredicate(
+                predicate.name.to_string(),
+            ));
         }
         Formula::Not(new_formula) => {
             return check_predicate_declarations(&*new_formula, declared_predicates);
         }
-        Formula::And(new_formula) |
-        Formula::Or(new_formula) |
-        Formula::Xor(new_formula) => {
+        Formula::And(new_formula) | Formula::Or(new_formula) | Formula::Xor(new_formula) => {
             for f in new_formula {
                 check_predicate_declarations(&*f, declared_predicates)?;
             }

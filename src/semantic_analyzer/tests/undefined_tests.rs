@@ -73,8 +73,10 @@ pub fn inconsistent_predicate_action_effect_test() {
                 }
                 Err(error) => {
                     match error {
-                        SemanticErrorType::InconsistentPredicateArity(x) => {
-                            assert_eq!(x, "hold")
+                        SemanticErrorType::InconsistentPredicateArity(ar_error) => {
+                            assert_eq!(ar_error.symbol, "hold");
+                            assert_eq!(ar_error.expected_arity, 2);
+                            assert_eq!(ar_error.found_arity, 3)
                             // TODO: assert locality in future
                         }
                         token => {
@@ -288,8 +290,10 @@ pub fn inconsistent_subtask_arity_test() {
                 }
                 Err(error) => {
                     match error {
-                        SemanticErrorType::InconsistentTaskArity(x) => {
-                            assert_eq!(x, "c_2")
+                        SemanticErrorType::InconsistentTaskArity(ar_error) => {
+                            assert_eq!(ar_error.symbol, "c_2");
+                            assert_eq!(ar_error.expected_arity, 1);
+                            assert_eq!(ar_error.found_arity, 2);
                             // TODO: assert locality in future
                         }
                         error => {

@@ -18,8 +18,8 @@ pub enum SemanticErrorType{
     UndefinedParameter(String),
     UndefinedObject(String),
     // Inconsistency Error
-    InconsistentPredicateArity(String),
-    InconsistentTaskArity(String),
+    InconsistentPredicateArity(ArityError),
+    InconsistentTaskArity(ArityError),
     InconsistentPredicateArgType(TypeError),
     InconsistentTaskArgType(TypeError),
     // Ordering Errors
@@ -45,8 +45,12 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::UndefinedParameter(param) => write!(f, "parameter {} is not defined.", param),
             SemanticErrorType::UndefinedObject(object) => write!(f, "object {} is not defined.", object),
             // Inconsistency Error
-            SemanticErrorType::InconsistentPredicateArity(pred) => write!(f, "Inconsistent predicate arity: {}", pred),
-            SemanticErrorType::InconsistentTaskArity(task) => write!(f, "Inconsistent task arity: {}", task),
+            SemanticErrorType::InconsistentPredicateArity(ar_error) => {
+                write!(f, "Predicate {} takes {} parameters, but {} are given.", ar_error.symbol, ar_error.expected_arity, ar_error.found_arity)
+            }
+            SemanticErrorType::InconsistentTaskArity(ar_error) => {
+                write!(f, "Task {} takes {} parameters, but {} are given.", ar_error.symbol, ar_error.expected_arity, ar_error.found_arity)
+            }
             SemanticErrorType::InconsistentPredicateArgType(type_error) => write!(f, "{}", type_error),
             SemanticErrorType::InconsistentTaskArgType(type_error) => write!(f, "{}", type_error),
             // Ordering Errors
@@ -83,3 +87,10 @@ impl fmt::Display for TypeError{
         }
     }
 }
+
+#[derive(Debug)]
+pub struct ArityError {
+    pub symbol: String,
+    pub expected_arity: u32,
+    pub found_arity: u32
+} 

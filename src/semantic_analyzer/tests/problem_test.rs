@@ -341,9 +341,9 @@ pub fn p_inconsistent_goal_predicate_test() {
                         Err(d) => {
                             match d {
                                 SemanticErrorType::InconsistentPredicateArity(ty)=> {
-                                    if ty != "at" {
-                                        panic!("wrong error")
-                                    }
+                                    assert_eq!(ty.symbol, "at");
+                                    assert_eq!(ty.expected_arity, 2);
+                                    assert_eq!(ty.found_arity, 1);
                                 },
                                 _ => panic!()
                             }

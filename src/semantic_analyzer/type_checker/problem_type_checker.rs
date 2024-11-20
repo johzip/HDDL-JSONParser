@@ -9,7 +9,10 @@ pub struct ProblemTypeChecker<'a> {
 }
 
 impl<'a> ProblemTypeChecker<'a> {
-    pub fn new(symbol_table: SymbolTable<'a>, problem: &'a ProblemAST<'a>) -> ProblemTypeChecker<'a> {
+    pub fn new(
+        symbol_table: SymbolTable<'a>,
+        problem: &'a ProblemAST<'a>,
+    ) -> ProblemTypeChecker<'a> {
         let mut objects = HashMap::new();
         for object in problem.objects.iter() {
             objects.insert(object.name, object.symbol_type);
@@ -38,23 +41,26 @@ impl<'a> ProblemTypeChecker<'a> {
         match declared_predicates.get(predicate) {
             Some(definition) => {
                 if definition.variables.len() != predicate.variables.len() {
-                    return Err(SemanticErrorType::InconsistentPredicateArity(
-                        predicate.name.to_string(),
-                    ));
+                    return Err(SemanticErrorType::InconsistentPredicateArity(ArityError {
+                        symbol: predicate.name.to_string(),
+                        expected_arity: definition.variables.len() as u32,
+                        found_arity: predicate.variables.len() as u32,
+                    }));
                 }
                 for (expected, found) in definition.variables.iter().zip(predicate.variables.iter())
                 {
                     match self.objects.get(found.name) {
                         Some(object_type) => {
-                            let is_consistent = self.generic_type_checker
+                            let is_consistent = self
+                                .generic_type_checker
                                 .is_var_type_consistent(*object_type, expected.symbol_type);
                             if !is_consistent {
                                 return Err(SemanticErrorType::InconsistentPredicateArgType(
                                     TypeError {
                                         expected: expected.symbol_type.map(String::from),
                                         found: found.symbol_type.map(String::from),
-                                        var_name: predicate.name.to_string()
-                                    }
+                                        var_name: predicate.name.to_string(),
+                                    },
                                 ));
                             }
                         }
@@ -62,36 +68,44 @@ impl<'a> ProblemTypeChecker<'a> {
                             return Err(SemanticErrorType::UndefinedObject(found.name.to_string()));
                         }
                     }
-                    
                 }
                 return Ok(());
             }
             None => {
-                return Err(SemanticErrorType::UndefinedPredicate(predicate.name.to_string()));
+                return Err(SemanticErrorType::UndefinedPredicate(
+                    predicate.name.to_string(),
+                ));
             }
         }
     }
 
-    pub fn check_subtask_instantiation(&self, subtask: &'a Subtask<'a>) -> Result<(), SemanticErrorType> {
+    pub fn check_subtask_instantiation(
+        &self,
+        subtask: &'a Subtask<'a>,
+    ) -> Result<(), SemanticErrorType> {
         if self.symbol_table.actions.contains(&subtask.task_symbol) {
             let action = self.symbol_table.actions.get(&subtask.task_symbol).unwrap();
             if action.parameters.len() != subtask.terms.len() {
-                return Err(SemanticErrorType::InconsistentTaskArity(subtask.task_symbol.to_string()));
+                return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
+                    symbol: subtask.task_symbol.to_string(),
+                    expected_arity: action.parameters.len() as u32,
+                    found_arity: subtask.terms.len() as u32,
+                }));
             }
             for (expected, found) in action.parameters.iter().zip(subtask.terms.iter()) {
                 match self.objects.get(found) {
                     Some(object_type) => {
-                        let is_consistent = self.generic_type_checker.is_var_type_consistent(*object_type, expected.symbol_type);
+                        let is_consistent = self
+                            .generic_type_checker
+                            .is_var_type_consistent(*object_type, expected.symbol_type);
                         if !is_consistent {
-                            return Err(SemanticErrorType::InconsistentTaskArgType(
-                                TypeError {
-                                    expected: expected.symbol_type.map(String::from),
-                                    found: object_type.map(String::from),
-                                    var_name: subtask.task_symbol.to_string()
-                                }
-                            ));
+                            return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
+                                expected: expected.symbol_type.map(String::from),
+                                found: object_type.map(String::from),
+                                var_name: subtask.task_symbol.to_string(),
+                            }));
                         }
-                    },
+                    }
                     None => {
                         return Err(SemanticErrorType::UndefinedObject(found.to_string()));
                     }
@@ -101,22 +115,26 @@ impl<'a> ProblemTypeChecker<'a> {
         } else if self.symbol_table.tasks.contains(subtask.task_symbol) {
             let task = self.symbol_table.tasks.get(&subtask.task_symbol).unwrap();
             if task.parameters.len() != subtask.terms.len() {
-                return Err(SemanticErrorType::InconsistentTaskArity(subtask.task_symbol.to_string()));
+                return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
+                    symbol: subtask.task_symbol.to_string(),
+                    expected_arity: task.parameters.len() as u32,
+                    found_arity: subtask.terms.len() as u32,
+                }));
             }
             for (expected, found) in task.parameters.iter().zip(subtask.terms.iter()) {
                 match self.objects.get(found) {
                     Some(object_type) => {
-                        let is_consistent = self.generic_type_checker.is_var_type_consistent(*object_type, expected.symbol_type);
+                        let is_consistent = self
+                            .generic_type_checker
+                            .is_var_type_consistent(*object_type, expected.symbol_type);
                         if !is_consistent {
-                            return Err(SemanticErrorType::InconsistentTaskArgType(
-                                TypeError {
-                                    expected: expected.symbol_type.map(String::from),
-                                    found: object_type.map(String::from),
-                                    var_name: subtask.task_symbol.to_string()
-                                }
-                            ));
+                            return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
+                                expected: expected.symbol_type.map(String::from),
+                                found: object_type.map(String::from),
+                                var_name: subtask.task_symbol.to_string(),
+                            }));
                         }
-                    },
+                    }
                     None => {
                         return Err(SemanticErrorType::UndefinedObject(found.to_string()));
                     }
@@ -124,7 +142,9 @@ impl<'a> ProblemTypeChecker<'a> {
             }
             return Ok(());
         } else {
-            return Err(SemanticErrorType::UndefinedSubtask(subtask.task_symbol.to_string()));
+            return Err(SemanticErrorType::UndefinedSubtask(
+                subtask.task_symbol.to_string(),
+            ));
         }
     }
 }

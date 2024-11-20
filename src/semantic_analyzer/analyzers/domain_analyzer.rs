@@ -119,9 +119,11 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                 for declared_compound_task in self.domain.compound_tasks.iter() {
                     if method.task_name == declared_compound_task.name {
                         if method.task_terms.len() != declared_compound_task.parameters.len() {
-                            return Err(SemanticErrorType::InconsistentTaskArity(
-                                method.task_name.to_string(),
-                            ));
+                            return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
+                                symbol: method.task_name.to_string(),
+                                expected_arity: method.task_terms.len() as u32,
+                                found_arity: declared_compound_task.parameters.len() as u32,
+                            }));
                         } else {
                             break;
                         }
