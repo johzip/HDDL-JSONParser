@@ -23,12 +23,10 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
     pub fn verify_problem(
         &self,
     ) -> Result<Vec<WarningType>, SemanticErrorType> {
-        // TODO: test
         if let Some(error) = self.type_checker.check_type_declarations(&self.problem.objects) {
             return Err(error);
         }
 
-        // TODO: test
         // check for duplicate objects
         let mut object_types = HashMap::new();
         for obj in self.problem.objects.iter() {
@@ -47,17 +45,29 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
             let _ = self.type_checker.check_predicate_instantiation(predicate)?;
         }
 
-        // TODO: test
         // check the initial task network
         if let Some(htn) = &self.problem.init_tn {
             if !htn.tn.orderings.is_acyclic() {
                 return Err(SemanticErrorType::CyclicOrderingDeclaration);
             }
 
+            // TODO: test
             for subtask in htn.tn.subtasks.iter() {
                 let _ = self.type_checker.check_subtask_instantiation(subtask)?;
             }
         }
+
+        // TODO: test
+        // check goal description
+        match &self.problem.goal {
+            Some(goal) => {
+                for predicate in goal.get_propositional_predicates() {
+                    let _ = self.type_checker.check_predicate_instantiation(predicate)?;
+                }
+            }
+            None => {}
+        }
+        
 
         Ok(self.type_checker.symbol_table.warnings.iter().cloned().collect())
     }

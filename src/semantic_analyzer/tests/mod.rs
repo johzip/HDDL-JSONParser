@@ -3,6 +3,7 @@ mod undefined_tests;
 mod cycle_detection_tests;
 mod type_checking_tests;
 mod tdg_tests;
+mod problem_test;
 
 use super::*;
 use crate::syntactic_analyzer::*;
