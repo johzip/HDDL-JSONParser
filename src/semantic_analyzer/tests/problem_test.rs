@@ -299,3 +299,169 @@ pub fn p_cyclic_init_tn_ordering_test() {
         AbstractSyntaxTree::Problem(_) => panic!()
     }
 }
+
+#[test]
+pub fn p_inconsistent_goal_predicate_test() {
+    let program = get_domain();
+    let problem = String::from("
+        (define (problem p1)
+            (:domain d)
+            (:objects
+                x1 x2 - place
+                truck1 truck2 -locatable
+            )
+            (:htn
+                :parameters ()
+                :ordered-subtasks ()
+            )
+            (:goal
+                (and
+                    (at truck1 x1)
+                    (at truck1)
+                )
+            )
+    ").into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let d_ast = parser.parse().unwrap();
+    match d_ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let p_lexer = LexicalAnalyzer::new(&problem);
+            let p_parser = Parser::new(p_lexer);
+            let p_ast = p_parser.parse().unwrap();
+            match p_ast {
+                AbstractSyntaxTree::Problem(p) => {
+                    let d_analyzer = DomainSemanticAnalyzer::new(&d);
+                    let domain_symbols = d_analyzer.verify_domain().unwrap();
+                    let p_analyzer = ProblemSemanticAnalyzer::new(&p, domain_symbols);
+                    match p_analyzer.verify_problem() {
+                        Ok(_) => {
+                            panic!("error not found")
+                        }
+                        Err(d) => {
+                            match d {
+                                SemanticErrorType::InconsistentPredicateArity(ty)=> {
+                                    if ty != "at" {
+                                        panic!("wrong error")
+                                    }
+                                },
+                                _ => panic!()
+                            }
+                        }
+                    }
+                }
+                _ => panic!()
+            }
+        }
+        AbstractSyntaxTree::Problem(_) => panic!()
+    }
+}
+
+#[test]
+pub fn p_inconsistent_init_predicate_test() {
+    let program = get_domain();
+    let problem = String::from("
+        (define (problem p1)
+            (:domain d)
+            (:objects
+                x1 x2 - place
+                truck1 truck2 -locatable
+                crate1 - crate
+            )
+            (:htn
+                :parameters ()
+                :ordered-subtasks ()
+            )
+            (:init
+                (at truck1 crate1)
+            )
+    ").into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let d_ast = parser.parse().unwrap();
+    match d_ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let p_lexer = LexicalAnalyzer::new(&problem);
+            let p_parser = Parser::new(p_lexer);
+            let p_ast = p_parser.parse().unwrap();
+            match p_ast {
+                AbstractSyntaxTree::Problem(p) => {
+                    let d_analyzer = DomainSemanticAnalyzer::new(&d);
+                    let domain_symbols = d_analyzer.verify_domain().unwrap();
+                    let p_analyzer = ProblemSemanticAnalyzer::new(&p, domain_symbols);
+                    match p_analyzer.verify_problem() {
+                        Ok(_) => {
+                            panic!("error not found")
+                        }
+                        Err(d) => {
+                            match d {
+                                SemanticErrorType::InconsistentPredicateArgType(ty)=> {
+                                    if ty.var_name != "at" {
+                                        panic!("wrong error")
+                                    }
+                                },
+                                token => panic!("{:?}", token)
+                            }
+                        }
+                    }
+                }
+                _ => panic!()
+            }
+        }
+        AbstractSyntaxTree::Problem(_) => panic!()
+    }
+}
+
+#[test]
+pub fn p_inconsistent_subtask_test() {
+    let program = get_domain();
+    let problem = String::from("
+        (define (problem p1)
+            (:domain d)
+            (:objects
+                x1 x2 - place
+                truck1 truck2 -locatable
+                crate1 crate2 - crate
+            )
+            (:htn
+                :parameters ()
+                :subtasks (and
+                    (t1 (do_get_truck truck1 truck2))
+                )
+            )
+    ").into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let d_ast = parser.parse().unwrap();
+    match d_ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let p_lexer = LexicalAnalyzer::new(&problem);
+            let p_parser = Parser::new(p_lexer);
+            let p_ast = p_parser.parse().unwrap();
+            match p_ast {
+                AbstractSyntaxTree::Problem(p) => {
+                    let d_analyzer = DomainSemanticAnalyzer::new(&d);
+                    let domain_symbols = d_analyzer.verify_domain().unwrap();
+                    let p_analyzer = ProblemSemanticAnalyzer::new(&p, domain_symbols);
+                    match p_analyzer.verify_problem() {
+                        Ok(_) => {
+                            panic!("error not found")
+                        }
+                        Err(d) => {
+                            match d {
+                                SemanticErrorType::InconsistentTaskArgType(ty)=> {
+                                    if ty.var_name != "do_get_truck" {
+                                        panic!("wrong error")
+                                    }
+                                },
+                                token => panic!("{:?}", token)
+                            }
+                        }
+                    }
+                }
+                _ => panic!()
+            }
+        }
+        AbstractSyntaxTree::Problem(_) => panic!()
+    }
+}

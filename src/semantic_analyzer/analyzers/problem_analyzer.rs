@@ -39,7 +39,6 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
             }
         }
 
-        // TODO: test
         // check the consistency of init predicates
         for predicate in self.problem.init_state.iter() {
             let _ = self.type_checker.check_predicate_instantiation(predicate)?;
@@ -51,13 +50,11 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
                 return Err(SemanticErrorType::CyclicOrderingDeclaration);
             }
 
-            // TODO: test
             for subtask in htn.tn.subtasks.iter() {
                 let _ = self.type_checker.check_subtask_instantiation(subtask)?;
             }
         }
 
-        // TODO: test
         // check goal description
         match &self.problem.goal {
             Some(goal) => {
