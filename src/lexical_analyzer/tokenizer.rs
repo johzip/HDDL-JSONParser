@@ -16,7 +16,6 @@ impl <'a> LexicalAnalyzer <'a> {
             cursor: Cell::new(0),
             last_token_pos: Cell::new(TokenPosition {
                 line: 1,
-                column: (1, None)
             }),
         }
     }
@@ -218,7 +217,7 @@ impl <'a> LexicalAnalyzer <'a> {
             if current == '\n' {
                 let new_line = self.last_token_pos.get().line + 1;
                 self.last_token_pos.set(
-                    TokenPosition { line: new_line, column: (0, None) }
+                    TokenPosition { line: new_line }
                 );
             }
             self.cursor.set(self.cursor.get() + 1);

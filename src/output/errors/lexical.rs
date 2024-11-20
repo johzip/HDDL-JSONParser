@@ -18,10 +18,10 @@ impl fmt::Display for LexicalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.error_type {
             LexicalErrorType::InvalidIdentifier => {
-                writeln!(f, "{} Identifier {}", self.position, self.lexeme)
+                writeln!(f, "line {}: {} is an invalid identifier.", self.position.line, self.lexeme)
             }
             LexicalErrorType::InvalidKeyword => {
-                writeln!(f, "{} Invalid Token {}", self.position, self.lexeme)
+                writeln!(f, "line {}: {} is an invalid keyword.", self.position.line, self.lexeme)
             }
         }
     }

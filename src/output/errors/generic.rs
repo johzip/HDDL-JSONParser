@@ -7,25 +7,25 @@ pub enum ParsingError{
     Semantic(SemanticErrorType)
 }
 
-impl  From<LexicalError> for ParsingError {
+impl From<LexicalError> for ParsingError {
     fn from(value: LexicalError) -> Self {
         ParsingError::Lexiacal(value)
     }
 }
 
-impl  From<SyntacticError> for ParsingError {
+impl From<SyntacticError> for ParsingError {
     fn from(value: SyntacticError) -> Self {
         ParsingError::Syntactic(value)
     }
 }
 
-impl  From<SemanticErrorType> for ParsingError {
+impl From<SemanticErrorType> for ParsingError {
     fn from(value: SemanticErrorType) -> Self {
         ParsingError::Semantic(value)
     }
 }
 
-impl  std::fmt::Display for ParsingError {
+impl std::fmt::Display for ParsingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Lexiacal(error) => write!(f, "{}", error),

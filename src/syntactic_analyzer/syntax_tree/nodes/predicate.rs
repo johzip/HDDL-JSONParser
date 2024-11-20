@@ -22,7 +22,7 @@ impl <'a> Predicate<'a> {
     pub fn new_dummy(name: &'a str) -> Predicate {
         Predicate {
             name,
-            name_pos: TokenPosition { line: 0, column: (0, None) },
+            name_pos: TokenPosition { line: 0 },
             variables: vec![]
         }
     }

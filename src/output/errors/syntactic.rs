@@ -10,6 +10,6 @@ pub struct SyntacticError {
 
 impl fmt::Display for SyntacticError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{} expected: {}, but found: {}", self.position, self.expected, self.found)
+        writeln!(f, "line {}: expected '{}', but found '{}'", self.position.line, self.expected, self.found)
     }
 }

@@ -31,24 +31,24 @@ impl fmt::Display for SemanticErrorType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             // Duplicate Errors
-            SemanticErrorType::DuplicateObjectDeclaration(obj) => write!(f, "Duplicate object declaration: {}", obj),
-            SemanticErrorType::DuplicateRequirementDeclaration(req_type) => write!(f, "Duplicate requirement declaration: {:?}", req_type),
-            SemanticErrorType::DuplicatePredicateDeclaration(pred) => write!(f, "Duplicate predicate declaration: {}", pred),
-            SemanticErrorType::DuplicateActionDeclaration(action) => write!(f, "Duplicate action declaration: {}", action),
-            SemanticErrorType::DuplicateCompoundTaskDeclaration(task) => write!(f, "Duplicate compound task declaration: {}", task),
-            SemanticErrorType::DuplicateMethodDeclaration(method) => write!(f, "Duplicate method declaration: {}", method),
+            SemanticErrorType::DuplicateObjectDeclaration(obj) => write!(f, "object {} is declared multiple times.", obj),
+            SemanticErrorType::DuplicateRequirementDeclaration(req_type) => write!(f, "requirement {:?} is declared multiple times.", req_type),
+            SemanticErrorType::DuplicatePredicateDeclaration(pred) => write!(f, "predicate {} is declared multiple times.", pred),
+            SemanticErrorType::DuplicateActionDeclaration(action) => write!(f, "action {} is declared multiple times.", action),
+            SemanticErrorType::DuplicateCompoundTaskDeclaration(task) => write!(f, "compound task {} is declared multiple times.", task),
+            SemanticErrorType::DuplicateMethodDeclaration(method) => write!(f, "method {} is declared multiple times.", method),
             // Undefined Entities
-            SemanticErrorType::UndefinedPredicate(pred) => write!(f, "Undefined predicate: {}", pred),
-            SemanticErrorType::UndefinedType(typ) => write!(f, "Undefined type: {}", typ),
-            SemanticErrorType::UndefinedSubtask(subtask) => write!(f, "Undefined subtask: {}", subtask),
-            SemanticErrorType::UndefinedTask(task) => write!(f, "Undefined task: {}", task),
-            SemanticErrorType::UndefinedParameter(param) => write!(f, "Undefined parameter: {}", param),
-            SemanticErrorType::UndefinedObject(object) => write!(f, "Undefined object: {}", object),
+            SemanticErrorType::UndefinedPredicate(pred) => write!(f, "predicate {} is not defined.", pred),
+            SemanticErrorType::UndefinedType(typ) => write!(f, "type {} is not defined.", typ),
+            SemanticErrorType::UndefinedSubtask(subtask) => write!(f, "subtask {} is not defined.", subtask),
+            SemanticErrorType::UndefinedTask(task) => write!(f, "task {} is not defined.", task),
+            SemanticErrorType::UndefinedParameter(param) => write!(f, "parameter {} is not defined.", param),
+            SemanticErrorType::UndefinedObject(object) => write!(f, "object {} is not defined.", object),
             // Inconsistency Error
             SemanticErrorType::InconsistentPredicateArity(pred) => write!(f, "Inconsistent predicate arity: {}", pred),
             SemanticErrorType::InconsistentTaskArity(task) => write!(f, "Inconsistent task arity: {}", task),
-            SemanticErrorType::InconsistentPredicateArgType(type_error) => write!(f, "Inconsistent predicate argument type: {}", type_error),
-            SemanticErrorType::InconsistentTaskArgType(type_error) => write!(f, "Inconsistent task argument type: {}", type_error),
+            SemanticErrorType::InconsistentPredicateArgType(type_error) => write!(f, "{}", type_error),
+            SemanticErrorType::InconsistentTaskArgType(type_error) => write!(f, "{}", type_error),
             // Ordering Errors
             SemanticErrorType::CyclicTypeDeclaration => write!(f, "Cyclic type declaration"),
             SemanticErrorType::CyclicOrderingDeclaration => write!(f, "Cyclic ordering declaration"),
@@ -69,13 +69,13 @@ impl fmt::Display for TypeError{
         write!(f, "Type error for variable {}. ", self.var_name)?;
         match (&self.expected, &self.found) {
             (Some(expected), Some(found)) => {
-                write!(f, "Expected object of type '{}', but found '{}'", expected, found)
+                write!(f, "Expected object of type '{}', but found '{}'.", expected, found)
             },
             (Some(expected), None) => {
-                write!(f, "Expected object of type '{}', but found untyped", expected)
+                write!(f, "Expected object of type '{}', but did not find any typing.", expected)
             },
             (None, Some(found)) => {
-                write!(f, "Expected no type, but found '{}'", found)
+                write!(f, "Expected no type, but found '{}'.", found)
             },
             (None, None) => {
                 unreachable!()
