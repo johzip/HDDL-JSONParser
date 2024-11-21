@@ -95,8 +95,9 @@ pub fn predicates_duplicate_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::DuplicatePredicateDeclaration(x) => {
-                            assert_eq!(x, "pred_1")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "pred_1");
+                            assert_eq!(x.first_pos.line, 4);
+                            assert_eq!(x.second_pos.line, 6)
                         }
                         _ => {
                             panic!("caught wrong error")

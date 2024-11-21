@@ -1,12 +1,12 @@
-use crate::lexical_analyzer::RequirementType;
+use crate::lexical_analyzer::{RequirementType, TokenPosition};
 use std::fmt;
 
 #[derive(Debug)]
 pub enum SemanticErrorType{
     // Duplicate Errors
-    DuplicateObjectDeclaration(String),
+    DuplicateObjectDeclaration(DuplicateError),
     DuplicateRequirementDeclaration(RequirementType),
-    DuplicatePredicateDeclaration(String),
+    DuplicatePredicateDeclaration(DuplicateError),
     DuplicateActionDeclaration(String),
     DuplicateCompoundTaskDeclaration(String),
     DuplicateMethodDeclaration(String),
@@ -31,9 +31,9 @@ impl fmt::Display for SemanticErrorType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             // Duplicate Errors
-            SemanticErrorType::DuplicateObjectDeclaration(obj) => write!(f, "object {} is declared multiple times.", obj),
-            SemanticErrorType::DuplicateRequirementDeclaration(req_type) => write!(f, "requirement {:?} is declared multiple times.", req_type),
-            SemanticErrorType::DuplicatePredicateDeclaration(pred) => write!(f, "predicate {} is declared multiple times.", pred),
+            SemanticErrorType::DuplicateObjectDeclaration(duplicate) => write!(f, "object {}", duplicate),
+            SemanticErrorType::DuplicateRequirementDeclaration(req) => write!(f, "requirement {}", req),
+            SemanticErrorType::DuplicatePredicateDeclaration(duplicate) => write!(f, "predicate {}", duplicate),
             SemanticErrorType::DuplicateActionDeclaration(action) => write!(f, "action {} is declared multiple times.", action),
             SemanticErrorType::DuplicateCompoundTaskDeclaration(task) => write!(f, "compound task {} is declared multiple times.", task),
             SemanticErrorType::DuplicateMethodDeclaration(method) => write!(f, "method {} is declared multiple times.", method),
@@ -65,7 +65,7 @@ impl fmt::Display for SemanticErrorType {
 pub struct TypeError {
     pub expected: Option<String>,
     pub found: Option<String>,
-    pub var_name: String
+    pub var_name: String,
 } 
 
 impl fmt::Display for TypeError{
@@ -93,4 +93,17 @@ pub struct ArityError {
     pub symbol: String,
     pub expected_arity: u32,
     pub found_arity: u32
-} 
+}
+
+#[derive(Debug)]
+pub struct DuplicateError{
+    pub symbol: String,
+    pub first_pos: TokenPosition,
+    pub second_pos: TokenPosition
+}
+
+impl fmt::Display for DuplicateError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "'{}' is first defined in line {}, and then redefined in line {}.", self.symbol, self.first_pos.line, self.second_pos.line)
+    }
+}

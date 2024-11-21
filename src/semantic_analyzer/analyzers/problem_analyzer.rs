@@ -1,9 +1,9 @@
 use super::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub struct ProblemSemanticAnalyzer<'a> {
     problem: &'a ProblemAST<'a>,
-    type_checker: ProblemTypeChecker<'a>
+    type_checker: ProblemTypeChecker<'a>,
 }
 
 impl<'a> ProblemSemanticAnalyzer<'a> {
@@ -13,29 +13,33 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
     ) -> ProblemSemanticAnalyzer<'a> {
         ProblemSemanticAnalyzer {
             problem,
-            type_checker: ProblemTypeChecker::new(
-                domain_symbols,
-                problem
-            ),
+            type_checker: ProblemTypeChecker::new(domain_symbols, problem),
         }
     }
 
-    pub fn verify_problem(
-        &self,
-    ) -> Result<Vec<WarningType>, SemanticErrorType> {
-        if let Some(error) = self.type_checker.check_type_declarations(&self.problem.objects) {
+    pub fn verify_problem(&self) -> Result<Vec<WarningType>, SemanticErrorType> {
+        if let Some(error) = self
+            .type_checker
+            .check_type_declarations(&self.problem.objects)
+        {
             return Err(error);
         }
 
         // check for duplicate objects
         let mut object_types = HashMap::new();
+        let mut object_positions = HashMap::new();
         for obj in self.problem.objects.iter() {
             if object_types.contains_key(obj.name) {
                 return Err(SemanticErrorType::DuplicateObjectDeclaration(
-                    obj.name.to_string(),
+                    DuplicateError {
+                        symbol: obj.name.to_string(),
+                        first_pos: *object_positions.get(obj.name).unwrap(),
+                        second_pos: obj.name_pos,
+                    }, 
                 ));
             } else {
                 object_types.insert(obj.name, obj.symbol_type);
+                object_positions.insert(obj.name, obj.name_pos);
             }
         }
 
@@ -51,7 +55,9 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
             }
 
             for subtask in htn.tn.subtasks.iter() {
-                let _ = self.type_checker.check_subtask_instantiation(subtask, &htn.parameters)?;
+                let _ = self
+                    .type_checker
+                    .check_subtask_instantiation(subtask, &htn.parameters)?;
             }
         }
 
@@ -64,8 +70,13 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
             }
             None => {}
         }
-        
 
-        Ok(self.type_checker.symbol_table.warnings.iter().cloned().collect())
+        Ok(self
+            .type_checker
+            .symbol_table
+            .warnings
+            .iter()
+            .cloned()
+            .collect())
     }
 }

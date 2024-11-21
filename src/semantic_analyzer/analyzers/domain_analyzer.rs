@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use super::*;
 use crate::lexical_analyzer::RequirementType;
@@ -43,9 +43,11 @@ impl<'a> DomainSemanticAnalyzer<'a> {
         let mut declared_actions = HashSet::new();
         for action in self.domain.actions.iter() {
             if !declared_actions.insert(action) {
-                return Err(SemanticErrorType::DuplicateActionDeclaration(
-                    action.name.to_string(),
-                ));
+                return Err(
+                    SemanticErrorType::DuplicateActionDeclaration(
+                        action.name.to_string(),
+                    )
+                );
             }
             // assert precondition predicates are declared
             match &action.preconditions {
@@ -169,18 +171,25 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             predicates: declared_predicates,
             tasks: declared_tasks,
             actions: declared_actions,
-            type_hierarchy: type_hierarchy
+            type_hierarchy: type_hierarchy,
         })
     }
 
     // returns declared predicates (if there is no error)
     fn verify_predicates(&'a self) -> Result<HashSet<&'a Predicate>, SemanticErrorType> {
         let mut declared_predicates = HashSet::new();
+        let mut predicate_positions = HashMap::new();
         for predicate in self.domain.predicates.iter() {
             if !declared_predicates.insert(predicate) {
                 return Err(SemanticErrorType::DuplicatePredicateDeclaration(
-                    predicate.name.to_string(),
+                    DuplicateError {
+                        symbol: predicate.name.to_string(),
+                        first_pos: *predicate_positions.get(predicate.name).unwrap(),
+                        second_pos: predicate.name_pos,
+                    },
                 ));
+            } else {
+                predicate_positions.insert(predicate.name, predicate.name_pos);
             }
             if let Some(error) = self
                 .type_checker

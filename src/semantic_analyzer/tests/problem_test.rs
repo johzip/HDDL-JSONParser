@@ -227,7 +227,7 @@ pub fn p_duplicate_object_definition_test() {
                         Err(d) => {
                             match d {
                                 SemanticErrorType::DuplicateObjectDeclaration(ty) => {
-                                    if ty != "x1" {
+                                    if ty.symbol != "x1" {
                                         panic!("wrong error")
                                     }
                                 },
