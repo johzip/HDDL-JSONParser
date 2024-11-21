@@ -1,36 +1,66 @@
 use super::*;
 
+#[test]
+pub fn objects_duplicate_test() {
+    let domain = String::from(
+        "(define (domain bal)
+            (:types t1 t2)
+            (:predicates 
+                (at ?a )
+                (hold ?a ?b)
+            )
+            (:action a_1
+             :parameters (p_1 p_2  p_3)
+             :precondition (not (at p_1))
+             :effect (and (not (hold p_2 p_3)) (at p_2))
+            )
+            (:action a_2
+             :parameters (p_1 p_2)
+             :precondition (not (at p_1))
+             :effect (and (not (at p_2)))
+            )
+            )
+         ) ").into_bytes();
+    let domain_lexer = LexicalAnalyzer::new(&domain);
+    let domain_parser = Parser::new(domain_lexer);
+    let domain_ast = domain_parser.parse().unwrap();
+    match domain_ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
+            let symbols = semantic_parser.verify_domain().unwrap();
+            let problem = String::from(
+                "(define (problem p1) (domain bal)
+                    (:objects
+                        a b c - t1
+                        d - t1
+                        t
+                        a -t2
+                        )
+                    )",
+            ).into_bytes();
+            let problem_lexer = LexicalAnalyzer::new(&problem);
+            let problem_parser = Parser::new(problem_lexer);
+            let problem_ast = problem_parser.parse().unwrap();
+            match problem_ast {
+                AbstractSyntaxTree::Problem(p) => {
+                    let semantic_parser = ProblemSemanticAnalyzer::new(&p, symbols);
+                    match semantic_parser.verify_problem() {
+                        Err(SemanticErrorType::DuplicateObjectDeclaration(x)) => {
+                            assert_eq!(x.symbol, "a");
+                            assert_eq!(x.first_pos.line, 3);
+                            assert_eq!(x.second_pos.line, 6);
+                        }
+                        _ => panic!()
 
-// TODO: Create the interface
-// #[test]
-// pub fn objects_duplicate_test() {
-//     let program = String::from(
-//         "(define (problem p1) (domain bal)
-//                             (:objects a b c - d b - f t)
-//                           )",
-//     )
-//     .into_bytes();
-//     let lexer = LexicalAnalyzer::new(&program);
-//     let parser = Parser::new(lexer);
-//     let ast = parser.parse().unwrap();
-//     let semantic_parser = SemanticAnalyzer::new(&ast);
-//     match semantic_parser.verify_ast() {
-//         Ok(_) => {
-//             panic!("errors are not caught")
-//         }
-//         Err(error) => {
-//             match error {
-//                 SemanticErrorType::DuplicateObjectDeclaration(x) => {
-//                     assert_eq!(x, "b");
-//                     // TODO: assert locality in future
-//                 }
-//                 _ => {
-//                     panic!("caught wrong error")
-//                 }
-//             }
-//         }
-//     }
-// }
+                    }
+                }
+                _ => panic!("here")
+            }
+
+        }
+        _ => panic!(),
+    }
+}
 
 #[test]
 pub fn requirements_duplicate_test() {
@@ -64,9 +94,8 @@ pub fn requirements_duplicate_test() {
                 }
             }
         }
-        _ => panic!()
+        _ => panic!(),
     }
-    
 }
 
 #[test]
@@ -92,21 +121,19 @@ pub fn predicates_duplicate_test() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
-                Err(error) => {
-                    match error {
-                        SemanticErrorType::DuplicatePredicateDeclaration(x) => {
-                            assert_eq!(x.symbol, "pred_1");
-                            assert_eq!(x.first_pos.line, 4);
-                            assert_eq!(x.second_pos.line, 6)
-                        }
-                        _ => {
-                            panic!("caught wrong error")
-                        }
+                Err(error) => match error {
+                    SemanticErrorType::DuplicatePredicateDeclaration(x) => {
+                        assert_eq!(x.symbol, "pred_1");
+                        assert_eq!(x.first_pos.line, 4);
+                        assert_eq!(x.second_pos.line, 6)
                     }
-                }
+                    _ => {
+                        panic!("caught wrong error")
+                    }
+                },
             }
         }
-        _ => panic!()
+        _ => panic!(),
     }
 }
 
@@ -147,20 +174,19 @@ pub fn action_duplicate_test() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
-                Err(error) => {
-                    match error {
-                        SemanticErrorType::DuplicateActionDeclaration(x) => {
-                            assert_eq!(x, "a_1")
-                            // TODO: assert locality in future
-                        }
-                        token => {
-                            panic!("{:?}", token)
-                        }
+                Err(error) => match error {
+                    SemanticErrorType::DuplicateActionDeclaration(x) => {
+                        assert_eq!(x.symbol, "a_1");
+                        assert_eq!(x.first_pos.line, 7);
+                        assert_eq!(x.second_pos.line, 17);
                     }
-                }
+                    token => {
+                        panic!("{:?}", token)
+                    }
+                },
             }
         }
-        _ => panic!()
+        _ => panic!(),
     }
 }
 
@@ -190,22 +216,20 @@ pub fn compound_task_duplicate_test() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
-                Err(error) => {
-                    match error {
-                        SemanticErrorType::DuplicateCompoundTaskDeclaration(x) => {
-                            assert_eq!(x, "c_1")
-                            // TODO: assert locality in future
-                        }
-                        _ => {
-                            panic!("caught wrong error")
-                        }
+                Err(error) => match error {
+                    SemanticErrorType::DuplicateCompoundTaskDeclaration(x) => {
+                        assert_eq!(x.symbol, "c_1");
+                        assert_eq!(x.first_pos.line, 2);
+                        assert_eq!(x.second_pos.line, 8);
                     }
-                }
+                    _ => {
+                        panic!("caught wrong error")
+                    }
+                },
             }
         }
-        _ => panic!()
+        _ => panic!(),
     }
-    
 }
 
 #[test]
@@ -252,19 +276,18 @@ pub fn method_duplicate_test() {
                 Ok(_) => {
                     panic!("errors are not caught")
                 }
-                Err(error) => {
-                    match error {
-                        SemanticErrorType::DuplicateMethodDeclaration(x) => {
-                            assert_eq!(x, "m_1")
-                            // TODO: assert locality in future
-                        }
-                        _ => {
-                            panic!("caught wrong error")
-                        }
+                Err(error) => match error {
+                    SemanticErrorType::DuplicateMethodDeclaration(x) => {
+                        assert_eq!(x.symbol, "m_1");
+                        assert_eq!(x.first_pos.line, 7);
+                        assert_eq!(x.second_pos.line, 22);
                     }
-                }
+                    _ => {
+                        panic!("caught wrong error")
+                    }
+                },
             }
         }
-        _ => panic!()
+        _ => panic!(),
     }
 }

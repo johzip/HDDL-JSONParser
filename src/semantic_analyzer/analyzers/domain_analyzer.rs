@@ -41,13 +41,18 @@ impl<'a> DomainSemanticAnalyzer<'a> {
 
         // assert actions are correct
         let mut declared_actions = HashSet::new();
+        let mut action_positions = HashMap::new();
         for action in self.domain.actions.iter() {
             if !declared_actions.insert(action) {
-                return Err(
-                    SemanticErrorType::DuplicateActionDeclaration(
-                        action.name.to_string(),
-                    )
-                );
+                return Err(SemanticErrorType::DuplicateActionDeclaration(
+                    DuplicateError {
+                        symbol: action.name.to_string(),
+                        first_pos: *action_positions.get(action.name).unwrap(),
+                        second_pos: action.name_pos,
+                    },
+                ));
+            } else {
+                action_positions.insert(action.name, action.name_pos);
             }
             // assert precondition predicates are declared
             match &action.preconditions {
@@ -86,11 +91,18 @@ impl<'a> DomainSemanticAnalyzer<'a> {
 
         // assert methods are correct
         let mut declared_methods = HashSet::new();
+        let mut method_positions = HashMap::new();
         for method in self.domain.methods.iter() {
             if !declared_methods.insert(method.name) {
                 return Err(SemanticErrorType::DuplicateMethodDeclaration(
-                    method.name.to_string(),
+                    DuplicateError {
+                        symbol: method.name.to_string(),
+                        first_pos: *method_positions.get(method.name).unwrap(),
+                        second_pos: method.name_pos,
+                    },
                 ));
+            } else {
+                method_positions.insert(method.name, method.name_pos);
             }
             // Assert preconditions are valid
             match &method.precondition {
@@ -204,11 +216,18 @@ impl<'a> DomainSemanticAnalyzer<'a> {
     // returns declared compound tasks (if there is no error)
     fn verify_compound_tasks(&'a self) -> Result<HashSet<&Task<'a>>, SemanticErrorType> {
         let mut declared_tasks = HashSet::new();
+        let mut task_positions = HashMap::new();
         for task in self.domain.compound_tasks.iter() {
             if !declared_tasks.insert(task) {
                 return Err(SemanticErrorType::DuplicateCompoundTaskDeclaration(
-                    task.name.to_string(),
+                    DuplicateError {
+                        symbol: task.name.to_string(),
+                        first_pos: *task_positions.get(task.name).unwrap(),
+                        second_pos: task.name_pos,
+                    },
                 ));
+            } else {
+                task_positions.insert(task.name, task.name_pos);
             }
             // assert parameter types are declared
             if let Some(error) = self.type_checker.check_type_declarations(&task.parameters) {

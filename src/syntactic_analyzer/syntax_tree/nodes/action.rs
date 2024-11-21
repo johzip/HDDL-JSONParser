@@ -1,11 +1,14 @@
 use std::hash::Hash;
 use std::borrow::Borrow;
+use crate::lexical_analyzer::TokenPosition;
+
 use super::*;
 
 
 #[derive(Debug)]
 pub struct Action<'a> {
     pub name: &'a str,
+    pub name_pos: TokenPosition,
     pub parameters: Vec<Symbol<'a>>,
     pub preconditions: Option<Formula<'a>>,
     pub effects: Option<Formula<'a>>
