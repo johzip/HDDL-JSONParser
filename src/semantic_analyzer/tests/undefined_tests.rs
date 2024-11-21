@@ -30,8 +30,8 @@ pub fn undefined_predicate_action_precondition_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedPredicate(x) => {
-                            assert_eq!(x, "pred_5")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "pred_5");
+                            assert_eq!(x.position.line, 9);
                         }
                         token => {
                             panic!("{:?}", token)
@@ -126,8 +126,8 @@ pub fn undefined_predicate_method_precondition_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedPredicate(x) => {
-                            assert_eq!(x, "pred_5")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "pred_5");
+                            assert_eq!(x.position.line, 10);
                         }
                         _ => {
                             panic!("caught wrong error")
@@ -436,8 +436,8 @@ pub fn undefined_predicate_forall_quantification_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedPredicate(x) => {
-                            assert_eq!(x, "wro")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "wro");
+                            assert_eq!(x.position.line, 16)
                         }
                         error => {
                             panic!("{:?}", error)

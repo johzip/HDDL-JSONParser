@@ -100,7 +100,10 @@ impl<'a> DomainTypeChecker<'a> {
                 }
                 None => {
                     return Err(SemanticErrorType::UndefinedPredicate(
-                        used_predicate.name.to_string(),
+                        UndefinedSymbolError {
+                            symbol: used_predicate.name.to_string(),
+                            position: used_predicate.name_pos,
+                        },
                     ));
                 }
             }

@@ -23,7 +23,10 @@ pub fn check_predicate_declarations<'a>(
                 }
             }
             return Err(SemanticErrorType::UndefinedPredicate(
-                predicate.name.to_string(),
+                UndefinedSymbolError {
+                    symbol: predicate.name.to_string(),
+                    position: predicate.name_pos,
+                },
             ));
         }
         Formula::Not(new_formula) => {

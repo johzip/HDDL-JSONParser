@@ -11,7 +11,7 @@ pub enum SemanticErrorType{
     DuplicateCompoundTaskDeclaration(DuplicateError),
     DuplicateMethodDeclaration(DuplicateError),
     // Undefined Entities
-    UndefinedPredicate(String),
+    UndefinedPredicate(UndefinedSymbolError),
     UndefinedType(String),
     UndefinedSubtask(String),
     UndefinedTask(String),
@@ -38,7 +38,9 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::DuplicateCompoundTaskDeclaration(duplicate) => write!(f, "compound task {}", duplicate),
             SemanticErrorType::DuplicateMethodDeclaration(duplicate) => write!(f, "method {}", duplicate),
             // Undefined Entities
-            SemanticErrorType::UndefinedPredicate(pred) => write!(f, "predicate {} is not defined.", pred),
+            SemanticErrorType::UndefinedPredicate(undefined) => {
+                write!(f, "line {}: predicate {} is not defined.", undefined.position.line, undefined.symbol)
+            }
             SemanticErrorType::UndefinedType(typ) => write!(f, "type {} is not defined.", typ),
             SemanticErrorType::UndefinedSubtask(subtask) => write!(f, "subtask {} is not defined.", subtask),
             SemanticErrorType::UndefinedTask(task) => write!(f, "task {} is not defined.", task),
@@ -106,4 +108,10 @@ impl fmt::Display for DuplicateError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "'{}' is first defined in line {}, and then redefined in line {}.", self.symbol, self.first_pos.line, self.second_pos.line)
     }
+}
+
+#[derive(Debug)]
+pub struct UndefinedSymbolError{
+    pub symbol: String,
+    pub position: TokenPosition,
 }
