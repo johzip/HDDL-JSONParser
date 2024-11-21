@@ -5,7 +5,7 @@ use std::fs;
 
 #[test]
 pub fn ipc_validation_test() {
-    for folder in fs::read_dir("tests/problems/total-order").unwrap() {
+    for folder in fs::read_dir("tests/ipc").unwrap() {
         let path = folder.as_ref().unwrap().path();
         let domain_path = fs::read_dir(path.clone()).unwrap().filter(|x| {
             x.as_ref().unwrap().file_name() == "domain.hddl"
