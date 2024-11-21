@@ -51,7 +51,7 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
             }
 
             for subtask in htn.tn.subtasks.iter() {
-                let _ = self.type_checker.check_subtask_instantiation(subtask)?;
+                let _ = self.type_checker.check_subtask_instantiation(subtask, &htn.parameters)?;
             }
         }
 

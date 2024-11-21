@@ -37,8 +37,7 @@ impl<'a> ProblemTypeChecker<'a> {
         &self,
         predicate: &'a Predicate<'a>,
     ) -> Result<(), SemanticErrorType> {
-        let declared_predicates = &self.symbol_table.predicates;
-        match declared_predicates.get(predicate) {
+        match &self.symbol_table.predicates.get(predicate) {
             Some(definition) => {
                 if definition.variables.len() != predicate.variables.len() {
                     return Err(SemanticErrorType::InconsistentPredicateArity(ArityError {
@@ -64,9 +63,29 @@ impl<'a> ProblemTypeChecker<'a> {
                                 ));
                             }
                         }
-                        None => {
-                            return Err(SemanticErrorType::UndefinedObject(found.name.to_string()));
-                        }
+                        None => match self.symbol_table.constants.get(&found.name) {
+                            Some(constant) => {
+                                let is_consistent =
+                                    self.generic_type_checker.is_var_type_consistent(
+                                        constant.symbol_type,
+                                        expected.symbol_type,
+                                    );
+                                if !is_consistent {
+                                    return Err(SemanticErrorType::InconsistentPredicateArgType(
+                                        TypeError {
+                                            expected: expected.symbol_type.map(String::from),
+                                            found: constant.symbol_type.map(String::from),
+                                            var_name: predicate.name.to_string(),
+                                        },
+                                    ));
+                                }
+                            }
+                            None => {
+                                return Err(SemanticErrorType::UndefinedObject(
+                                    found.name.to_string(),
+                                ));
+                            }
+                        },
                     }
                 }
                 return Ok(());
@@ -79,9 +98,11 @@ impl<'a> ProblemTypeChecker<'a> {
         }
     }
 
+    // TODO: Refactor the redundancies out 
     pub fn check_subtask_instantiation(
         &self,
         subtask: &'a Subtask<'a>,
+        parameters: &Option<Vec<Symbol<'a>>>,
     ) -> Result<(), SemanticErrorType> {
         if self.symbol_table.actions.contains(&subtask.task_symbol) {
             let action = self.symbol_table.actions.get(&subtask.task_symbol).unwrap();
@@ -107,7 +128,58 @@ impl<'a> ProblemTypeChecker<'a> {
                         }
                     }
                     None => {
-                        return Err(SemanticErrorType::UndefinedObject(found.to_string()));
+                        let mut undefined = false;
+                        match &*parameters {
+                            Some(params) => {
+                                match params.iter().find(|x| &x.name == found) {
+                                    Some(definition) => {
+                                        let is_consistent = self
+                                            .generic_type_checker
+                                            .is_var_type_consistent(definition.symbol_type, expected.symbol_type);
+                                        if !is_consistent {
+                                            return Err(SemanticErrorType::InconsistentTaskArgType(
+                                                TypeError {
+                                                    expected: expected.symbol_type.map(String::from),
+                                                    found: definition.symbol_type.map(String::from),
+                                                    var_name: subtask.task_symbol.to_string(),
+                                                },
+                                            ));
+                                        }
+                                    }
+                                    None => {
+                                        undefined = true;
+                                    }
+                                }
+                            }
+                            None => {
+                                undefined = true;
+                            }
+                        }
+                        if undefined {
+                            match self.symbol_table.constants.get(found) {
+                                Some(constant) => {
+                                    let is_consistent =
+                                        self.generic_type_checker.is_var_type_consistent(
+                                            constant.symbol_type,
+                                            expected.symbol_type,
+                                        );
+                                    if !is_consistent {
+                                        return Err(SemanticErrorType::InconsistentPredicateArgType(
+                                            TypeError {
+                                                expected: expected.symbol_type.map(String::from),
+                                                found: constant.symbol_type.map(String::from),
+                                                var_name: action.name.to_string(),
+                                            },
+                                        ));
+                                    }
+                                }
+                                None => {
+                                    return Err(SemanticErrorType::UndefinedObject(
+                                        found.to_string(),
+                                    ));
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -136,7 +208,58 @@ impl<'a> ProblemTypeChecker<'a> {
                         }
                     }
                     None => {
-                        return Err(SemanticErrorType::UndefinedObject(found.to_string()));
+                        let mut undefined = false;
+                        match &*parameters {
+                            Some(params) => {
+                                match params.iter().find(|x| &x.name == found) {
+                                    Some(definition) => {
+                                        let is_consistent = self
+                                            .generic_type_checker
+                                            .is_var_type_consistent(definition.symbol_type, expected.symbol_type);
+                                        if !is_consistent {
+                                            return Err(SemanticErrorType::InconsistentTaskArgType(
+                                                TypeError {
+                                                    expected: expected.symbol_type.map(String::from),
+                                                    found: definition.symbol_type.map(String::from),
+                                                    var_name: subtask.task_symbol.to_string(),
+                                                },
+                                            ));
+                                        }
+                                    }
+                                    None => {
+                                        undefined = true;
+                                    }
+                                }
+                            }
+                            None => {
+                                undefined = true;
+                            }
+                        }
+                        if undefined {
+                            match self.symbol_table.constants.get(found) {
+                                Some(constant) => {
+                                    let is_consistent =
+                                        self.generic_type_checker.is_var_type_consistent(
+                                            constant.symbol_type,
+                                            expected.symbol_type,
+                                        );
+                                    if !is_consistent {
+                                        return Err(SemanticErrorType::InconsistentPredicateArgType(
+                                            TypeError {
+                                                expected: expected.symbol_type.map(String::from),
+                                                found: constant.symbol_type.map(String::from),
+                                                var_name: task.name.to_string(),
+                                            },
+                                        ));
+                                    }
+                                }
+                                None => {
+                                    return Err(SemanticErrorType::UndefinedObject(
+                                        found.to_string(),
+                                    ));
+                                }
+                            }
+                        }
                     }
                 }
             }
