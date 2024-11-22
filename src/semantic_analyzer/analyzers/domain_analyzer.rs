@@ -125,9 +125,10 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             }
             // Assert task is defined
             if !declared_tasks.contains(method.task_name) {
-                return Err(SemanticErrorType::UndefinedTask(
-                    method.task_name.to_string(),
-                ));
+                return Err(SemanticErrorType::UndefinedTask(UndefinedSymbolError {
+                    symbol: method.task_name.to_string(),
+                    position: method.task_name_pos,
+                }));
             } else {
                 // Assert task arity is consistent
                 for declared_compound_task in self.domain.compound_tasks.iter() {
@@ -137,7 +138,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                                 symbol: method.task_name.to_string(),
                                 expected_arity: method.task_terms.len() as u32,
                                 found_arity: declared_compound_task.parameters.len() as u32,
-                                position: method.task_name_pos
+                                position: method.task_name_pos,
                             }));
                         } else {
                             break;
@@ -147,7 +148,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             }
 
             // Assert task type is consistent
-            match self.type_checker.is_task_consistent(
+            let _ = self.type_checker.is_task_consistent(
                 &method.task_name,
                 &method.task_name_pos,
                 &method.task_terms.iter().map(|x| x.name).collect(),
@@ -155,12 +156,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                 &declared_constants,
                 &declared_tasks,
                 &HashSet::new(),
-            ) {
-                Err(SemanticErrorType::UndefinedSubtask(task_name)) => {
-                    return Err(SemanticErrorType::UndefinedTask(task_name));
-                }
-                _ => {}
-            }
+            )?;
 
             // Assert subtask types are consistent
             for subtask in method.tn.subtasks.iter() {

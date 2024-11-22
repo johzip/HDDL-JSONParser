@@ -14,7 +14,7 @@ pub enum SemanticErrorType {
     UndefinedPredicate(UndefinedSymbolError),
     UndefinedType(String),
     UndefinedSubtask(String),
-    UndefinedTask(String),
+    UndefinedTask(UndefinedSymbolError),
     UndefinedParameter(String),
     UndefinedObject(String),
     // Inconsistency Error
@@ -61,7 +61,9 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::UndefinedSubtask(subtask) => {
                 write!(f, "subtask {} is not defined.", subtask)
             }
-            SemanticErrorType::UndefinedTask(task) => write!(f, "task {} is not defined.", task),
+            SemanticErrorType::UndefinedTask(undefined) => {
+                write!(f, "line {}: task {} is not defined.", undefined.position.line, undefined.symbol)
+            }
             SemanticErrorType::UndefinedParameter(param) => {
                 write!(f, "parameter {} is not defined.", param)
             }

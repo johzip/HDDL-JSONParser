@@ -139,7 +139,7 @@ pub fn inconsistent_subtask_arity_test () {
             (:predicates 
                 (at ?l - t7)
             )
-            (:task abs :parameters(?a))
+            (:task abs :parameters(?a - t1))
             (:action test1
             :parameters(?l1 ?l2 - t5)
             :precondition (at ?l2)
@@ -169,7 +169,8 @@ pub fn inconsistent_subtask_arity_test () {
                     assert_eq!(x.found_arity, 1);
                     assert_eq!(x.position.line, 21);
                 }
-                _ => panic!()
+                Err(token) => panic!("{:?}", token),
+                Ok(_) => panic!("error not found")
             }
         }
         _ => panic!()
@@ -196,8 +197,8 @@ pub fn method_prec_type_checking_test () {
             :effect (not(at ?l1))
             )
             (:method m1
-                :parameters(?l2 - t1 ?l1 - t5)
-                :task (abs ?l)
+                :parameters(?l2 - t1 ?l1 - t5 ?l4)
+                :task (abs ?l4)
                 :precondition (at ?l2)
                 :tasks (test1 ?l1 ?l1)
             )
@@ -233,7 +234,7 @@ pub fn method_subtask_checking_test () {
             (:predicates 
                 (at ?l - t7)
             )
-            (:task abs :parameters(?a))
+            (:task abs :parameters(?a - t1))
             (:action test1
             :parameters(?l1 ?l2 - t3)
             :precondition (at ?l2)
@@ -246,7 +247,7 @@ pub fn method_subtask_checking_test () {
             )
             (:method m1
                 :parameters(?l2 - t1 ?l1 - t2 ?l3 - t6)
-                :task (abs ?l)
+                :task (abs ?l2)
                 :precondition ()
                 :tasks (and
                     (test1 ?l1 ?l1)

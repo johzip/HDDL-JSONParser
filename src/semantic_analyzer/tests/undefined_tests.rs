@@ -488,8 +488,8 @@ pub fn undefined_method_task_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedTask(x) => {
-                            assert_eq!(x, "deliver_abs")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "deliver_abs");
+                            assert_eq!(x.position.line, 12)
                         }
                         _ => {
                             panic!("caught wrong error")
