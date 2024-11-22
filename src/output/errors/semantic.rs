@@ -90,7 +90,9 @@ impl fmt::Display for SemanticErrorType {
             }
             SemanticErrorType::InconsistentTaskArgType(type_error) => write!(f, "{}", type_error),
             // Ordering Errors
-            SemanticErrorType::CyclicTypeDeclaration => write!(f, "Cyclic type declaration"),
+            SemanticErrorType::CyclicTypeDeclaration => {
+                write!(f, "Type hierarchy is cyclic.")
+            }
             SemanticErrorType::CyclicOrderingDeclaration => {
                 write!(f, "Cyclic ordering declaration")
             }
