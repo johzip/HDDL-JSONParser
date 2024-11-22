@@ -86,6 +86,98 @@ pub fn effect_type_checking_test () {
 }
 
 #[test]
+pub fn inconsistent_predicate_arity_test () {
+    let program = String::from(
+        "(define (domain bal)
+            (:types
+            t1 t2 - t3
+            t4 t5 - t6
+            t3 t6 - t7
+            )
+            (:predicates 
+                (at ?l - t1)
+            )
+            (:action test1
+            :parameters(?l1 ?l2 - t1)
+            :precondition (at ?l2)
+            :effect (and 
+                (not (at ?l1 ?l2) )
+            )
+            )
+        ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let ast = parser.parse().unwrap();
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
+            match semantic_parser.verify_domain() {
+                Err(SemanticErrorType::InconsistentPredicateArity(x)) => {
+                    assert_eq!(x.symbol, "at");
+                    assert_eq!(x.expected_arity, 1);
+                    assert_eq!(x.found_arity, 2);
+                    assert_eq!(x.position.line, 14)
+                }
+                _ => {panic!()}
+            }
+        }
+        _ => panic!()
+    }
+}
+
+#[test]
+pub fn inconsistent_subtask_arity_test () {
+    let program = String::from(
+        "(define (domain bal)
+            (:types
+            t1 t2 - t3
+            t4 t5 - t6
+            t3 t6 - t7
+            )
+            (:predicates 
+                (at ?l - t7)
+            )
+            (:task abs :parameters(?a))
+            (:action test1
+            :parameters(?l1 ?l2 - t5)
+            :precondition (at ?l2)
+            :effect (not(at ?l1))
+            )
+            (:method m1
+                :parameters(?l2 - t1 ?l1 - t5)
+                :task (abs ?l2)
+                :tasks (and
+                    (test1 ?l1 ?l1)
+                    (test1 ?l1)
+                )
+            )
+        ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let ast = parser.parse().unwrap();
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
+            match semantic_parser.verify_domain() {
+                Err(SemanticErrorType::InconsistentTaskArity(x)) => {
+                    assert_eq!(x.symbol, "test1");
+                    assert_eq!(x.expected_arity, 2);
+                    assert_eq!(x.found_arity, 1);
+                    assert_eq!(x.position.line, 21);
+                }
+                _ => panic!()
+            }
+        }
+        _ => panic!()
+    }
+    
+}
+
+#[test]
 pub fn method_prec_type_checking_test () {
     let program = String::from(
         "(define (domain bal)
@@ -127,7 +219,6 @@ pub fn method_prec_type_checking_test () {
         }
         _ => panic!()
     }
-    
 }
 
 #[test]

@@ -137,6 +137,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                                 symbol: method.task_name.to_string(),
                                 expected_arity: method.task_terms.len() as u32,
                                 found_arity: declared_compound_task.parameters.len() as u32,
+                                position: method.task_name_pos
                             }));
                         } else {
                             break;
@@ -148,6 +149,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             // Assert task type is consistent
             match self.type_checker.is_task_consistent(
                 &method.task_name,
+                &method.task_name_pos,
                 &method.task_terms.iter().map(|x| x.name).collect(),
                 &method.params,
                 &declared_constants,
@@ -164,6 +166,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             for subtask in method.tn.subtasks.iter() {
                 let _ = self.type_checker.is_task_consistent(
                     &subtask.task_symbol,
+                    &subtask.task_symbol_pos,
                     &subtask.terms,
                     &method.params,
                     &declared_constants,

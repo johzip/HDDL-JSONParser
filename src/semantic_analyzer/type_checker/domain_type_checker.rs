@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use crate::lexical_analyzer::TokenPosition;
+
 use super::*;
 
 #[derive(Clone)]
@@ -83,6 +85,7 @@ impl<'a> DomainTypeChecker<'a> {
                             symbol: used_predicate.name.to_string(),
                             expected_arity: expected_list.len() as u32,
                             found_arity: found_list.len() as u32,
+                            position: used_predicate.name_pos
                         }));
                     }
                     for ((var_name, f), e) in found_list.into_iter().zip(expected_list.into_iter())
@@ -114,15 +117,18 @@ impl<'a> DomainTypeChecker<'a> {
     pub fn is_task_consistent(
         &self,
         task_name: &'a str,
+        task_position: &TokenPosition,
         task_terms: &Vec<&'a str>,
         parameters: &Vec<Symbol<'a>>,
         declared_constants: &HashSet<&Symbol<'a>>,
         declared_tasks: &HashSet<&Task<'a>>,
         declared_actions: &HashSet<&Action<'a>>,
     ) -> Result<(), SemanticErrorType> {
-        // Store parameter types
+        // Store parameter types as a mapping from name to type
         let par_types: HashMap<&str, Option<&str>> =
             HashMap::from_iter(parameters.iter().map(|par| (par.name, par.symbol_type)));
+        
+        // process arguements to a vec of (argument name, type)
         let mut found = vec![];
         for term in task_terms {
             match par_types.get(term) {
@@ -150,6 +156,7 @@ impl<'a> DomainTypeChecker<'a> {
                         symbol: task_name.to_string(),
                         expected_arity: expected.len() as u32,
                         found_arity: found.len() as u32,
+                        position: *task_position
                     }));
                 }
                 for ((name, f), e) in found.iter().zip(expected.iter()) {
@@ -175,6 +182,7 @@ impl<'a> DomainTypeChecker<'a> {
                             symbol: task_name.to_string(),
                             expected_arity: expected.len() as u32,
                             found_arity: found.len() as u32,
+                            position: *task_position
                         }));
                     }
                     for ((name, f), e) in found.iter().zip(expected.iter()) {

@@ -44,6 +44,7 @@ impl<'a> ProblemTypeChecker<'a> {
                         symbol: predicate.name.to_string(),
                         expected_arity: definition.variables.len() as u32,
                         found_arity: predicate.variables.len() as u32,
+                        position: predicate.name_pos
                     }));
                 }
                 for (expected, found) in definition.variables.iter().zip(predicate.variables.iter())
@@ -114,6 +115,7 @@ impl<'a> ProblemTypeChecker<'a> {
                     symbol: subtask.task_symbol.to_string(),
                     expected_arity: action.parameters.len() as u32,
                     found_arity: subtask.terms.len() as u32,
+                    position: subtask.task_symbol_pos
                 }));
             }
             for (expected, found) in action.parameters.iter().zip(subtask.terms.iter()) {
@@ -198,6 +200,7 @@ impl<'a> ProblemTypeChecker<'a> {
                     symbol: subtask.task_symbol.to_string(),
                     expected_arity: task.parameters.len() as u32,
                     found_arity: subtask.terms.len() as u32,
+                    position: subtask.task_symbol_pos
                 }));
             }
             for (expected, found) in task.parameters.iter().zip(subtask.terms.iter()) {
