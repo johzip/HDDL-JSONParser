@@ -235,8 +235,8 @@ pub fn undefined_subtask_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedSubtask(x) => {
-                            assert_eq!(x, "c_3")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "c_3");
+                            assert_eq!(x.position.line, 20);
                         }
                         error => {
                             panic!("{:?}", error)

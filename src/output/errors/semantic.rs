@@ -13,7 +13,7 @@ pub enum SemanticErrorType {
     // Undefined Entities
     UndefinedPredicate(UndefinedSymbolError),
     UndefinedType(UndefinedSymbolError),
-    UndefinedSubtask(String),
+    UndefinedSubtask(UndefinedSymbolError),
     UndefinedTask(UndefinedSymbolError),
     UndefinedParameter(UndefinedSymbolError),
     UndefinedObject(UndefinedSymbolError),
@@ -60,8 +60,8 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::UndefinedType(undefined) => {
                 write!(f, "line {}: type {} is not defined.", undefined.position.line, undefined.symbol)
             },
-            SemanticErrorType::UndefinedSubtask(subtask) => {
-                write!(f, "subtask {} is not defined.", subtask)
+            SemanticErrorType::UndefinedSubtask(undefined) => {
+                write!(f, "line {}: subtask {} is not defined.", undefined.position.line, undefined.symbol)
             }
             SemanticErrorType::UndefinedTask(undefined) => {
                 write!(f, "line {}: task {} is not defined.", undefined.position.line, undefined.symbol)

@@ -61,10 +61,9 @@ impl<'a> DomainTypeChecker<'a> {
                                 instantiated_vars.push((var, par_type));
                             }
                             None => match declared_constants.get(var) {
-                                Some(constant) => instantiated_vars.push((
-                                    var,
-                                    &constant.symbol_type,
-                                )),
+                                Some(constant) => {
+                                    instantiated_vars.push((var, &constant.symbol_type))
+                                }
                                 None => {
                                     return Err(SemanticErrorType::UndefinedParameter(
                                         UndefinedSymbolError {
@@ -211,7 +210,10 @@ impl<'a> DomainTypeChecker<'a> {
                     return Ok(());
                 }
                 None => {
-                    return Err(SemanticErrorType::UndefinedSubtask(task.name.to_string()));
+                    return Err(SemanticErrorType::UndefinedSubtask(UndefinedSymbolError {
+                        symbol: task.name.to_string(),
+                        position: task.name_pos,
+                    }));
                 }
             },
         }

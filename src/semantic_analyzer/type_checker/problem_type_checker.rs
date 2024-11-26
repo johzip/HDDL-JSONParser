@@ -296,9 +296,10 @@ impl<'a> ProblemTypeChecker<'a> {
             }
             return Ok(());
         } else {
-            return Err(SemanticErrorType::UndefinedSubtask(
-                subtask.task.name.to_string(),
-            ));
+            return Err(SemanticErrorType::UndefinedSubtask(UndefinedSymbolError {
+                symbol: subtask.task.name.to_string(),
+                position: subtask.task.name_pos,
+            }));
         }
     }
 }
