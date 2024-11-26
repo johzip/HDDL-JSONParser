@@ -5,10 +5,12 @@ pub struct TypeChecker<'a> {
     pub type_hierarchy: GraphMap<&'a str, (), Directed>,
 }
 
-impl <'a> TypeChecker <'a> {
+impl<'a> TypeChecker<'a> {
     pub fn new(types: &Option<Vec<Symbol<'a>>>) -> TypeChecker<'a> {
         match &types {
-            None => TypeChecker {type_hierarchy: GraphMap::new()},
+            None => TypeChecker {
+                type_hierarchy: GraphMap::new(),
+            },
             Some(type_deps) => {
                 let mut type_graph: GraphMap<&str, (), Directed> =
                     GraphMap::<_, (), Directed>::new();
@@ -28,18 +30,18 @@ impl <'a> TypeChecker <'a> {
                 }
                 return TypeChecker {
                     type_hierarchy: type_graph,
-                };  
+                };
             }
         }
     }
 
     pub fn verify_type_hierarchy(&self) -> Result<(), SemanticErrorType> {
         match toposort(&self.type_hierarchy, None) {
-            Ok(_) => { Ok(()) }
+            Ok(_) => Ok(()),
             Err(_) => {
                 return Err(SemanticErrorType::CyclicTypeDeclaration);
             }
-        }    
+        }
     }
 
     pub fn check_type_declarations(
@@ -49,14 +51,21 @@ impl <'a> TypeChecker <'a> {
         for parameter in parameters.iter() {
             if let Some(t) = parameter.symbol_type {
                 if !self.type_hierarchy.contains_node(t) {
-                    return Some(SemanticErrorType::UndefinedType(t.to_string()));
+                    return Some(SemanticErrorType::UndefinedType(UndefinedSymbolError {
+                        symbol: parameter.symbol_type.unwrap().to_string(),
+                        position: parameter.type_pos.unwrap(),
+                    }));
                 }
             }
         }
         None
     }
 
-    pub fn is_var_type_consistent(&self, found: Option<&'a str>, expected: Option<&'a str>) -> bool {
+    pub fn is_var_type_consistent(
+        &self,
+        found: Option<&'a str>,
+        expected: Option<&'a str>,
+    ) -> bool {
         match (found, expected) {
             (Some(found_typing), Some(defined_typing)) => {
                 // type matches exactly

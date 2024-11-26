@@ -138,8 +138,7 @@ fn get_domain() -> Vec<u8> {
 #[test]
 pub fn p_undeclared_type_test() {
     let program = get_domain();
-    let problem = String::from("
-        (define (problem p1)
+    let problem = String::from("(define (problem p1)
             (:domain d)
             (:objects
                 x1 x2 - place
@@ -173,9 +172,8 @@ pub fn p_undeclared_type_test() {
                         Err(d) => {
                             match d {
                                 SemanticErrorType::UndefinedType(ty) => {
-                                    if ty != "car" {
-                                        panic!("wrong error")
-                                    }
+                                    assert_eq!(ty.symbol, "car");
+                                    assert_eq!(ty.position.line, 6);
                                 },
                                 _ => panic!()
                             }

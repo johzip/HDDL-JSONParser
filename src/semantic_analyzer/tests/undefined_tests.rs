@@ -337,8 +337,8 @@ pub fn undefined_type_compound_task_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedType(x) => {
-                            assert_eq!(x, "t5")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "t5");
+                            assert_eq!(x.position.line, 9);
                         }
                         _ => {
                             panic!("caught wrong error")
@@ -380,8 +380,8 @@ pub fn undefined_type_predicate_test() {
                 Err(error) => {
                     match error {
                         SemanticErrorType::UndefinedType(x) => {
-                            assert_eq!(x, "t2")
-                            // TODO: assert locality in future
+                            assert_eq!(x.symbol, "t2");
+                            assert_eq!(x.position.line, 6);
                         }
                         _ => {
                             panic!("caught wrong error")
