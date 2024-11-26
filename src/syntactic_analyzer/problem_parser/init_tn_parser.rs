@@ -46,13 +46,14 @@ impl<'a> Parser<'a> {
         let mut subtasks = vec![];
         let mut orderings = vec![];
         let mut constraints = None;
-
+        let mut ordering_pos = None;
         match self.tokenizer.get_token()? {
             Token::Keyword(KeywordName::Subtasks) => {
                 subtasks = self.parse_subtasks()?;
                 loop {
                     match self.tokenizer.get_token()? {
                         Token::Keyword(KeywordName::Ordering) => {
+                            ordering_pos = Some(self.tokenizer.get_last_token_position());
                             match self.tokenizer.get_token()? {
                                 Token::Punctuator(PunctuationType::LParentheses) => {
                                     match self.tokenizer.get_token()? {
@@ -152,6 +153,7 @@ impl<'a> Parser<'a> {
                         Token::Punctuator(PunctuationType::RParentheses) => {
                             return Ok(HTN {
                                 subtasks,
+                                ordering_pos,
                                 orderings: TaskOrdering::Partial(orderings),
                                 constraints,
                             });
@@ -174,6 +176,7 @@ impl<'a> Parser<'a> {
                         constraints = Some(self.parse_constraints()?);
                         return Ok(HTN {
                             subtasks,
+                            ordering_pos,
                             orderings: TaskOrdering::Total,
                             constraints,
                         });
@@ -181,6 +184,7 @@ impl<'a> Parser<'a> {
                     Token::Punctuator(PunctuationType::RParentheses) => {
                         return Ok(HTN {
                             subtasks,
+                            ordering_pos,
                             orderings: TaskOrdering::Total,
                             constraints,
                         });

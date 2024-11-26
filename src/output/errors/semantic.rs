@@ -24,7 +24,7 @@ pub enum SemanticErrorType {
     InconsistentTaskArgType(TypeError),
     // Ordering Errors
     CyclicTypeDeclaration,
-    CyclicOrderingDeclaration,
+    CyclicOrderingDeclaration(TokenPosition),
 }
 
 impl fmt::Display for SemanticErrorType {
@@ -95,8 +95,8 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::CyclicTypeDeclaration => {
                 write!(f, "Type hierarchy is cyclic.")
             }
-            SemanticErrorType::CyclicOrderingDeclaration => {
-                write!(f, "Cyclic ordering declaration")
+            SemanticErrorType::CyclicOrderingDeclaration(pos) => {
+                write!(f, "line {}: task ordering is cyclic.", pos.line)
             }
         }
     }

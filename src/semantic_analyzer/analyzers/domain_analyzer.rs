@@ -170,7 +170,11 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             }
             // Assert orderings are acyclic
             if !method.tn.orderings.is_acyclic() {
-                return Err(SemanticErrorType::CyclicOrderingDeclaration);
+                return Err(
+                    SemanticErrorType::CyclicOrderingDeclaration(
+                        method.tn.ordering_pos.unwrap()
+                    )
+                );
             }
         }
         let type_hierarchy = self.type_checker.get_type_hierarchy();

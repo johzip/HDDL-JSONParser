@@ -51,7 +51,11 @@ impl<'a> ProblemSemanticAnalyzer<'a> {
         // check the initial task network
         if let Some(htn) = &self.problem.init_tn {
             if !htn.tn.orderings.is_acyclic() {
-                return Err(SemanticErrorType::CyclicOrderingDeclaration);
+                return Err(
+                    SemanticErrorType::CyclicOrderingDeclaration(
+                        htn.tn.ordering_pos.unwrap()
+                    )
+                );
             }
 
             for subtask in htn.tn.subtasks.iter() {

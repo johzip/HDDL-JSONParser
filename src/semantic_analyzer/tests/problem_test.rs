@@ -295,8 +295,8 @@ pub fn p_duplicate_object_definition_test() {
 #[test]
 pub fn p_cyclic_init_tn_ordering_test() {
     let program = get_domain();
-    let problem = String::from("
-        (define (problem p1)
+    let problem = String::from(
+        "(define (problem p1)
             (:domain d)
             (:objects
                 x1 x2 - place
@@ -335,7 +335,8 @@ pub fn p_cyclic_init_tn_ordering_test() {
                         }
                         Err(d) => {
                             match d {
-                                SemanticErrorType::CyclicOrderingDeclaration => {
+                                SemanticErrorType::CyclicOrderingDeclaration(pos) => {
+                                    assert_eq!(pos.line, 14);
                                 },
                                 _ => panic!()
                             }

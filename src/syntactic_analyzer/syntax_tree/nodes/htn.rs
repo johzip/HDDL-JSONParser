@@ -14,6 +14,7 @@ pub struct InitialTaskNetwork<'a> {
 #[derive(Debug, Clone)]
 pub struct HTN<'a> {
     pub subtasks: Vec<Subtask<'a>>,
+    pub ordering_pos: Option<TokenPosition>,
     pub orderings: TaskOrdering<'a>,
     pub constraints: Option<Vec<Constraint<'a>>>, 
 }
