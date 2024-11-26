@@ -68,7 +68,7 @@ impl<'a> TDG<'a> {
         }
     }
 
-    pub fn reachable(&self, task_name: &str) -> HashSet<&str> {
+    pub fn reachable(&self, task_name: &str) -> ReachableSet {
         let mut reach_t = HashSet::new();
         let task_index = self
             .tasks
@@ -89,12 +89,26 @@ impl<'a> TDG<'a> {
                 panic!()
             }
         }
-        self.tasks
-            .iter()
-            .enumerate()
-            .filter(|(index, _)| reach_t.contains(index))
-            .map(|(_, (name, t_type))| *name)
-            .collect()
+        let nullables = self.compute_nullables();
+        let mut primitives = HashSet::new();
+        let mut compounds = HashSet::new();
+        for (index, (reachable_name, reachable_type)) in self.tasks.iter().enumerate() {
+            if reach_t.contains(&index) {
+                match reachable_type {
+                    TaskType::Primitive => {
+                        primitives.insert(*reachable_name);
+                    }
+                    TaskType::Compound => {
+                        compounds.insert(*reachable_name);
+                    }
+                }
+            }
+        }
+        ReachableSet {
+            primitives,
+            compounds,
+            nullable: nullables.contains(task_name),
+        }
     }
 
     pub fn get_recursion_type(&self, nullable_symbols: &HashSet<&'a str>) -> RecursionType {
@@ -484,4 +498,10 @@ impl<'a> TDG<'a> {
 enum TaskType {
     Primitive,
     Compound,
+}
+
+pub struct ReachableSet<'a> {
+    pub primitives: HashSet<&'a str>,
+    pub compounds: HashSet<&'a str>,
+    pub nullable: bool,
 }

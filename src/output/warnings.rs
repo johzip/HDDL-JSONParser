@@ -1,14 +1,14 @@
+use crate::lexical_analyzer::TokenPosition;
+
 #[derive(Debug, Clone)]
 pub enum WarningType {
     // Action Errors
-    UnsatisfiableActionPrecondition(String),
-    // TODO: test
-    UnsatisfiableMethodPrecondition(String),
+    UnsatisfiableActionPrecondition(WarningInfo),
+    UnsatisfiableMethodPrecondition(WarningInfo),
     // TODO: implement
     ImmutablePredicate(String),
     // Compound Task errors
-    // TODO: implement
-    NoPrimitiveRefinement(String),
+    NoPrimitiveRefinement(WarningInfo),
     // Redundant Elements
     // TODO: implement
     UnusedType(String),
@@ -23,17 +23,17 @@ pub enum WarningType {
 impl std::fmt::Display for WarningType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            Self::UnsatisfiableActionPrecondition(action) => {
-                write!(f, "The precondition of action {} cannot be satisfied", action)
+            Self::UnsatisfiableActionPrecondition(info) => {
+                write!(f, "line {}: the precondition of action {} is inconsistent.", info.position.line, info.symbol)
             }
-            Self::UnsatisfiableMethodPrecondition(method) => {
-                write!(f, "The precondition of method {} cannot be satisfied", method)
+            Self::UnsatisfiableMethodPrecondition(info) => {
+                write!(f, "line {}: the precondition of method {} is inconsistent.", info.position.line, info.symbol)
             }
             Self::ImmutablePredicate(predicate) => {
                 write!(f, "Predicate {} does not appear in the effect of any action", predicate)
             }
-            Self::NoPrimitiveRefinement(task) => {
-                write!(f, "Compound task {} does not have a primitive refinement", task)
+            Self::NoPrimitiveRefinement(info) => {
+                write!(f, "line {}: compound task {} does not have a primitive refinement", info.position.line, info.symbol)
             }
             Self::UnusedType(type_name) => {
                 write!(f, "Type {} is declared, but never used", type_name)
@@ -50,4 +50,10 @@ impl std::fmt::Display for WarningType {
             }
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct WarningInfo {
+    pub symbol: String,
+    pub position: TokenPosition,
 }

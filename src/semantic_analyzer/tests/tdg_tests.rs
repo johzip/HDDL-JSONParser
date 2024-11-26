@@ -33,6 +33,11 @@ pub fn tdg_correctness_test () {
                     (t4 (p_1 ?p1))
                 )
             )
+            (:method m_2
+                :parameters (?p1) 
+                :task (abs_1 ?p1)
+                :ordered-subtasks ()
+            )
         ) ",
     )
     .into_bytes();
@@ -58,15 +63,18 @@ pub fn tdg_correctness_test () {
                 AbstractSyntaxTree::Problem(p_ast) => {
                     let tdg = TDG::new(&d);
                     let reachable_abs_1 = tdg.reachable("abs_1");
-                    assert_eq!(reachable_abs_1.len(), 4);
-                    assert_eq!(reachable_abs_1.contains("abs_1"), true);
-                    assert_eq!(reachable_abs_1.contains("abs_2"), true);
-                    assert_eq!(reachable_abs_1.contains("abs_3"), true);
-                    assert_eq!(reachable_abs_1.contains("p_1"), true);
+                    assert_eq!(reachable_abs_1.compounds.len(), 3);
+                    assert_eq!(reachable_abs_1.primitives.len(), 1);
+                    assert_eq!(reachable_abs_1.compounds.contains("abs_1"), true);
+                    assert_eq!(reachable_abs_1.compounds.contains("abs_2"), true);
+                    assert_eq!(reachable_abs_1.compounds.contains("abs_3"), true);
+                    assert_eq!(reachable_abs_1.primitives.contains("p_1"), true);
+                    assert_eq!(reachable_abs_1.nullable, true);
 
                     let reachable_p_2 = tdg.reachable("p_2");
-                    assert_eq!(reachable_p_2.len(), 1);
-                    assert_eq!(reachable_p_2.contains("p_2"), true);
+                    assert_eq!(reachable_p_2.primitives.len(), 1);
+                    assert_eq!(reachable_p_2.primitives.contains("p_2"), true);
+                    assert_eq!(reachable_p_2.nullable, false);
                 }
                 _ => panic!()
             }

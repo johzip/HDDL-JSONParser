@@ -2,6 +2,8 @@ use super::*;
 use std::collections::HashSet;
 use petgraph::prelude::GraphMap;
 use petgraph::Directed;
+
+#[derive(Debug)]
 pub struct SymbolTable<'a> {
     pub warnings: Vec<WarningType>,
     pub constants: HashSet<&'a Symbol<'a>>,

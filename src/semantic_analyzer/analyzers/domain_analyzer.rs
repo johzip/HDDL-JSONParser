@@ -66,9 +66,10 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableActionPrecondition(
-                            action.name.to_string(),
-                        ));
+                        warnings.push(WarningType::UnsatisfiableActionPrecondition(WarningInfo {
+                            symbol: action.name.to_string(),
+                            position: action.name_pos,
+                        }));
                     }
                 }
                 _ => {}
@@ -116,9 +117,10 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(
-                            method.name.name.to_string(),
-                        ));
+                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(WarningInfo {
+                            symbol: method.name.name.to_string(),
+                            position: method.name.name_pos,
+                        }));
                     }
                 }
                 _ => {}
@@ -170,11 +172,20 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             }
             // Assert orderings are acyclic
             if !method.tn.orderings.is_acyclic() {
-                return Err(
-                    SemanticErrorType::CyclicOrderingDeclaration(
-                        method.tn.ordering_pos.unwrap()
-                    )
-                );
+                return Err(SemanticErrorType::CyclicOrderingDeclaration(
+                    method.tn.ordering_pos.unwrap(),
+                ));
+            }
+        }
+        // Check whether all compound tasks can be refined to primitive ones
+        let tdg = TDG::new(self.domain);
+        for task in declared_tasks.iter() {
+            let reachables = tdg.reachable(&task.name);
+            if (reachables.primitives.len() == 0) && (reachables.nullable == false) {
+                warnings.push(WarningType::NoPrimitiveRefinement(WarningInfo {
+                    symbol: task.name.to_string(),
+                    position: task.name_pos,
+                }));
             }
         }
         let type_hierarchy = self.type_checker.get_type_hierarchy();
