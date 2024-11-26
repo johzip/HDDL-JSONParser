@@ -190,6 +190,57 @@ pub fn p_undeclared_type_test() {
 }
 
 #[test]
+pub fn p_undefined_object_test() {
+    let program = get_domain();
+    let problem = String::from("(define (problem p1)
+            (:domain d)
+            (:objects
+                x1 x2 - place
+                truck1 truck2 -truck
+            )
+            (:htn
+                :parameters ()
+                :ordered-subtasks (and
+                    (do_get_truck truck1 x3)
+                )
+            )
+    ").into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let d_ast = parser.parse().unwrap();
+    match d_ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let p_lexer = LexicalAnalyzer::new(&problem);
+            let p_parser = Parser::new(p_lexer);
+            let p_ast = p_parser.parse().unwrap();
+            match p_ast {
+                AbstractSyntaxTree::Problem(p) => {
+                    let d_analyzer = DomainSemanticAnalyzer::new(&d);
+                    let domain_symbols = d_analyzer.verify_domain().unwrap();
+                    let p_analyzer = ProblemSemanticAnalyzer::new(&p, domain_symbols);
+                    match p_analyzer.verify_problem() {
+                        Ok(_) => {
+                            panic!("error not found")
+                        }
+                        Err(d) => {
+                            match d {
+                                SemanticErrorType::UndefinedObject(undefined) => {
+                                    assert_eq!(undefined.symbol, "x3");
+                                    assert_eq!(undefined.position.line, 10);
+                                },
+                                token => panic!("{:?}", token)
+                            }
+                        }
+                    }
+                }
+                _ => panic!()
+            }
+        }
+        AbstractSyntaxTree::Problem(_) => panic!()
+    }
+}
+
+#[test]
 pub fn p_duplicate_object_definition_test() {
     let program = get_domain();
     let problem = String::from("

@@ -16,7 +16,7 @@ pub enum SemanticErrorType {
     UndefinedSubtask(String),
     UndefinedTask(UndefinedSymbolError),
     UndefinedParameter(UndefinedSymbolError),
-    UndefinedObject(String),
+    UndefinedObject(UndefinedSymbolError),
     // Inconsistency Error
     InconsistentPredicateArity(ArityError),
     InconsistentTaskArity(ArityError),
@@ -67,8 +67,8 @@ impl fmt::Display for SemanticErrorType {
             SemanticErrorType::UndefinedParameter(undefined) => {
                 write!(f, "line {}: parameter {} is not defined.", undefined.position.line, undefined.symbol)
             }
-            SemanticErrorType::UndefinedObject(object) => {
-                write!(f, "object {} is not defined.", object)
+            SemanticErrorType::UndefinedObject(undefined) => {
+                write!(f, "line {}: object {} is not defined.", undefined.position.line, undefined.symbol)
             }
             // Inconsistency Error
             SemanticErrorType::InconsistentPredicateArity(ar_error) => {

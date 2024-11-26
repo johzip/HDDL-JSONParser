@@ -44,7 +44,7 @@ impl<'a> ProblemTypeChecker<'a> {
                         symbol: predicate.name.to_string(),
                         expected_arity: definition.variables.len() as u32,
                         found_arity: predicate.variables.len() as u32,
-                        position: predicate.name_pos
+                        position: predicate.name_pos,
                     }));
                 }
                 for (expected, found) in definition.variables.iter().zip(predicate.variables.iter())
@@ -85,7 +85,10 @@ impl<'a> ProblemTypeChecker<'a> {
                             }
                             None => {
                                 return Err(SemanticErrorType::UndefinedObject(
-                                    found.name.to_string(),
+                                    UndefinedSymbolError {
+                                        symbol: found.name.to_string(),
+                                        position: found.name_pos,
+                                    },
                                 ));
                             }
                         },
@@ -117,7 +120,7 @@ impl<'a> ProblemTypeChecker<'a> {
                     symbol: subtask.task.name.to_string(),
                     expected_arity: action.parameters.len() as u32,
                     found_arity: subtask.terms.len() as u32,
-                    position: subtask.task.name_pos
+                    position: subtask.task.name_pos,
                 }));
             }
             for (expected, found) in action.parameters.iter().zip(subtask.terms.iter()) {
@@ -151,7 +154,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                                 expected: expected.symbol_type.map(String::from),
                                                 found: param.symbol_type.map(String::from),
                                                 var_name: subtask.task.name.to_string(),
-                                                position: found.name_pos
+                                                position: found.name_pos,
                                             },
                                         ));
                                     }
@@ -181,7 +184,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                                         .map(String::from),
                                                     found: constant.symbol_type.map(String::from),
                                                     var_name: action.name.to_string(),
-                                                    position: found.name_pos
+                                                    position: found.name_pos,
                                                 },
                                             ),
                                         );
@@ -189,7 +192,10 @@ impl<'a> ProblemTypeChecker<'a> {
                                 }
                                 None => {
                                     return Err(SemanticErrorType::UndefinedObject(
-                                        found.name.to_string(),
+                                        UndefinedSymbolError {
+                                            symbol: found.name.to_string(),
+                                            position: found.name_pos,
+                                        },
                                     ));
                                 }
                             }
@@ -205,7 +211,7 @@ impl<'a> ProblemTypeChecker<'a> {
                     symbol: subtask.task.name.to_string(),
                     expected_arity: task.parameters.len() as u32,
                     found_arity: subtask.terms.len() as u32,
-                    position: subtask.task.name_pos
+                    position: subtask.task.name_pos,
                 }));
             }
             for (expected, found) in task.parameters.iter().zip(subtask.terms.iter()) {
@@ -219,7 +225,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                 expected: expected.symbol_type.map(String::from),
                                 found: object_type.map(String::from),
                                 var_name: subtask.task.name.to_string(),
-                                position: found.name_pos
+                                position: found.name_pos,
                             }));
                         }
                     }
@@ -239,7 +245,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                                 expected: expected.symbol_type.map(String::from),
                                                 found: definition.symbol_type.map(String::from),
                                                 var_name: subtask.task.name.to_string(),
-                                                position: found.name_pos
+                                                position: found.name_pos,
                                             },
                                         ));
                                     }
@@ -269,7 +275,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                                         .map(String::from),
                                                     found: constant.symbol_type.map(String::from),
                                                     var_name: task.name.to_string(),
-                                                    position: found.name_pos
+                                                    position: found.name_pos,
                                                 },
                                             ),
                                         );
@@ -277,7 +283,10 @@ impl<'a> ProblemTypeChecker<'a> {
                                 }
                                 None => {
                                     return Err(SemanticErrorType::UndefinedObject(
-                                        found.name.to_string(),
+                                        UndefinedSymbolError {
+                                            symbol: found.name.to_string(),
+                                            position: found.name_pos,
+                                        },
                                     ));
                                 }
                             }
