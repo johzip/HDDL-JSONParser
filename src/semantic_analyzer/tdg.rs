@@ -4,7 +4,7 @@ use super::*;
 
 pub struct TDG<'a> {
     tasks: Vec<(&'a str, TaskType)>,
-    methods: Vec<(&'a str, HTN<'a>)>,
+    methods: Vec<(&'a Symbol<'a>, HTN<'a>)>,
     edges_from_tasks: HashMap<usize, HashSet<usize>>,
     edges_to_tasks: HashMap<usize, HashSet<usize>>,
 }
@@ -35,15 +35,15 @@ impl<'a> TDG<'a> {
         let mut methods = vec![];
         // collect "task to method" edges
         for (method_index, method) in domain.methods.iter().enumerate() {
-            methods.push((method.name, method.tn.clone()));
-            match task_indices.get(method.task_name) {
+            methods.push((&method.name, method.tn.clone()));
+            match task_indices.get(method.task.name) {
                 Some(task_index) => match to_methods.get_mut(task_index) {
                     Some(set) => {
                         set.insert(method_index);
                     }
                     None => panic!("{} not found", task_index),
                 },
-                None => panic!("{} is not defined", method.task_name),
+                None => panic!("{} is not defined", method.task.name),
             }
         }
 
@@ -53,9 +53,9 @@ impl<'a> TDG<'a> {
                 .1
                 .subtasks
                 .iter()
-                .map(|x| match task_indices.get(x.task_symbol) {
+                .map(|x| match task_indices.get(x.task.name) {
                     Some(id) => *id,
-                    None => panic!("{} not found", x.task_symbol),
+                    None => panic!("{} not found", x.task.name),
                 })
                 .collect();
             to_tasks.insert(method_index, tasks);
@@ -153,7 +153,7 @@ impl<'a> TDG<'a> {
                             .map(|(task_id, method_id)| {
                                 (
                                     self.tasks[*task_id].0.to_string(),
-                                    self.methods[*method_id].0.to_string(),
+                                    self.methods[*method_id].0.name.to_string(),
                                 )
                             })
                             .collect();
@@ -219,12 +219,12 @@ impl<'a> TDG<'a> {
         match &method.orderings {
             TaskOrdering::Total => {
                 for (index, subtask) in method.subtasks.iter().enumerate() {
-                    if subtask.task_symbol == *task {
+                    if subtask.task.name == *task {
                         return method
                             .subtasks
                             .iter()
                             .take(index)
-                            .map(|x| self.get_task_index(&x.task_symbol))
+                            .map(|x| self.get_task_index(&x.task.name))
                             .collect();
                     }
                 }
@@ -237,11 +237,11 @@ impl<'a> TDG<'a> {
                 let mut id_to_task_mapping: HashMap<&str, &str> = HashMap::new();
                 let mut task_occurances: HashSet<&str> = HashSet::new();
                 for subtask in method.subtasks.iter() {
-                    match subtask.id {
+                    match &subtask.id {
                         Some(id) => {
-                            id_to_task_mapping.insert(id, subtask.task_symbol);
-                            if subtask.task_symbol == *task {
-                                task_occurances.insert(&id);
+                            id_to_task_mapping.insert(&id.name, &subtask.task.name);
+                            if subtask.task.name == *task {
+                                task_occurances.insert(&id.name);
                             }
                         }
                         None => {}
@@ -292,12 +292,12 @@ impl<'a> TDG<'a> {
         match &method.orderings {
             TaskOrdering::Total => {
                 for (index, subtask) in method.subtasks.iter().enumerate() {
-                    if subtask.task_symbol == *task {
+                    if subtask.task.name == *task {
                         return method
                             .subtasks
                             .iter()
                             .skip(index + 1)
-                            .map(|x| self.get_task_index(&x.task_symbol))
+                            .map(|x| self.get_task_index(&x.task.name))
                             .collect();
                     }
                 }
@@ -310,11 +310,11 @@ impl<'a> TDG<'a> {
                 let mut id_to_task_mapping: HashMap<&str, &str> = HashMap::new();
                 let mut task_occurances: HashSet<&str> = HashSet::new();
                 for subtask in method.subtasks.iter() {
-                    match subtask.id {
+                    match &subtask.id {
                         Some(id) => {
-                            id_to_task_mapping.insert(id, subtask.task_symbol);
-                            if subtask.task_symbol == *task {
-                                task_occurances.insert(&id);
+                            id_to_task_mapping.insert(&id.name, &subtask.task.name);
+                            if subtask.task.name == *task {
+                                task_occurances.insert(&id.name);
                             }
                         }
                         None => {}

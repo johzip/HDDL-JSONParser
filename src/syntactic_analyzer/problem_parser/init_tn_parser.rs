@@ -73,7 +73,9 @@ impl<'a> Parser<'a> {
                                                     let error = SyntacticError {
                                                         expected: "'('".to_string(),
                                                         found: token.to_string(),
-                                                        position: self.tokenizer.get_last_token_position(),
+                                                        position: self
+                                                            .tokenizer
+                                                            .get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
                                                 }
@@ -81,42 +83,51 @@ impl<'a> Parser<'a> {
                                         },
                                         Token::Operator(OperationType::LessThan) => {
                                             match self.tokenizer.get_token()? {
-                                                Token::Identifier(t1) => {
-                                                    loop {
-                                                        match self.tokenizer.get_token()? {
-                                                            Token::Identifier(t2) => {
-                                                                orderings.push((t1, t2));
-                                                            }
-                                                            Token::Punctuator(
-                                                                PunctuationType::RParentheses,
-                                                            ) => {
-                                                                break;
-                                                            }
-                                                            token => {
-                                                                let error = SyntacticError {
-                                                                    expected: format!("another task id after {}", t1).to_string(),
-                                                                    found: token.to_string(),
-                                                                     position: self.tokenizer.get_last_token_position(),
-                                                                };
-                                                                return Err(ParsingError::Syntactic(error));
-                                                            }
+                                                Token::Identifier(t1) => loop {
+                                                    match self.tokenizer.get_token()? {
+                                                        Token::Identifier(t2) => {
+                                                            orderings.push((t1, t2));
+                                                        }
+                                                        Token::Punctuator(
+                                                            PunctuationType::RParentheses,
+                                                        ) => {
+                                                            break;
+                                                        }
+                                                        token => {
+                                                            let error = SyntacticError {
+                                                                expected: format!(
+                                                                    "another task id after {}",
+                                                                    t1
+                                                                )
+                                                                .to_string(),
+                                                                found: token.to_string(),
+                                                                position: self
+                                                                    .tokenizer
+                                                                    .get_last_token_position(),
+                                                            };
+                                                            return Err(ParsingError::Syntactic(
+                                                                error,
+                                                            ));
                                                         }
                                                     }
-                                                }
+                                                },
                                                 token => {
                                                     let error = SyntacticError {
-                                                        expected: "expected a task identifier".to_string(),
+                                                        expected: "expected a task identifier"
+                                                            .to_string(),
                                                         found: token.to_string(),
-                                                        position: self.tokenizer.get_last_token_position(),
+                                                        position: self
+                                                            .tokenizer
+                                                            .get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
                                                 }
                                             }
                                         }
                                         // no ordering
-                                        Token::Punctuator(PunctuationType::RParentheses) => { }
+                                        Token::Punctuator(PunctuationType::RParentheses) => {}
                                         token => {
-                                            let error = SyntacticError{
+                                            let error = SyntacticError {
                                                 expected: "ordering constraints".to_string(),
                                                 found: token.to_string(),
                                                 position: self.tokenizer.get_last_token_position(),
@@ -199,38 +210,35 @@ impl<'a> Parser<'a> {
     fn parse_ordering(&'a self) -> Result<Vec<(&'a str, &'a str)>, ParsingError> {
         let mut orderings: Vec<(&str, &str)> = vec![];
         match self.tokenizer.get_token()? {
-            Token::Operator(OperationType::LessThan) => {
-                match self.tokenizer.get_token()? {
-                    Token::Identifier(t1) => {
-                        loop {
-                            match self.tokenizer.get_token()? {
-                                Token::Identifier(t2) => {
-                                    orderings.push((t1, t2));
-                                }
-                                Token::Punctuator(PunctuationType::RParentheses) => {
-                                    return Ok(orderings);
-                                }
-                                token => {
-                                    let error = SyntacticError {
-                                        expected: format!("the task ids that come after {}", t1).to_string(),
-                                        found: token.to_string(),
-                                        position: self.tokenizer.get_last_token_position(),
-                                    };
-                                    return Err(ParsingError::Syntactic(error));
-                                }
-                            }
+            Token::Operator(OperationType::LessThan) => match self.tokenizer.get_token()? {
+                Token::Identifier(t1) => loop {
+                    match self.tokenizer.get_token()? {
+                        Token::Identifier(t2) => {
+                            orderings.push((t1, t2));
+                        }
+                        Token::Punctuator(PunctuationType::RParentheses) => {
+                            return Ok(orderings);
+                        }
+                        token => {
+                            let error = SyntacticError {
+                                expected: format!("the task ids that come after {}", t1)
+                                    .to_string(),
+                                found: token.to_string(),
+                                position: self.tokenizer.get_last_token_position(),
+                            };
+                            return Err(ParsingError::Syntactic(error));
                         }
                     }
-                    token => {
-                        let error = SyntacticError {
-                            expected: "task identifier".to_string(),
-                            found: token.to_string(),
-                            position: self.tokenizer.get_last_token_position(),
-                        };
-                        return Err(ParsingError::Syntactic(error));
-                    }
+                },
+                token => {
+                    let error = SyntacticError {
+                        expected: "task identifier".to_string(),
+                        found: token.to_string(),
+                        position: self.tokenizer.get_last_token_position(),
+                    };
+                    return Err(ParsingError::Syntactic(error));
                 }
-            }
+            },
             token => {
                 let error = SyntacticError {
                     expected: "character '<' to start an ordering constraint".to_string(),
@@ -304,45 +312,64 @@ impl<'a> Parser<'a> {
     fn parse_subtask(&'a self) -> Result<Subtask, ParsingError> {
         match self.tokenizer.get_token()? {
             Token::Identifier(id) => {
-                let id_pos = self.tokenizer.get_last_token_position();
+                let id_symbol = Symbol::new(
+                    id,
+                    self.tokenizer.get_last_token_position(),
+                    None,
+                    None
+                );
                 let mut terms = vec![];
-                let mut terms_pos = vec![];
                 match self.tokenizer.get_token()? {
                     Token::Punctuator(PunctuationType::LParentheses) => {
                         match self.tokenizer.get_token()? {
                             Token::Identifier(task) => {
-                                let task_symbol_pos = self.tokenizer.get_last_token_position();
+                                let task_symbol = Symbol::new(
+                                    task,
+                                    self.tokenizer.get_last_token_position(),
+                                    None,
+                                    None
+                                );
                                 loop {
                                     match self.tokenizer.get_token()? {
                                         Token::Identifier(term) => {
-                                            terms.push(term);
-                                            terms_pos.push(self.tokenizer.get_last_token_position());
+                                            terms.push(Symbol::new(
+                                                term,
+                                                self.tokenizer.get_last_token_position(),
+                                                None,
+                                                None
+                                            ));
                                         }
                                         Token::Punctuator(PunctuationType::RParentheses) => {
                                             match self.tokenizer.get_token()? {
-                                                Token::Punctuator(PunctuationType::RParentheses) => {
+                                                Token::Punctuator(
+                                                    PunctuationType::RParentheses,
+                                                ) => {
                                                     return Ok(Subtask {
-                                                        id: Some(id),
-                                                        id_pos: Some(id_pos),
-                                                        task_symbol: task,
-                                                        task_symbol_pos,
+                                                        id: Some(id_symbol),
+                                                        task: task_symbol,
                                                         terms: terms,
-                                                        terms_pos
                                                     });
                                                 }
                                                 token => {
-                                                    let error = SyntacticError{
-                                                        expected: format!("')' to close the block of {}", task).to_string(),
+                                                    let error = SyntacticError {
+                                                        expected: format!(
+                                                            "')' to close the block of {}",
+                                                            task
+                                                        )
+                                                        .to_string(),
                                                         found: token.to_string(),
-                                                        position: self.tokenizer.get_last_token_position(),
+                                                        position: self
+                                                            .tokenizer
+                                                            .get_last_token_position(),
                                                     };
                                                     return Err(ParsingError::Syntactic(error));
                                                 }
                                             }
                                         }
                                         token => {
-                                            let error = SyntacticError{
-                                                expected: "either a ')' or an identifier".to_string(),
+                                            let error = SyntacticError {
+                                                expected: "either a ')' or an identifier"
+                                                    .to_string(),
                                                 found: token.to_string(),
                                                 position: self.tokenizer.get_last_token_position(),
                                             };
@@ -352,7 +379,7 @@ impl<'a> Parser<'a> {
                                 }
                             }
                             token => {
-                                let error = SyntacticError{
+                                let error = SyntacticError {
                                     expected: format!("a subtask name for {}!=...", id).to_string(),
                                     found: token.to_string(),
                                     position: self.tokenizer.get_last_token_position(),
@@ -362,27 +389,33 @@ impl<'a> Parser<'a> {
                         }
                     }
                     Token::Identifier(term) => {
-                        terms.push(term);
-                        terms_pos.push(self.tokenizer.get_last_token_position());
+                        terms.push(Symbol::new(
+                            term, 
+                            self.tokenizer.get_last_token_position(), 
+                            None, 
+                            None
+                        ));
                         loop {
                             match self.tokenizer.get_token()? {
                                 Token::Identifier(term) => {
-                                    terms.push(term);
-                                    terms_pos.push(self.tokenizer.get_last_token_position());
+                                    terms.push(Symbol::new(
+                                        term, 
+                                        self.tokenizer.get_last_token_position(), 
+                                        None, 
+                                        None
+                                    ));
                                 }
                                 Token::Punctuator(PunctuationType::RParentheses) => {
                                     return Ok(Subtask {
                                         id: None,
-                                        id_pos: None,
-                                        task_symbol: id,
-                                        task_symbol_pos: id_pos,
+                                        task: id_symbol,
                                         terms: terms,
-                                        terms_pos
                                     })
                                 }
                                 token => {
-                                    let error = SyntacticError{
-                                        expected: format!("either a term for {}, or ')'", term).to_string(),
+                                    let error = SyntacticError {
+                                        expected: format!("either a term for {}, or ')'", term)
+                                            .to_string(),
                                         found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
                                     };
@@ -394,15 +427,12 @@ impl<'a> Parser<'a> {
                     Token::Punctuator(PunctuationType::RParentheses) => {
                         return Ok(Subtask {
                             id: None,
-                            id_pos: None,
-                            task_symbol: id,
-                            task_symbol_pos: id_pos,
+                            task: id_symbol,
                             terms: terms,
-                            terms_pos
                         })
                     }
                     token => {
-                        let error = SyntacticError{
+                        let error = SyntacticError {
                             expected: "subtask definition".to_string(),
                             found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
@@ -412,7 +442,7 @@ impl<'a> Parser<'a> {
                 }
             }
             token => {
-                let error = SyntacticError{
+                let error = SyntacticError {
                     expected: "task id".to_string(),
                     found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
@@ -446,7 +476,7 @@ impl<'a> Parser<'a> {
                                     return Ok(constraints);
                                 }
                                 token => {
-                                    let error = SyntacticError{
+                                    let error = SyntacticError {
                                         expected: "a constraint definition".to_string(),
                                         found: token.to_string(),
                                         position: self.tokenizer.get_last_token_position(),
@@ -455,7 +485,6 @@ impl<'a> Parser<'a> {
                                 }
                             }
                         }
-                        
                     },
                     // single constraint declaration
                     Token::Operator(OperationType::Not) | Token::Operator(OperationType::Equal) => {
@@ -463,7 +492,7 @@ impl<'a> Parser<'a> {
                         return Ok(constraints);
                     }
                     token => {
-                        let error = SyntacticError{
+                        let error = SyntacticError {
                             expected: "constraint declerations".to_string(),
                             found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
@@ -473,7 +502,7 @@ impl<'a> Parser<'a> {
                 }
             }
             token => {
-                let error = SyntacticError{
+                let error = SyntacticError {
                     expected: "'('".to_string(),
                     found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),
@@ -485,122 +514,120 @@ impl<'a> Parser<'a> {
 
     pub fn parse_constraint(&'a self) -> Result<Constraint<'a>, ParsingError> {
         match self.tokenizer.get_token()? {
-            Token::Operator(OperationType::Not) => {
-                match self.tokenizer.get_token()? {
-                    Token::Punctuator(PunctuationType::LParentheses) => {
-                        match self.tokenizer.get_token()? {
-                            Token::Operator(OperationType::Equal) => {
-                                match self.tokenizer.get_token()? {
-                                    Token::Identifier(t1) => {
+            Token::Operator(OperationType::Not) => match self.tokenizer.get_token()? {
+                Token::Punctuator(PunctuationType::LParentheses) => {
+                    match self.tokenizer.get_token()? {
+                        Token::Operator(OperationType::Equal) => {
+                            match self.tokenizer.get_token()? {
+                                Token::Identifier(t1) => match self.tokenizer.get_token()? {
+                                    Token::Identifier(t2) => {
                                         match self.tokenizer.get_token()? {
-                                            Token::Identifier(t2) => {
+                                            Token::Punctuator(PunctuationType::RParentheses) => {
                                                 match self.tokenizer.get_token()? {
-                                                    Token::Punctuator(PunctuationType::RParentheses) => {
-                                                        match self.tokenizer.get_token()? {
-                                                            Token::Punctuator(PunctuationType::RParentheses) => {
-                                                                return Ok(Constraint::NotEqual(t1, t2));
-                                                            }
-                                                            token => {
-                                                                let error = SyntacticError{
+                                                    Token::Punctuator(
+                                                        PunctuationType::RParentheses,
+                                                    ) => {
+                                                        return Ok(Constraint::NotEqual(t1, t2));
+                                                    }
+                                                    token => {
+                                                        let error = SyntacticError{
                                                                     expected: format!(") to close the inequality constraint").to_string(),
                                                                     found: token.to_string(),
                                                                     position: self.tokenizer.get_last_token_position(),
                                                                 };
-                                                                return Err(ParsingError::Syntactic(error));
-                                                            }
-                                                        }
-                                                    }
-                                                    token => {
-                                                        let error = SyntacticError{
-                                                            expected: format!(") to close the inequality constraint").to_string(),
-                                                            found: token.to_string(),
-                                                            position: self.tokenizer.get_last_token_position(),
-                                                        };
                                                         return Err(ParsingError::Syntactic(error));
                                                     }
                                                 }
                                             }
                                             token => {
-                                                let error = SyntacticError{
-                                                    expected: format!("right hand side of {}!=...", t1).to_string(),
+                                                let error = SyntacticError {
+                                                    expected: format!(
+                                                        ") to close the inequality constraint"
+                                                    )
+                                                    .to_string(),
                                                     found: token.to_string(),
-                                                    position: self.tokenizer.get_last_token_position(),
+                                                    position: self
+                                                        .tokenizer
+                                                        .get_last_token_position(),
                                                 };
                                                 return Err(ParsingError::Syntactic(error));
                                             }
                                         }
                                     }
                                     token => {
-                                        let error = SyntacticError{
-                                            expected: "task identifier".to_string(),
+                                        let error = SyntacticError {
+                                            expected: format!("right hand side of {}!=...", t1)
+                                                .to_string(),
                                             found: token.to_string(),
                                             position: self.tokenizer.get_last_token_position(),
                                         };
                                         return Err(ParsingError::Syntactic(error));
                                     }
+                                },
+                                token => {
+                                    let error = SyntacticError {
+                                        expected: "task identifier".to_string(),
+                                        found: token.to_string(),
+                                        position: self.tokenizer.get_last_token_position(),
+                                    };
+                                    return Err(ParsingError::Syntactic(error));
                                 }
                             }
-                            token => {
-                                let error = SyntacticError{
-                                    expected: "equality keyword '='".to_string(),
-                                    found: token.to_string(),
-                                    position: self.tokenizer.get_last_token_position(),
-                                };
-                                return Err(ParsingError::Syntactic(error));
-                            }
+                        }
+                        token => {
+                            let error = SyntacticError {
+                                expected: "equality keyword '='".to_string(),
+                                found: token.to_string(),
+                                position: self.tokenizer.get_last_token_position(),
+                            };
+                            return Err(ParsingError::Syntactic(error));
                         }
                     }
+                }
+                token => {
+                    let error = SyntacticError {
+                        expected: "'(' after keyword 'not'".to_string(),
+                        found: token.to_string(),
+                        position: self.tokenizer.get_last_token_position(),
+                    };
+                    return Err(ParsingError::Syntactic(error));
+                }
+            },
+            Token::Operator(OperationType::Equal) => match self.tokenizer.get_token()? {
+                Token::Identifier(t1) => match self.tokenizer.get_token()? {
+                    Token::Identifier(t2) => match self.tokenizer.get_token()? {
+                        Token::Punctuator(PunctuationType::RParentheses) => {
+                            return Ok(Constraint::Equal(t1, t2));
+                        }
+                        token => {
+                            let error = SyntacticError {
+                                expected: format!(") to close the equality constraint").to_string(),
+                                found: token.to_string(),
+                                position: self.tokenizer.get_last_token_position(),
+                            };
+                            return Err(ParsingError::Syntactic(error));
+                        }
+                    },
                     token => {
-                        let error = SyntacticError{
-                            expected: "'(' after keyword 'not'".to_string(),
+                        let error = SyntacticError {
+                            expected: format!("right hand side of {}=...", t1).to_string(),
                             found: token.to_string(),
                             position: self.tokenizer.get_last_token_position(),
                         };
                         return Err(ParsingError::Syntactic(error));
                     }
+                },
+                token => {
+                    let error = SyntacticError {
+                        expected: "a task identifier".to_string(),
+                        found: token.to_string(),
+                        position: self.tokenizer.get_last_token_position(),
+                    };
+                    return Err(ParsingError::Syntactic(error));
                 }
-            }
-            Token::Operator(OperationType::Equal) => {
-                match self.tokenizer.get_token()? {
-                    Token::Identifier(t1) => {
-                        match self.tokenizer.get_token()? {
-                            Token::Identifier(t2) => {
-                                match self.tokenizer.get_token()? {
-                                    Token::Punctuator(PunctuationType::RParentheses) => {
-                                        return Ok(Constraint::Equal(t1, t2));
-                                    }
-                                    token => {
-                                        let error = SyntacticError{
-                                            expected: format!(") to close the equality constraint").to_string(),
-                                            found: token.to_string(),
-                                            position: self.tokenizer.get_last_token_position(),
-                                        };
-                                        return Err(ParsingError::Syntactic(error));
-                                    }
-                                }
-                            }
-                            token => {
-                                let error = SyntacticError{
-                                    expected: format!("right hand side of {}=...", t1).to_string(),
-                                    found: token.to_string(),
-                                    position: self.tokenizer.get_last_token_position(),
-                                };
-                                return Err(ParsingError::Syntactic(error));
-                            }
-                        }
-                    }
-                    token => {
-                        let error = SyntacticError{
-                            expected: "a task identifier".to_string(),
-                            found: token.to_string(),
-                            position: self.tokenizer.get_last_token_position(),
-                        };
-                        return Err(ParsingError::Syntactic(error));
-                    }
-                }
-            }
+            },
             token => {
-                let error = SyntacticError{
+                let error = SyntacticError {
                     expected: "either an equalilty or non-equality constraint".to_string(),
                     found: token.to_string(),
                     position: self.tokenizer.get_last_token_position(),

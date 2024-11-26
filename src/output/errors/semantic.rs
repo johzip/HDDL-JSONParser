@@ -105,11 +105,12 @@ pub struct TypeError {
     pub expected: Option<String>,
     pub found: Option<String>,
     pub var_name: String,
+    pub position: TokenPosition,
 }
 
 impl fmt::Display for TypeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Type error for variable {}. ", self.var_name)?;
+        write!(f, "line {}: Type error for variable {}. ", self.position.line, self.var_name)?;
         match (&self.expected, &self.found) {
             (Some(expected), Some(found)) => {
                 write!(

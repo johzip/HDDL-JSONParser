@@ -60,6 +60,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                         expected: expected.symbol_type.map(String::from),
                                         found: found.symbol_type.map(String::from),
                                         var_name: predicate.name.to_string(),
+                                        position: found.name_pos,
                                     },
                                 ));
                             }
@@ -77,6 +78,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                             expected: expected.symbol_type.map(String::from),
                                             found: constant.symbol_type.map(String::from),
                                             var_name: predicate.name.to_string(),
+                                            position: found.name_pos,
                                         },
                                     ));
                                 }
@@ -108,18 +110,18 @@ impl<'a> ProblemTypeChecker<'a> {
         subtask: &'a Subtask<'a>,
         parameters: &Option<Vec<Symbol<'a>>>,
     ) -> Result<(), SemanticErrorType> {
-        if self.symbol_table.actions.contains(&subtask.task_symbol) {
-            let action = self.symbol_table.actions.get(&subtask.task_symbol).unwrap();
+        if self.symbol_table.actions.contains(&subtask.task.name) {
+            let action = self.symbol_table.actions.get(&subtask.task.name).unwrap();
             if action.parameters.len() != subtask.terms.len() {
                 return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
-                    symbol: subtask.task_symbol.to_string(),
+                    symbol: subtask.task.name.to_string(),
                     expected_arity: action.parameters.len() as u32,
                     found_arity: subtask.terms.len() as u32,
-                    position: subtask.task_symbol_pos
+                    position: subtask.task.name_pos
                 }));
             }
             for (expected, found) in action.parameters.iter().zip(subtask.terms.iter()) {
-                match self.objects.get(found) {
+                match self.objects.get(found.name) {
                     Some(object_type) => {
                         let is_consistent = self
                             .generic_type_checker
@@ -128,26 +130,28 @@ impl<'a> ProblemTypeChecker<'a> {
                             return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
                                 expected: expected.symbol_type.map(String::from),
                                 found: object_type.map(String::from),
-                                var_name: subtask.task_symbol.to_string(),
+                                var_name: subtask.task.name.to_string(),
+                                position: found.name_pos,
                             }));
                         }
                     }
                     None => {
                         let mut undefined = false;
                         match &*parameters {
-                            Some(params) => match params.iter().find(|x| &x.name == found) {
-                                Some(definition) => {
+                            Some(params) => match params.iter().find(|x| &x.name == &found.name) {
+                                Some(param) => {
                                     let is_consistent =
                                         self.generic_type_checker.is_var_type_consistent(
-                                            definition.symbol_type,
+                                            param.symbol_type,
                                             expected.symbol_type,
                                         );
                                     if !is_consistent {
                                         return Err(SemanticErrorType::InconsistentTaskArgType(
                                             TypeError {
                                                 expected: expected.symbol_type.map(String::from),
-                                                found: definition.symbol_type.map(String::from),
-                                                var_name: subtask.task_symbol.to_string(),
+                                                found: param.symbol_type.map(String::from),
+                                                var_name: subtask.task.name.to_string(),
+                                                position: found.name_pos
                                             },
                                         ));
                                     }
@@ -177,6 +181,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                                         .map(String::from),
                                                     found: constant.symbol_type.map(String::from),
                                                     var_name: action.name.to_string(),
+                                                    position: found.name_pos
                                                 },
                                             ),
                                         );
@@ -184,7 +189,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                 }
                                 None => {
                                     return Err(SemanticErrorType::UndefinedObject(
-                                        found.to_string(),
+                                        found.name.to_string(),
                                     ));
                                 }
                             }
@@ -193,18 +198,18 @@ impl<'a> ProblemTypeChecker<'a> {
                 }
             }
             return Ok(());
-        } else if self.symbol_table.tasks.contains(subtask.task_symbol) {
-            let task = self.symbol_table.tasks.get(&subtask.task_symbol).unwrap();
+        } else if self.symbol_table.tasks.contains(subtask.task.name) {
+            let task = self.symbol_table.tasks.get(&subtask.task.name).unwrap();
             if task.parameters.len() != subtask.terms.len() {
                 return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
-                    symbol: subtask.task_symbol.to_string(),
+                    symbol: subtask.task.name.to_string(),
                     expected_arity: task.parameters.len() as u32,
                     found_arity: subtask.terms.len() as u32,
-                    position: subtask.task_symbol_pos
+                    position: subtask.task.name_pos
                 }));
             }
             for (expected, found) in task.parameters.iter().zip(subtask.terms.iter()) {
-                match self.objects.get(found) {
+                match self.objects.get(found.name) {
                     Some(object_type) => {
                         let is_consistent = self
                             .generic_type_checker
@@ -213,14 +218,15 @@ impl<'a> ProblemTypeChecker<'a> {
                             return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
                                 expected: expected.symbol_type.map(String::from),
                                 found: object_type.map(String::from),
-                                var_name: subtask.task_symbol.to_string(),
+                                var_name: subtask.task.name.to_string(),
+                                position: found.name_pos
                             }));
                         }
                     }
                     None => {
                         let mut undefined = false;
                         match &*parameters {
-                            Some(params) => match params.iter().find(|x| &x.name == found) {
+                            Some(params) => match params.iter().find(|x| &x.name == &found.name) {
                                 Some(definition) => {
                                     let is_consistent =
                                         self.generic_type_checker.is_var_type_consistent(
@@ -232,7 +238,8 @@ impl<'a> ProblemTypeChecker<'a> {
                                             TypeError {
                                                 expected: expected.symbol_type.map(String::from),
                                                 found: definition.symbol_type.map(String::from),
-                                                var_name: subtask.task_symbol.to_string(),
+                                                var_name: subtask.task.name.to_string(),
+                                                position: found.name_pos
                                             },
                                         ));
                                     }
@@ -262,6 +269,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                                         .map(String::from),
                                                     found: constant.symbol_type.map(String::from),
                                                     var_name: task.name.to_string(),
+                                                    position: found.name_pos
                                                 },
                                             ),
                                         );
@@ -269,7 +277,7 @@ impl<'a> ProblemTypeChecker<'a> {
                                 }
                                 None => {
                                     return Err(SemanticErrorType::UndefinedObject(
-                                        found.to_string(),
+                                        found.name.to_string(),
                                     ));
                                 }
                             }
@@ -280,7 +288,7 @@ impl<'a> ProblemTypeChecker<'a> {
             return Ok(());
         } else {
             return Err(SemanticErrorType::UndefinedSubtask(
-                subtask.task_symbol.to_string(),
+                subtask.task.name.to_string(),
             ));
         }
     }

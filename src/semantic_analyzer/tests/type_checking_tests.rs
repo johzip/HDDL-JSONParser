@@ -35,7 +35,7 @@ pub fn basic_type_checking_test () {
                             assert_eq!(t_err.var_name, "l1");
                             assert_eq!(t_err.found.unwrap(), "t2");
                             assert_eq!(t_err.expected.unwrap(), "t1");
-                            // TODO: assert locality in future
+                            assert_eq!(t_err.position.line, 12);
                         }
                         _ => {
                             panic!("caught wrong error")
@@ -273,7 +273,7 @@ pub fn method_subtask_checking_test () {
                             assert_eq!(t_error.expected.unwrap(), "t2");
                             assert_eq!(t_error.found.unwrap(), "t6");
                             assert_eq!(t_error.var_name, "l3");
-                            // TODO: test locality
+                            assert_eq!(t_error.position.line, 27);
                         }
                         any => {
                             panic!("{:?}", any)

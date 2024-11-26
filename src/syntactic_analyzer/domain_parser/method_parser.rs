@@ -4,7 +4,12 @@ impl<'a> Parser<'a> {
     pub fn parse_method(&'a self) -> Result<Method<'a>, ParsingError> {
         match self.tokenizer.get_token()? {
             Token::Identifier(method_name) => {
-                let name_pos = self.tokenizer.get_last_token_position();
+                let name = Symbol::new(
+                    method_name, 
+                    self.tokenizer.get_last_token_position(), 
+                    None, 
+                    None
+                );
                 match self.tokenizer.get_token()? {
                     Token::Keyword(KeywordName::Parameters) => {
                         match self.tokenizer.get_token()? {
@@ -16,7 +21,12 @@ impl<'a> Parser<'a> {
                                             Token::Punctuator(PunctuationType::LParentheses) => {
                                                 match self.tokenizer.get_token()? {
                                                     Token::Identifier(task_name) => {
-                                                        let task_name_pos = self.tokenizer.get_last_token_position();
+                                                        let task = Symbol::new(
+                                                            task_name, 
+                                                            self.tokenizer.get_last_token_position(), 
+                                                            None, 
+                                                            None
+                                                        );
                                                         let terms = self.parse_args()?;
                                                         match self.tokenizer.lookahead()? {
                                                             Token::Keyword(KeywordName::Precondition) => {
@@ -25,11 +35,9 @@ impl<'a> Parser<'a> {
                                                                 let precondition = self.parse_formula()?;
                                                                 let tn = self.parse_htn()?;
                                                                 return Ok(Method {
-                                                                    name: method_name,
-                                                                    name_pos,
+                                                                    name,
                                                                     params,
-                                                                    task_name: task_name,
-                                                                    task_name_pos,
+                                                                    task,
                                                                     task_terms: terms,
                                                                     precondition: Some(precondition),
                                                                     tn,
@@ -41,11 +49,9 @@ impl<'a> Parser<'a> {
                                                             ) => {
                                                                 let tn = self.parse_htn()?;
                                                                 return Ok(Method {
-                                                                    name: method_name,
-                                                                    name_pos,
+                                                                    name,
                                                                     params,
-                                                                    task_name: task_name,
-                                                                    task_name_pos,
+                                                                    task,
                                                                     task_terms: terms,
                                                                     precondition: None,
                                                                     tn,

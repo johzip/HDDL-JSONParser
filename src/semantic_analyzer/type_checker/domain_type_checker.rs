@@ -51,25 +51,28 @@ impl<'a> DomainTypeChecker<'a> {
         let par_types: HashMap<&str, Option<&str>> =
             HashMap::from_iter(parameters.iter().map(|par| (par.name, par.symbol_type)));
         // Assert predicate typing correctness
-        for used_predicate in formula {
-            match declared_predicates.get(used_predicate) {
+        for instantiated_predicate in formula {
+            match declared_predicates.get(instantiated_predicate) {
                 Some(predicate_definition) => {
-                    let mut found_list = vec![];
-                    for var in used_predicate.variables.iter() {
+                    let mut instantiated_vars = vec![];
+                    for var in instantiated_predicate.variables.iter() {
                         match par_types.get(var.name) {
                             Some(par_type) => {
-                                found_list.push((var.name, par_type));
+                                instantiated_vars.push((var, par_type));
                             }
                             None => {
-                                if !declared_constants.contains(&var.name) {
-                                    return Err(SemanticErrorType::UndefinedParameter(
-                                        var.name.to_string(),
-                                    ));
-                                } else {
-                                    found_list.push((
-                                        var.name,
-                                        &declared_constants.get(&var.name).unwrap().symbol_type,
-                                    ))
+                                match declared_constants.get(var) {
+                                    Some(constant) => {
+                                        instantiated_vars.push((
+                                            var,
+                                            &declared_constants.get(&var.name).unwrap().symbol_type,
+                                        ))
+                                    }
+                                    None => {
+                                        return Err(SemanticErrorType::UndefinedParameter(
+                                            var.name.to_string(),
+                                        ));
+                                    }
                                 }
                             }
                         }
@@ -80,22 +83,23 @@ impl<'a> DomainTypeChecker<'a> {
                         .map(|x| &x.symbol_type)
                         .collect();
                     // Assert args have the same arity
-                    if &found_list.len() != &expected_list.len() {
+                    if &instantiated_vars.len() != &expected_list.len() {
                         return Err(SemanticErrorType::InconsistentPredicateArity(ArityError {
-                            symbol: used_predicate.name.to_string(),
+                            symbol: instantiated_predicate.name.to_string(),
                             expected_arity: expected_list.len() as u32,
-                            found_arity: found_list.len() as u32,
-                            position: used_predicate.name_pos
+                            found_arity: instantiated_vars.len() as u32,
+                            position: instantiated_predicate.name_pos,
                         }));
                     }
-                    for ((var_name, f), e) in found_list.into_iter().zip(expected_list.into_iter())
+                    for ((var, f), e) in instantiated_vars.into_iter().zip(expected_list.into_iter())
                     {
                         if !self.generic_type_checker.is_var_type_consistent(*f, *e) {
                             return Err(SemanticErrorType::InconsistentPredicateArgType(
                                 TypeError {
                                     expected: e.map(|inner| inner.to_string()),
                                     found: f.map(|inner| inner.to_string()),
-                                    var_name: var_name.to_string(),
+                                    var_name: var.name.to_string(),
+                                    position: var.name_pos
                                 },
                             ));
                         }
@@ -104,8 +108,8 @@ impl<'a> DomainTypeChecker<'a> {
                 None => {
                     return Err(SemanticErrorType::UndefinedPredicate(
                         UndefinedSymbolError {
-                            symbol: used_predicate.name.to_string(),
-                            position: used_predicate.name_pos,
+                            symbol: instantiated_predicate.name.to_string(),
+                            position: instantiated_predicate.name_pos,
                         },
                     ));
                 }
@@ -116,88 +120,86 @@ impl<'a> DomainTypeChecker<'a> {
 
     pub fn is_task_consistent(
         &self,
-        task_name: &'a str,
-        task_position: &TokenPosition,
-        task_terms: &Vec<&'a str>,
+        task: &Symbol<'a>,
+        task_terms: &Vec<Symbol<'a>>,
         parameters: &Vec<Symbol<'a>>,
         declared_constants: &HashSet<&Symbol<'a>>,
         declared_tasks: &HashSet<&Task<'a>>,
         declared_actions: &HashSet<&Action<'a>>,
     ) -> Result<(), SemanticErrorType> {
-        // Store parameter types as a mapping from name to type
-        let par_types: HashMap<&str, Option<&str>> =
-            HashMap::from_iter(parameters.iter().map(|par| (par.name, par.symbol_type)));
-        
-        // process arguements to a vec of (argument name, type)
-        let mut found = vec![];
-        for term in task_terms {
-            match par_types.get(term) {
-                Some(typing) => {
-                    found.push((term, typing));
+        // Store parameter types as a mapping from name to (type and position)
+        let par_types: HashMap<&str, &Symbol> = HashMap::from_iter(
+            parameters.iter().map(|par| {(par.name, par)})
+        );
+        let mut found_types = vec![];
+        for term in task_terms.iter() {
+            match par_types.get(term.name) {
+                Some(par_definition) => {
+                    found_types.push((term, par_definition));
                 }
                 None => {
-                    if !declared_constants.contains(term) {
-                        return Err(SemanticErrorType::UndefinedParameter(term.to_string()));
-                    } else {
-                        found.push((term, &declared_constants.get(term).unwrap().symbol_type))
-                    }
+                    return Err(SemanticErrorType::UndefinedParameter(term.name.to_string()));
                 }
             }
         }
-        match declared_actions.iter().find(|x| x.name == task_name) {
+        match declared_actions.iter().find(|x| x.name == task.name) {
             Some(definition) => {
-                let expected: Vec<Option<&str>> = definition
+                let expected_types: Vec<Option<&str>> = definition
                     .parameters
                     .iter()
                     .map(|x| x.symbol_type)
                     .collect();
-                if found.len() != expected.len() {
+                if task_terms.len() != expected_types.len() {
                     return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
-                        symbol: task_name.to_string(),
-                        expected_arity: expected.len() as u32,
-                        found_arity: found.len() as u32,
-                        position: *task_position
+                        symbol: task.name.to_string(),
+                        expected_arity: expected_types.len() as u32,
+                        found_arity: task_terms.len() as u32,
+                        position: task.name_pos,
                     }));
                 }
-                for ((name, f), e) in found.iter().zip(expected.iter()) {
-                    if !self.generic_type_checker.is_var_type_consistent(**f, *e) {
+                for ((term, parameter), expected_type) in found_types.iter().zip(expected_types.iter()) {
+                    if !self.generic_type_checker.is_var_type_consistent(parameter.symbol_type, *expected_type) {
                         return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
-                            expected: e.map(|inner| inner.to_string()),
-                            found: f.map(|inner| inner.to_string()),
-                            var_name: name.to_string(),
+                            expected: expected_type.map(|inner| inner.to_string()),
+                            found: parameter.symbol_type.map(|inner| inner.to_string()),
+                            var_name: term.name.to_string(),
+                            position: term.name_pos
                         }));
                     }
                 }
                 return Ok(());
             }
-            None => match declared_tasks.iter().find(|x| x.name == task_name) {
-                Some(definition) => {
-                    let expected: Vec<Option<&str>> = definition
-                        .parameters
-                        .iter()
-                        .map(|x| x.symbol_type)
-                        .collect();
-                    if found.len() != expected.len() {
-                        return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
-                            symbol: task_name.to_string(),
-                            expected_arity: expected.len() as u32,
-                            found_arity: found.len() as u32,
-                            position: *task_position
-                        }));
-                    }
-                    for ((name, f), e) in found.iter().zip(expected.iter()) {
-                        if !self.generic_type_checker.is_var_type_consistent(**f, *e) {
-                            return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
-                                expected: e.map(|inner| inner.to_string()),
-                                found: f.map(|inner| inner.to_string()),
-                                var_name: name.to_string(),
+            None => {
+                match declared_tasks.iter().find(|x| x.name == task.name) {
+                    Some(definition) => {
+                        let expected: Vec<Option<&str>> = definition
+                            .parameters
+                            .iter()
+                            .map(|x| x.symbol_type)
+                            .collect();
+                        if found_types.len() != expected.len() {
+                            return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
+                                symbol: task.name.to_string(),
+                                expected_arity: expected.len() as u32,
+                                found_arity: found_types.len() as u32,
+                                position: task.name_pos,
                             }));
                         }
+                        for ((term, parameter), expected_type) in found_types.iter().zip(expected.iter()) {
+                            if !self.generic_type_checker.is_var_type_consistent(parameter.symbol_type, *expected_type) {
+                                return Err(SemanticErrorType::InconsistentTaskArgType(TypeError {
+                                    expected: expected_type.map(|inner| inner.to_string()),
+                                    found: parameter.symbol_type.map(|inner| inner.to_string()),
+                                    var_name: term.name.to_string(),
+                                    position: term.name_pos,
+                                }));
+                            }
+                        }
+                        return Ok(());
                     }
-                    return Ok(());
-                }
-                None => {
-                    return Err(SemanticErrorType::UndefinedSubtask(task_name.to_string()));
+                    None => {
+                        return Err(SemanticErrorType::UndefinedSubtask(task.name.to_string()));
+                    }
                 }
             },
         }

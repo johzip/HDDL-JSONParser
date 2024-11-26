@@ -20,12 +20,9 @@ pub struct HTN<'a> {
 
 #[derive(Debug, Clone)]
 pub struct Subtask<'a> {
-    pub id: Option<&'a str>,
-    pub id_pos: Option<TokenPosition>,
-    pub task_symbol: &'a str,
-    pub task_symbol_pos: TokenPosition,
-    pub terms: Vec<&'a str>,
-    pub terms_pos: Vec<TokenPosition>,
+    pub id: Option<Symbol<'a>>,
+    pub task: Symbol<'a>,
+    pub terms: Vec<Symbol<'a>>
 }
 
 

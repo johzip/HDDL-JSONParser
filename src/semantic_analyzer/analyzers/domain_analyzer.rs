@@ -93,16 +93,16 @@ impl<'a> DomainSemanticAnalyzer<'a> {
         let mut declared_methods = HashSet::new();
         let mut method_positions = HashMap::new();
         for method in self.domain.methods.iter() {
-            if !declared_methods.insert(method.name) {
+            if !declared_methods.insert(&method.name) {
                 return Err(SemanticErrorType::DuplicateMethodDeclaration(
                     DuplicateError {
-                        symbol: method.name.to_string(),
-                        first_pos: *method_positions.get(method.name).unwrap(),
-                        second_pos: method.name_pos,
+                        symbol: method.name.name.to_string(),
+                        first_pos: *method_positions.get(&method.name).unwrap(),
+                        second_pos: method.name.name_pos,
                     },
                 ));
             } else {
-                method_positions.insert(method.name, method.name_pos);
+                method_positions.insert(&method.name, method.name.name_pos);
             }
             // Assert preconditions are valid
             match &method.precondition {
@@ -117,28 +117,28 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                     )?;
                     if !precondition.is_sat() {
                         warnings.push(WarningType::UnsatisfiableMethodPrecondition(
-                            method.name.to_string(),
+                            method.name.name.to_string(),
                         ));
                     }
                 }
                 _ => {}
             }
             // Assert task is defined
-            if !declared_tasks.contains(method.task_name) {
+            if !declared_tasks.contains(method.task.name) {
                 return Err(SemanticErrorType::UndefinedTask(UndefinedSymbolError {
-                    symbol: method.task_name.to_string(),
-                    position: method.task_name_pos,
+                    symbol: method.task.name.to_string(),
+                    position: method.task.name_pos,
                 }));
             } else {
                 // Assert task arity is consistent
                 for declared_compound_task in self.domain.compound_tasks.iter() {
-                    if method.task_name == declared_compound_task.name {
+                    if method.task.name == declared_compound_task.name {
                         if method.task_terms.len() != declared_compound_task.parameters.len() {
                             return Err(SemanticErrorType::InconsistentTaskArity(ArityError {
-                                symbol: method.task_name.to_string(),
+                                symbol: method.task.name.to_string(),
                                 expected_arity: method.task_terms.len() as u32,
                                 found_arity: declared_compound_task.parameters.len() as u32,
-                                position: method.task_name_pos,
+                                position: method.task.name_pos,
                             }));
                         } else {
                             break;
@@ -149,9 +149,8 @@ impl<'a> DomainSemanticAnalyzer<'a> {
 
             // Assert task type is consistent
             let _ = self.type_checker.is_task_consistent(
-                &method.task_name,
-                &method.task_name_pos,
-                &method.task_terms.iter().map(|x| x.name).collect(),
+                &method.task,
+                &method.task_terms,
                 &method.params,
                 &declared_constants,
                 &declared_tasks,
@@ -161,8 +160,7 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             // Assert subtask types are consistent
             for subtask in method.tn.subtasks.iter() {
                 let _ = self.type_checker.is_task_consistent(
-                    &subtask.task_symbol,
-                    &subtask.task_symbol_pos,
+                    &subtask.task,
                     &subtask.terms,
                     &method.params,
                     &declared_constants,
