@@ -673,6 +673,110 @@ mod tests {
     }
 
     #[test]
+    pub fn quantifier_parsing_test() {
+        let program = String::from(
+            "(define (domain bal)
+                (:action a_1
+                 :parameters (p_1 p_2 - t1 p_3 - t2)
+                 :precondition (and
+                    (not (at p_1))
+                    (exists (?num1 ?num2 - number) (smaller ?num1 ?num2))
+                 )
+                 :effect (and
+                    (not (hold p_2 p_3))
+                    (at p_2)
+                    (forall (?loc - s) (and (pred1 ?loc) (pred2 ?loc)))
+                 )
+                )
+             ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(&program);
+        match Parser::new(lexer).parse() {
+            Ok(AbstractSyntaxTree::Domain(ast)) => {
+                assert_eq!(ast.actions.len(), 1);
+                let action = &ast.actions[0];
+                assert_eq!(action.name, "a_1");
+                let a1_vars: Vec<&str> =
+                    action.parameters.iter().map(|x| x.name).collect();
+                let a1_var_types: Vec<&str> = action
+                    .parameters                    
+                    .iter()
+                    .map(|x| x.symbol_type.unwrap())
+                    .collect();
+                assert_eq!(a1_vars, vec!["p_1", "p_2", "p_3"]);
+                assert_eq!(a1_var_types, vec!["t1", "t1", "t2"]);
+                match &action.preconditions.as_ref().unwrap() {
+                    Formula::And(exps) => {
+                        assert_eq!(exps.len(), 2);
+                        match &*exps[0]  {
+                            Formula::Not(formula) => match &**formula {
+                                Formula::Atom(predicate) => {
+                                    assert_eq!(predicate.name, "at");
+                                    assert_eq!(predicate.variables.len(), 1);
+                                    assert_eq!(predicate.variables[0].name, "p_1");
+                                }
+                                _ => {
+                                    panic!("wrong formula")
+                                }
+                            },
+                            _ => panic!()
+                        }
+                        match &*exps[1]  {
+                            Formula::Exists(q, qs) => {
+                                assert_eq!(q.len(), 2);
+                                assert_eq!(q[0].name, "num1");
+                                assert_eq!(q[1].name, "num2");
+                                let predicates =  qs.get_propositional_predicates();
+                                assert_eq!(predicates.len(), 1);
+                            }
+                            _ => panic!()
+                        }
+                    }
+                    
+                    _ => panic!("wrong formula"),
+                }
+                match &action.effects.as_ref().unwrap() {
+                    Formula::And(formula) => {
+                        assert_eq!(formula.len(), 3);
+                        match formula[0].as_ref() {
+                            Formula::Not(exp) => {
+                                if let Formula::Atom(pred) = exp.as_ref() {
+                                    assert_eq!(pred.name, "hold");
+                                    assert_eq!(pred.variables.len(), 2);
+                                    assert_eq!(pred.variables[0].name, "p_2");
+                                    assert_eq!(pred.variables[1].name, "p_3");
+                                } else {
+                                    panic!("wrong formula")
+                                }
+                            }
+                            _ => panic!()
+                        }
+                        match formula[1].as_ref() {
+                            Formula::Atom(pred) => {
+                                assert_eq!(pred.name, "at");
+                                assert_eq!(pred.variables.len(), 1);
+                                assert_eq!(pred.variables[0].name, "p_2");
+                            }
+                            _ => panic!()
+                        }
+                        match formula[2].as_ref() {
+                            Formula::ForAll(q, e) => {
+                                assert_eq!(q.len(), 1);
+                                assert_eq!(q[0].name, "loc");
+                                assert_eq!(e.get_propositional_predicates().len(), 2);
+                            }
+                            _ => panic!()
+                        }
+                    }
+                    _ => panic!("wrong formula"),
+                }
+            }
+            _ => panic!("parsing errors"),
+        }
+    }
+
+    #[test]
     pub fn non_deterministic_action_parsing_test() {
         let program = String::from(
             "(define (domain bal)
