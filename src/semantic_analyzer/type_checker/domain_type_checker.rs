@@ -136,12 +136,19 @@ impl<'a> DomainTypeChecker<'a> {
                     found_types.push((term, par_definition));
                 }
                 None => {
-                    return Err(SemanticErrorType::UndefinedParameter(
-                        UndefinedSymbolError {
-                            symbol: term.name.to_string(),
-                            position: term.name_pos,
-                        },
-                    ));
+                    match declared_constants.get(term) {
+                        Some(constant) => {
+                            found_types.push((term, constant))
+                        }
+                        None => {
+                            return Err(SemanticErrorType::UndefinedParameter(
+                                UndefinedSymbolError {
+                                    symbol: term.name.to_string(),
+                                    position: term.name_pos,
+                                },
+                            ));
+                        }
+                    }
                 }
             }
         }
