@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Debug)]
 pub struct DomainAST<'a> {
+    pub name: String,
     pub types: Option<Vec<Symbol<'a>>>,
     pub constants: Option<Vec<Symbol<'a>>>,
     pub requirements: Vec<RequirementType>,
@@ -12,8 +13,9 @@ pub struct DomainAST<'a> {
 }
 
 impl<'a> DomainAST<'a> {
-    pub fn new() -> DomainAST<'a> {
+    pub fn new(name: String) -> DomainAST<'a> {
         DomainAST {
+            name,
             types: None,
             constants: None,
             requirements: vec![],

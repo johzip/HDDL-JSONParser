@@ -2,7 +2,7 @@ use super::*;
 
 impl <'a> Parser<'a> {
     pub fn parse_domain(&'a self, domain_name: &'a str) -> Result<DomainAST<'a>, ParsingError> {
-        let mut syntax_tree = DomainAST::new();
+        let mut syntax_tree = DomainAST::new(domain_name.to_string());
         loop {
             match self.tokenizer.get_token()? {
                 Token::Punctuator(PunctuationType::LParentheses) => {
