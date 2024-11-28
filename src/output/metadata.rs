@@ -15,12 +15,12 @@ impl Display for RecursionType {
             RecursionType::NonRecursive => write!(f, "Non-recursive"),
             RecursionType::Recursive(pairs) => {
                 writeln!(f, "Recursive")?;
-                write!(f, "Cycle:")?;
+                write!(f, "\tCycle: ")?;
                 format_task_pairs(pairs, f)
             }
             RecursionType::EmptyRecursion(pairs) => {
                 writeln!(f, "Empty recursion")?;
-                write!(f, "Cycle:")?;
+                write!(f, "\tCycle: ")?;
                 format_task_pairs(pairs, f)
             }
             RecursionType::GrowingEmptyPrefixRecursion(pairs) => {
@@ -30,7 +30,7 @@ impl Display for RecursionType {
             }
             RecursionType::GrowAndShrinkRecursion(pairs) => {
                 writeln!(f, "Grow and shrink recursion")?;
-                write!(f, "Cycle:")?;
+                write!(f, "\tCycle: ")?;
                 format_task_pairs(pairs, f)
             }
         }
@@ -39,14 +39,14 @@ impl Display for RecursionType {
 
 // Helper function to format the vector of task and method pairs
 fn format_task_pairs(pairs: &[(String, String)], f: &mut Formatter<'_>) -> std::fmt::Result {
-    write!(f, "[")?;
     for (i, (task, method)) in pairs.iter().enumerate() {
-        if i > 0 {
-            write!(f, ", ")?;
+        if i != pairs.len() - 1 {
+            write!(f, "[{}]-({})->", task, method)?;
+        } else {
+            write!(f, "[{}]", task)?;
         }
-        write!(f, "{}: {}", task, method)?;
     }
-    write!(f, "]")
+    Ok(())
 }
 
 
