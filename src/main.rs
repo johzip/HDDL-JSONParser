@@ -88,9 +88,9 @@ mod tests {
     fn recursion_type_test_integration() {
         let domain = fs::read("domain.hddl");
         match domain {
-            Ok(domain_content) => match HDDLAnalyzer::get_metadata(&domain_content, None) {
-                Ok(metadata) => {
-                    println!("{}", metadata)
+            Ok(domain_content) => match HDDLAnalyzer::verify(&domain_content, None) {
+                Ok(warning) => {
+
                 }
                 _ => panic!(),
             },

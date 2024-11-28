@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use super::*;
 
@@ -70,25 +70,49 @@ impl<'a> TDG<'a> {
 
     pub fn reachable(&self, task_name: &str) -> ReachableSet {
         let mut reach_t = HashSet::new();
-        let task_index = self
+        let task_index = match self
             .tasks
             .iter()
             .enumerate()
-            .filter(|(index, (name, t_type))| *name == task_name)
+            .filter(|(_, (name, _))| *name == task_name)
             .next()
-            .unwrap()
-            .0;
+            .unwrap() {
+                // if primitive, the only reachable task is itself
+                (_, (name, TaskType::Primitive)) => {
+                    return ReachableSet {
+                        primitives: HashSet::from([*name]),
+                        compounds: HashSet::new(),
+                        nullable: false
+                    };
+                }
+                // if compound, add the index for further processing
+                (i, (_, TaskType::Compound)) => {
+                    i
+                }
+            };
         reach_t.insert(task_index);
-        match self.edges_from_tasks.get(&task_index) {
-            Some(methods) => {
-                for m in methods {
-                    reach_t.extend(self.edges_to_tasks.get(m).unwrap().iter());
+        let mut visited= HashSet::new();
+        let mut queue = VecDeque::from([task_index]);
+        while !queue.is_empty() {
+            let task = queue.pop_front().unwrap();
+            if !visited.contains(&task) {
+                visited.insert(task);
+                match self.edges_from_tasks.get(&task) {
+                    Some(methods) => {
+                        for m in methods {
+                            let new_tasks = self.edges_to_tasks.get(m).unwrap();
+                            for new_task in new_tasks.iter() {
+                                reach_t.insert(*new_task);
+                                queue.push_back(*new_task);
+                            }
+                        }
+                    }
+                    None => { }
                 }
             }
-            None => {
-                panic!()
-            }
+            
         }
+        
         let nullables = self.compute_nullables();
         let mut primitives = HashSet::new();
         let mut compounds = HashSet::new();
