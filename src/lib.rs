@@ -5,7 +5,8 @@ mod output;
 
 use crate::lexical_analyzer::TokenPosition;
 use lexical_analyzer::LexicalAnalyzer;
-use output::{MetaData, ParsingError};
+use output::MetaData;
+pub use output::{ParsingError, SemanticErrorType, LexicalErrorType, SyntacticError, WarningType};
 use semantic_analyzer::*;
 use syntactic_analyzer::AbstractSyntaxTree;
 
