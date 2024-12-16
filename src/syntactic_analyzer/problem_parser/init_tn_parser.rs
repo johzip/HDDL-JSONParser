@@ -30,6 +30,17 @@ impl<'a> Parser<'a> {
                         tn: self.parse_htn()?,
                     });
                 }
+                // empty init tn
+                Token::Punctuator(PunctuationType::RParentheses) => {
+                    return Ok(InitialTaskNetwork {
+                        parameters: None,
+                        tn: HTN {
+                            subtasks: vec![],
+                            ordering_pos: None,
+                            orderings: TaskOrdering::Partial(vec![]),
+                            constraints: None },
+                    });
+                }
                 token => {
                     let error = SyntacticError {
                         expected: "expected the definition of the initial task network".to_string(),
@@ -47,6 +58,18 @@ impl<'a> Parser<'a> {
         let mut orderings = vec![];
         let mut constraints = None;
         let mut ordering_pos = None;
+        // check if it is an empty task network
+        match self.tokenizer.lookahead()? {
+            Token::Punctuator(PunctuationType::RParentheses) => {
+                return Ok(HTN {
+                    subtasks,
+                    ordering_pos,
+                    orderings: TaskOrdering::Partial(orderings),
+                    constraints,
+                });
+            }
+            _ => {}
+        }
         match self.tokenizer.get_token()? {
             Token::Keyword(KeywordName::Subtasks) => {
                 subtasks = self.parse_subtasks()?;

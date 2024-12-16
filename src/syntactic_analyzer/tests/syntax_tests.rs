@@ -986,4 +986,25 @@ mod tests {
             Err(token) => panic!("{:?}", token)
         }
     }
+
+    #[test]
+    pub fn empty_tn_test() {
+        let program = String::from(
+            "(define (problem p1) (domain bal)
+             (:htn ) ",
+        )
+        .into_bytes();
+        let lexer = LexicalAnalyzer::new(&program);
+        match Parser::new(lexer).parse() {
+            Ok(AbstractSyntaxTree::Problem(ast)) => match ast.init_tn {
+                Some(tn) => {
+                    assert_eq!(tn.parameters.is_none(), true);
+                    assert_eq!(tn.tn.subtasks.len(), 0);
+                }
+                _ => panic!()
+            }
+            Err(token) => panic!("{:?}", token),
+            _ => panic!()
+        }
+    }
 }
