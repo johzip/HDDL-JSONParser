@@ -84,7 +84,8 @@ pub enum RequirementType {
     TypedObjects,
     NegativePreconditions,
     UniversalPreconditions,
-    Equality
+    Equality,
+    STRIPS
 }
 
 impl fmt::Display for RequirementType {
@@ -96,6 +97,7 @@ impl fmt::Display for RequirementType {
             RequirementType::NegativePreconditions => ":negative-preconditions",
             RequirementType::UniversalPreconditions => ":universal-preconditions",
             RequirementType::Equality => ":equality",
+            RequirementType::STRIPS => ":strips",
         };
         write!(f, "{}", requirement)
     }
