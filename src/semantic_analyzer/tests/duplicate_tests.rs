@@ -191,6 +191,49 @@ pub fn action_duplicate_test() {
 }
 
 #[test]
+pub fn parameter_duplicate_test() {
+    let program = String::from(
+        "(define (domain bal)
+            (:types t1 t2)
+            (:predicates 
+                (at ?a )
+                (hold ?a ?b)
+            )
+            (:action a_1
+             :parameters (?p_1 ?p_2 ?p_3 ?p_1)
+             :precondition (not (at p_1))
+             :effect (and (not (hold p_2 p_3)) (at p_2))
+            )
+         ) ",
+    )
+    .into_bytes();
+    let lexer = LexicalAnalyzer::new(&program);
+    let parser = Parser::new(lexer);
+    let ast = parser.parse().unwrap();
+    match ast {
+        AbstractSyntaxTree::Domain(d) => {
+            let semantic_parser = DomainSemanticAnalyzer::new(&d);
+            match semantic_parser.verify_domain() {
+                Ok(_) => {
+                    panic!("errors are not caught")
+                }
+                Err(error) => match error {
+                    SemanticErrorType::DuplicateParameterDeclaration(x) => {
+                        assert_eq!(x.symbol, "p_1");
+                        assert_eq!(x.first_pos.line, 8);
+                        assert_eq!(x.second_pos.line, 8);
+                    }
+                    token => {
+                        panic!("{:?}", token)
+                    }
+                },
+            }
+        }
+        _ => panic!(),
+    }
+}
+
+#[test]
 pub fn compound_task_duplicate_test() {
     let program = String::from(
         "(define (domain bal)

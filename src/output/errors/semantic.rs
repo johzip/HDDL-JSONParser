@@ -10,6 +10,7 @@ pub enum SemanticErrorType {
     DuplicateActionDeclaration(DuplicateError),
     DuplicateCompoundTaskDeclaration(DuplicateError),
     DuplicateMethodDeclaration(DuplicateError),
+    DuplicateParameterDeclaration(DuplicateError),
     // Undefined Entities
     UndefinedPredicate(UndefinedSymbolError),
     UndefinedType(UndefinedSymbolError),
@@ -48,6 +49,9 @@ impl fmt::Display for SemanticErrorType {
             }
             SemanticErrorType::DuplicateMethodDeclaration(duplicate) => {
                 write!(f, "method {}", duplicate)
+            }
+            SemanticErrorType::DuplicateParameterDeclaration(duplicate) => {
+                write!(f, "parameter {}", duplicate)
             }
             // Undefined Entities
             SemanticErrorType::UndefinedPredicate(undefined) => {

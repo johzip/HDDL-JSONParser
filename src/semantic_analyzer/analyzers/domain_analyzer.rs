@@ -54,6 +54,22 @@ impl<'a> DomainSemanticAnalyzer<'a> {
             } else {
                 action_positions.insert(action.name, action.name_pos);
             }
+            // assert there is no duplicate paramter
+            let mut declared_params = HashSet::new();
+            let mut param_positions = HashMap::new();
+            for param in action.parameters.iter() {
+                if !declared_params.insert(param) {
+                    return Err(SemanticErrorType::DuplicateParameterDeclaration(
+                        DuplicateError {
+                            symbol: param.name.to_string(),
+                            first_pos: *param_positions.get(param.name).unwrap(),
+                            second_pos: param.name_pos,
+                        },
+                    ));
+                } else {
+                    param_positions.insert(param.name, param.name_pos);
+                }
+            }
             // assert precondition predicates are declared
             match &action.preconditions {
                 Some(precondition) => {
@@ -104,6 +120,22 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                 ));
             } else {
                 method_positions.insert(&method.name, method.name.name_pos);
+            }
+            // assert there is no duplicate paramter
+            let mut declared_params = HashSet::new();
+            let mut param_positions = HashMap::new();
+            for param in method.params.iter() {
+                if !declared_params.insert(param) {
+                    return Err(SemanticErrorType::DuplicateParameterDeclaration(
+                        DuplicateError {
+                            symbol: param.name.to_string(),
+                            first_pos: *param_positions.get(param.name).unwrap(),
+                            second_pos: param.name_pos,
+                        },
+                    ));
+                } else {
+                    param_positions.insert(param.name, param.name_pos);
+                }
             }
             // Assert preconditions are valid
             match &method.precondition {
