@@ -3,8 +3,6 @@ use crate::lexical_analyzer::TokenPosition;
 #[derive(Debug, Clone)]
 pub enum WarningType {
     // Action Errors
-    UnsatisfiableActionPrecondition(WarningInfo),
-    UnsatisfiableMethodPrecondition(WarningInfo),
     // TODO: implement
     ImmutablePredicate(String),
     // Compound Task errors
@@ -23,12 +21,6 @@ pub enum WarningType {
 impl std::fmt::Display for WarningType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            Self::UnsatisfiableActionPrecondition(info) => {
-                write!(f, "line {}: the precondition of action {} is inconsistent.", info.position.line, info.symbol)
-            }
-            Self::UnsatisfiableMethodPrecondition(info) => {
-                write!(f, "line {}: the precondition of method {} is inconsistent.", info.position.line, info.symbol)
-            }
             Self::ImmutablePredicate(predicate) => {
                 write!(f, "Predicate {} does not appear in the effect of any action", predicate)
             }

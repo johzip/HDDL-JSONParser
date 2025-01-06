@@ -1,6 +1,6 @@
 extern crate hddl_analyzer;
 
-use hddl_analyzer::{HDDLAnalyzer, SemanticErrorType};
+use hddl_analyzer::{HDDLAnalyzer, ParsingError, SemanticErrorType, WarningType};
 use std::fs;
 
 #[test]
@@ -423,6 +423,84 @@ pub fn undeclared_type_validation_test() {
             } else {
                 panic!()
             }
+        }
+    }
+}
+
+#[test]
+pub fn no_primitive_refinement_validation_test() {
+    let domain = fs::read(
+        "tests/flawed_domains/abstract-task-without-refinement-domain.hddl"
+    ).unwrap();
+    match HDDLAnalyzer::verify(&domain, None) {
+        Ok(warnings) => {
+            assert_eq!(warnings.len(), 1);
+            match &warnings[0] {
+                WarningType::NoPrimitiveRefinement(x) => {
+                    assert_eq!(x.symbol, "AchieveSomeGoal")
+                }
+                _ => panic!()
+            }
+        },
+        Err(err) => {
+            panic!()
+        }
+    }
+}
+
+#[test]
+pub fn no_method_validation_test() {
+    let domain = fs::read(
+        "tests/flawed_domains/abstract-task-without-decomposition-domain.hddl"
+    ).unwrap();
+    match HDDLAnalyzer::verify(&domain, None) {
+        Ok(warnings) => {
+            assert_eq!(warnings.len(), 1);
+            match &warnings[0] {
+                WarningType::NoPrimitiveRefinement(x) => {
+                    assert_eq!(x.symbol, "AchieveSomeGoal")
+                }
+                _ => panic!()
+            }
+        },
+        Err(err) => {
+            panic!()
+        }
+    }
+}
+
+#[test]
+pub fn complementary_effects_validation_test() {
+    let domain = fs::read(
+        "tests/flawed_domains/complementary-effects-domain.hddl"
+    ).unwrap();
+    match HDDLAnalyzer::verify(&domain, None) {
+        Ok(_) => panic!("error not found"),
+        Err(err) => {
+            match err {
+                ParsingError::Semantic(x) => {
+                    match x {
+                        SemanticErrorType::ComplementaryActionEffect(pos) => {
+                            assert_eq!(pos.line, 55)
+                        }
+                        token => panic!("{:?}", token)
+                    }
+                }
+                token => panic!("{:?}", token)
+            }
+        }
+    }
+}
+
+#[test]
+pub fn ignore_possibly_complementary_effects_validation_test() {
+    let domain = fs::read(
+        "tests/flawed_domains/possible-complementary-effects-domain.hddl"
+    ).unwrap();
+    match HDDLAnalyzer::verify(&domain, None) {
+        Ok(_) => {},
+        Err(err) => {
+            panic!()
         }
     }
 }

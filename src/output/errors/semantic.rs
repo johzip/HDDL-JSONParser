@@ -26,6 +26,10 @@ pub enum SemanticErrorType {
     // Ordering Errors
     CyclicTypeDeclaration,
     CyclicOrderingDeclaration(TokenPosition),
+    // Complementary Errors
+    ComplementaryActionEffect(TokenPosition),
+    ComplementaryActionPrecondition(TokenPosition),
+    ComplementaryMethodPrecondition(TokenPosition)
 }
 
 impl fmt::Display for SemanticErrorType {
@@ -101,6 +105,16 @@ impl fmt::Display for SemanticErrorType {
             }
             SemanticErrorType::CyclicOrderingDeclaration(pos) => {
                 write!(f, "line {}: task ordering is cyclic.", pos.line)
+            }
+            // Complementary Error
+            SemanticErrorType::ComplementaryActionEffect(pos) => {
+                write!(f, "line {}: action has contradictory effects.", pos.line)
+            }
+            SemanticErrorType::ComplementaryActionPrecondition(pos) => {
+                write!(f, "line {}: action has contradictory preconditions.", pos.line)
+            }
+            SemanticErrorType::ComplementaryMethodPrecondition(pos) => {
+                write!(f, "line {}: method has contradictory preconditions.", pos.line)
             }
         }
     }

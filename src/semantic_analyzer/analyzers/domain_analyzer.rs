@@ -82,10 +82,9 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableActionPrecondition(WarningInfo {
-                            symbol: action.name.to_string(),
-                            position: action.name_pos,
-                        }));
+                        return Err(SemanticErrorType::ComplementaryActionPrecondition(
+                            action.name_pos
+                        ));
                     }
                 }
                 _ => {}
@@ -101,6 +100,11 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                         &declared_constants,
                         &declared_predicates,
                     )?;
+                    if !effect.is_sat() {
+                        return Err(SemanticErrorType::ComplementaryActionEffect(
+                            action.name_pos
+                        ));
+                    }
                 }
                 _ => {}
             }
@@ -149,10 +153,9 @@ impl<'a> DomainSemanticAnalyzer<'a> {
                         &declared_predicates,
                     )?;
                     if !precondition.is_sat() {
-                        warnings.push(WarningType::UnsatisfiableMethodPrecondition(WarningInfo {
-                            symbol: method.name.name.to_string(),
-                            position: method.name.name_pos,
-                        }));
+                        return Err(SemanticErrorType::ComplementaryMethodPrecondition(
+                            method.name.name_pos
+                        ));
                     }
                 }
                 _ => {}

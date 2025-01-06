@@ -29,7 +29,9 @@ impl <'a> Parser <'a> {
             Token::Keyword(KeywordName::Effect) => {
                 // skip effects keyword
                 let _ = self.tokenizer.get_token();
-                effects = Some(self.parse_formula()?);
+                let formula = self.parse_formula()?;
+                let s = formula.clone().to_string();
+                effects = Some(formula);
             },
             // action has no effects
             Token::Punctuator(PunctuationType::RParentheses) => {}

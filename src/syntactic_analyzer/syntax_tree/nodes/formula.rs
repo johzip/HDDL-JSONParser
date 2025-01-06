@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 extern crate Robinson;
 use super::*;
@@ -53,7 +53,9 @@ impl<'a> Formula<'a> {
     }
 
     pub fn to_cnf(&self) -> Formula<'a> {
-        return self.simplify().to_nnf().distribute_disjunction();
+        let simplified = self.simplify();
+        let nnf = simplified.to_nnf();
+        return nnf.distribute_disjunction();
     }
 
     fn simplify(&self) -> Formula<'a> {
@@ -402,6 +404,42 @@ impl<'a> Formula<'a> {
         let cnf = self.to_cnf();
         let (var_count, mut clauses) = cnf.to_clauses();
         Robinson::parser::preproc_and_solve(clauses.as_mut(), var_count as usize)
+    }
+}
+
+impl<'a> fmt::Display for Formula<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Formula::Empty => write!(f, "∅"),
+            Formula::Atom(predicate) => write!(f, "{}", predicate.to_string()),
+            Formula::Not(inner) => write!(f, "¬({})", inner),
+            Formula::And(terms) => {
+                let terms_str = terms.iter().map(|term| format!("{}", term)).collect::<Vec<_>>().join(" ∧ ");
+                write!(f, "({})", terms_str)
+            }
+            Formula::Or(terms) => {
+                let terms_str = terms.iter().map(|term| format!("{}", term)).collect::<Vec<_>>().join(" ∨ ");
+                write!(f, "({})", terms_str)
+            }
+            Formula::Xor(terms) => {
+                let terms_str = terms.iter().map(|term| format!("{}", term)).collect::<Vec<_>>().join(" ⊕ ");
+                write!(f, "({})", terms_str)
+            }
+            Formula::Imply(lhs, rhs) => {
+                let lhs_str = lhs.iter().map(|term| format!("{}", term)).collect::<Vec<_>>().join(" ∧ ");
+                let rhs_str = rhs.iter().map(|term| format!("{}", term)).collect::<Vec<_>>().join(" ∧ ");
+                write!(f, "({}) ⇒ ({})", lhs_str, rhs_str)
+            }
+            Formula::Exists(vars, inner) => {
+                let vars_str = vars.iter().map(|var| format!("{}", var.name)).collect::<Vec<_>>().join(", ");
+                write!(f, "∃{}: {}", vars_str, inner)
+            }
+            Formula::ForAll(vars, inner) => {
+                let vars_str = vars.iter().map(|var| format!("{}", var.name)).collect::<Vec<_>>().join(", ");
+                write!(f, "∀{}: {}", vars_str, inner)
+            }
+            Formula::Equals(lhs, rhs) => write!(f, "{} = {}", lhs, rhs),
+        }
     }
 }
 
