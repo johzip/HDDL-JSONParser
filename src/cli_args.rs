@@ -8,14 +8,18 @@ pub struct CLIArgs {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    Verify(HDDLInfo),
-    Metadata(HDDLInfo)
+    Verify(InputArgs),
+    Metadata(InputArgs),
+    #[command(name = "to_json")] 
+    Serialize(InputArgs)
 }
 
 #[derive(Parser)]
-pub struct HDDLInfo {
+pub struct InputArgs {
     #[arg(index = 1)]
     pub domain_path: String,
     #[arg(short, long)]
     pub problem_path: Option<String>,
+    #[arg(short, long)]
+    pub output_file: Option<String>,
 }

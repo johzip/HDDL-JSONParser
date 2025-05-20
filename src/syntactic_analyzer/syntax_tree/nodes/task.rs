@@ -1,10 +1,12 @@
 use std::{borrow::Borrow, hash::Hash};
 
+use serde::Serialize;
+
 use crate::TokenPosition;
 
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Task<'a> {
     pub name: &'a str,
     pub name_pos: TokenPosition,

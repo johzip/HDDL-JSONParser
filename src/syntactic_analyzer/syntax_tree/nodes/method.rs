@@ -1,9 +1,11 @@
+use serde::Serialize;
+
 use crate::TokenPosition;
 
 use super::*;
 
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Method<'a> {
     pub name: Symbol<'a>,
     pub task: Symbol<'a>, 

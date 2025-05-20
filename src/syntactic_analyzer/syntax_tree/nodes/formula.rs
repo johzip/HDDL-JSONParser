@@ -1,9 +1,11 @@
 use std::{collections::HashMap, fmt};
 
 extern crate Robinson;
+use serde::Serialize;
+
 use super::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub enum Formula<'a> {
     Empty,
     Atom(Predicate<'a>),

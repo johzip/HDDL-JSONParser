@@ -1,17 +1,18 @@
 use petgraph::prelude::GraphMap;
 use petgraph::algo::toposort;
 use petgraph::Directed;
+use serde::Serialize;
 
 use crate::TokenPosition;
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct InitialTaskNetwork<'a> {
     pub parameters: Option<Vec<Symbol<'a>>>,
     pub tn: HTN<'a>
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct HTN<'a> {
     pub subtasks: Vec<Subtask<'a>>,
     pub ordering_pos: Option<TokenPosition>,
@@ -19,7 +20,7 @@ pub struct HTN<'a> {
     pub constraints: Option<Vec<Constraint<'a>>>, 
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Subtask<'a> {
     pub id: Option<Symbol<'a>>,
     pub task: Symbol<'a>,
@@ -27,13 +28,13 @@ pub struct Subtask<'a> {
 }
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum Constraint<'a> {
     Equal(&'a str, &'a str),
     NotEqual(&'a str, &'a str)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum TaskOrdering<'a> {
     Total,
     Partial(Vec<(&'a str, &'a str)>)

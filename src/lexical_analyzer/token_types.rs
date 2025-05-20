@@ -1,5 +1,7 @@
 use std::fmt;
 
+use serde::Serialize;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Keyword(KeywordName),
@@ -77,7 +79,7 @@ impl fmt::Display for OperationType {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize)]
 pub enum RequirementType {
     MethodPreconditions,
     Hierarchy,

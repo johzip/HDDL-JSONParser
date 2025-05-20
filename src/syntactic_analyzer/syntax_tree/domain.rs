@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct DomainAST<'a> {
     pub name: String,
     pub types: Option<Vec<Symbol<'a>>>,

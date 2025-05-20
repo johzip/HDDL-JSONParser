@@ -1,10 +1,12 @@
 use std::{fmt::format, hash::Hash};
 
+use serde::Serialize;
+
 use crate::TokenPosition;
 
 use super::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Predicate<'a> {
     pub name: &'a str,
     pub name_pos: TokenPosition,

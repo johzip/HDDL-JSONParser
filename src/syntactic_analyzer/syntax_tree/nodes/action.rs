@@ -1,11 +1,13 @@
 use std::hash::Hash;
 use std::borrow::Borrow;
+use serde::Serialize;
+
 use crate::lexical_analyzer::TokenPosition;
 
 use super::*;
 
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Action<'a> {
     pub name: &'a str,
     pub name_pos: TokenPosition,

@@ -1,6 +1,7 @@
 use super::*;
 use crate::TokenPosition;
-#[derive(Debug)]
+
+#[derive(Debug, Serialize)]
 pub struct ProblemAST<'a> {
     pub requirements: Vec<RequirementType>,
     pub init_tn: Option<InitialTaskNetwork<'a>>,

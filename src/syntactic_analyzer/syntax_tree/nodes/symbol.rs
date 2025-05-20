@@ -1,12 +1,16 @@
 use std::{borrow::Borrow, hash::Hash};
 
+use serde::Serialize;
+
 use crate::TokenPosition;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Symbol<'a> {
     pub name: &'a str,
     pub name_pos: TokenPosition,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub symbol_type: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub type_pos: Option<TokenPosition>
 }
 

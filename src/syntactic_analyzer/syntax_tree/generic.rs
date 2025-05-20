@@ -1,5 +1,7 @@
 use super::*;
 
+#[derive(Serialize)]
+#[serde(untagged)]
 pub enum AbstractSyntaxTree<'a>{
     Domain(DomainAST<'a>),
     Problem(ProblemAST<'a>)
