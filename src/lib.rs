@@ -12,6 +12,7 @@ pub use output::{LexicalErrorType, ParsingError, SemanticErrorType, SyntacticErr
 use semantic_analyzer::*;
 use syntactic_analyzer::AbstractSyntaxTree;
 
+
 pub struct HDDLAnalyzer {}
 
 impl HDDLAnalyzer {

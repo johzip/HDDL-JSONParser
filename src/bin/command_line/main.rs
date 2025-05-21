@@ -1,8 +1,8 @@
-mod cli_args;
-
 use clap::Parser;
 use hddl_analyzer::HDDLAnalyzer;
 use std::{env, fs};
+
+mod cli_args;
 
 use cli_args::{CLIArgs, Commands};
 
