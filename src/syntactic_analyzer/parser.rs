@@ -38,6 +38,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn classify(&self) -> FileVariant {
+        self.tokenizer.reset_cursor();
         let mut variant = FileVariant::MaybeNotHDDL;
         if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
             if let Ok(Token::Keyword(KeywordName::Define)) = self.tokenizer.get_token() {
