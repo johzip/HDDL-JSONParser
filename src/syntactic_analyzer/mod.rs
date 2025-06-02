@@ -10,3 +10,4 @@ pub use syntax_tree::*;
 use definition_types::*;
 use crate::output::*;
 use crate::lexical_analyzer::*;
+pub use definition_types::FileVariant;

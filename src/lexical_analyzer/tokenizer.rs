@@ -1,4 +1,3 @@
-
 use std::{cell::Cell, str::from_utf8};
 
 use super::*;
@@ -9,16 +8,20 @@ pub struct LexicalAnalyzer<'a> {
     last_token_pos: Cell<TokenPosition>,
 }
 
-impl <'a> LexicalAnalyzer <'a> {
+impl<'a> LexicalAnalyzer<'a> {
     pub fn new(program: &'a Vec<u8>) -> LexicalAnalyzer<'a> {
         LexicalAnalyzer {
             program,
             cursor: Cell::new(0),
-            last_token_pos: Cell::new(TokenPosition {
-                line: 1,
-            }),
+            last_token_pos: Cell::new(TokenPosition { line: 1 }),
         }
     }
+
+    // sets cursor to its initial position at zero
+    pub fn reset_cursor(&self) {
+        self.cursor.set(0);
+    }
+
     // get the next token without advancing the cursor
     pub fn lookahead(&self) -> Result<Token, LexicalError> {
         return self.parse(true);
@@ -72,17 +75,19 @@ impl <'a> LexicalAnalyzer <'a> {
                     }
                     match lexeme {
                         // Requirements
-                        "negative-preconditions" => Ok(Token::Requirement(
-                            RequirementType::NegativePreconditions,
-                        )),
+                        "negative-preconditions" => {
+                            Ok(Token::Requirement(RequirementType::NegativePreconditions))
+                        }
                         "strips" => Ok(Token::Requirement(RequirementType::STRIPS)),
                         "hierarchy" => Ok(Token::Requirement(RequirementType::Hierarchy)),
                         "equality" => Ok(Token::Requirement(RequirementType::Equality)),
-                        "method-preconditions" => Ok(Token::Requirement(
-                            RequirementType::MethodPreconditions,
-                        )),
+                        "method-preconditions" => {
+                            Ok(Token::Requirement(RequirementType::MethodPreconditions))
+                        }
                         "typing" => Ok(Token::Requirement(RequirementType::TypedObjects)),
-                        "universal-preconditions" => Ok(Token::Requirement(RequirementType::UniversalPreconditions)),
+                        "universal-preconditions" => {
+                            Ok(Token::Requirement(RequirementType::UniversalPreconditions))
+                        }
                         // Keywords
                         "requirements" => Ok(Token::Keyword(KeywordName::Requirements)),
                         "objects" => Ok(Token::Keyword(KeywordName::Objects)),
@@ -109,18 +114,18 @@ impl <'a> LexicalAnalyzer <'a> {
                         _ => Err(LexicalError {
                             error_type: LexicalErrorType::InvalidKeyword,
                             lexeme: lexeme.to_string(),
-                            position: self.last_token_pos.get()
+                            position: self.last_token_pos.get(),
                         }),
                     }
                 }
                 // Comment
                 ';' => {
-                        let mut current = self.program[self.cursor.get()] as char;
-                        while current != '\n' {
-                            self.cursor.set(self.cursor.get() + 1);
-                            current = self.program[self.cursor.get()] as char;
-                        }
-                        return self.parse(peek);
+                    let mut current = self.program[self.cursor.get()] as char;
+                    while current != '\n' {
+                        self.cursor.set(self.cursor.get() + 1);
+                        current = self.program[self.cursor.get()] as char;
+                    }
+                    return self.parse(peek);
                 }
                 // Other
                 _ => {
@@ -143,13 +148,16 @@ impl <'a> LexicalAnalyzer <'a> {
                                 Some(x) => return Ok(Token::Operator(x)),
                                 // Identifier
                                 None => {
-                                    if lexeme.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
+                                    if lexeme
+                                        .chars()
+                                        .all(|c| c.is_alphanumeric() || c == '_' || c == '-')
+                                    {
                                         return Ok(Token::Identifier(lexeme));
                                     } else {
                                         Err(LexicalError {
                                             error_type: LexicalErrorType::InvalidIdentifier,
                                             lexeme: lexeme.to_string(),
-                                            position: self.last_token_pos.get()
+                                            position: self.last_token_pos.get(),
                                         })
                                     }
                                 }
@@ -193,11 +201,16 @@ impl <'a> LexicalAnalyzer <'a> {
         if is_invalid {
             return Err(LexicalError {
                 error_type: LexicalErrorType::InvalidIdentifier,
-                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap().to_string(),
-                position: self.last_token_pos.get()
-            })
+                lexeme: from_utf8(&self.program[init_cur_pos..cursor_pos])
+                    .unwrap()
+                    .to_string(),
+                position: self.last_token_pos.get(),
+            });
         } else {
-            return Ok((from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(), cursor_pos))
+            return Ok((
+                from_utf8(&self.program[init_cur_pos..cursor_pos]).unwrap(),
+                cursor_pos,
+            ));
         }
     }
 
@@ -215,8 +228,8 @@ impl <'a> LexicalAnalyzer <'a> {
             if !LexicalAnalyzer::is_whitespace(&current) {
                 break;
             } else if current == '\n' {
-                self.last_token_pos.set(TokenPosition { 
-                    line: self.last_token_pos.get().line + 1 
+                self.last_token_pos.set(TokenPosition {
+                    line: self.last_token_pos.get().line + 1,
                 });
             }
             self.cursor.set(self.cursor.get() + 1);
@@ -238,28 +251,24 @@ impl <'a> LexicalAnalyzer <'a> {
 
     fn ordering_type(&self, c: &char, peek: bool) -> OperationType {
         match c {
-            '<' => {
-                match self.peek_next_char() {
-                    Some('=') => {
-                        if !peek {
-                            self.cursor.set(self.cursor.get() + 1);
-                        }
-                        OperationType::LessThanOrEqual
+            '<' => match self.peek_next_char() {
+                Some('=') => {
+                    if !peek {
+                        self.cursor.set(self.cursor.get() + 1);
                     }
-                    _ => OperationType::LessThan,
+                    OperationType::LessThanOrEqual
                 }
-            }
-            '>' => {
-                match self.peek_next_char() {
-                    Some('=') => {
-                        if !peek {
-                            self.cursor.set(self.cursor.get() + 1);
-                        }
-                        OperationType::GreaterThanOrEqual
+                _ => OperationType::LessThan,
+            },
+            '>' => match self.peek_next_char() {
+                Some('=') => {
+                    if !peek {
+                        self.cursor.set(self.cursor.get() + 1);
                     }
-                    _ => OperationType::GreaterThan,
+                    OperationType::GreaterThanOrEqual
                 }
-            }
+                _ => OperationType::GreaterThan,
+            },
             '=' => OperationType::Equal,
             _ => {
                 panic!("not an ordering relation");

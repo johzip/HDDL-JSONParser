@@ -3,6 +3,9 @@ mod output;
 mod semantic_analyzer;
 mod syntactic_analyzer;
 
+mod language_server;
+pub use language_server::RequestHandler;
+
 use std::collections::HashMap;
 
 use crate::lexical_analyzer::TokenPosition;
@@ -11,7 +14,7 @@ use output::MetaData;
 pub use output::{LexicalErrorType, ParsingError, SemanticErrorType, SyntacticError, WarningType};
 use semantic_analyzer::*;
 use syntactic_analyzer::AbstractSyntaxTree;
-
+use syntactic_analyzer::FileVariant;
 
 pub struct HDDLAnalyzer {}
 

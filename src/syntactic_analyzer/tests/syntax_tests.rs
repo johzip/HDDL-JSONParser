@@ -1007,4 +1007,22 @@ mod tests {
             _ => panic!()
         }
     }
+
+    #[test]
+    pub fn file_classification_test() {
+        let program = String::from(
+            "(define (domain blahblah)
+                (:constants
+                    Port AbstractDevice - Object
+                    AbstractCable Device - AbstractDevice
+                    PlugType PlugFace PlugDirection SignalType - Enum
+                )
+             ) ",
+        ).into_bytes();
+        let lexer = LexicalAnalyzer::new(&program);
+        match Parser::new(lexer).classify() {
+            FileVariant::Domain => {},
+            _ => panic!()
+        }
+    }
 }

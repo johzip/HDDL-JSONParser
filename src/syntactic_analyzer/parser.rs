@@ -37,6 +37,23 @@ impl<'a> Parser<'a> {
         }
     }
 
+    pub fn classify(&self) -> FileVariant {
+        let mut variant = FileVariant::MaybeNotHDDL;
+        if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
+            if let Ok(Token::Keyword(KeywordName::Define)) = self.tokenizer.get_token() {
+                if let Ok(Token::Punctuator(PunctuationType::LParentheses)) = self.tokenizer.get_token() {
+                    match self.tokenizer.get_token() {
+                        Ok(Token::Keyword(KeywordName::Domain)) => variant = FileVariant::Domain,
+                        Ok(Token::Keyword(KeywordName::Problem)) => variant =  FileVariant::Problem,
+                        _ => {}
+                    }
+                }
+            }
+        }
+        self.tokenizer.reset_cursor();
+        return variant;
+    }
+
     fn parse_document_type(&self) -> Result<DefinitionType, ParsingError> {
         // match keyword 'define'
         match self.tokenizer.get_token()? {
@@ -112,7 +129,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_problem_header(&self) -> Result<DefinitionType, ParsingError> {
+    pub fn parse_problem_header(&self) -> Result<DefinitionType, ParsingError> {
         // match problem name
         match self.tokenizer.get_token()? {
             Token::Identifier(problem_name) => {
@@ -131,7 +148,10 @@ impl<'a> Parser<'a> {
                                                         PunctuationType::RParentheses,
                                                     ) => {
                                                         return Ok(DefinitionType::Problem(
-                                                            ProblemDefinition{domain_name, problem_name},
+                                                            ProblemDefinition {
+                                                                domain_name,
+                                                                problem_name,
+                                                            },
                                                         ));
                                                     }
                                                     token => {
