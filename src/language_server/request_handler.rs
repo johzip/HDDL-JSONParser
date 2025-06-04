@@ -5,8 +5,6 @@ use tokio::sync::RwLock;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer};
 
-use crate::syntactic_analyzer::Parser;
-
 use super::*;
 
 pub struct RequestHandler {
@@ -20,6 +18,10 @@ impl RequestHandler {
             client,
             documents: Arc::new(RwLock::new(HashMap::new())),
         }
+    }
+
+    async fn sync(&self, url: Url, content: Vec<u8>) {
+        self.documents.write().await.insert(url, content);
     }
 }
 
@@ -61,21 +63,31 @@ impl LanguageServer for RequestHandler {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        if self
-            .documents
-            .read()
-            .await
-            .get(&params.text_document.uri)
-            .is_none()
-        {
-            self.documents.write().await.insert(
-                params.text_document.uri,
-                params.text_document.text.into_bytes(),
-            );
-        }
+        self.sync(
+            params.text_document.uri,
+            params.text_document.text.into_bytes(),
+        ).await;
     }
 
-    async fn did_save(&self, params: DidSaveTextDocumentParams) {}
+    async fn did_save(&self, params: DidSaveTextDocumentParams) {
+        // get the saved file content
+        let text = match params.text {
+            Some(content) => content.into_bytes(),
+            None => tokio::fs::read(params.text_document.uri.path())
+                .await
+                .unwrap(),
+        };
+        // sync the file
+        self.sync(params.text_document.uri, text).await;
+    }
+
+    async fn did_change(&self, params: DidChangeTextDocumentParams) {
+        let uri = params.text_document.uri;
+        // TODO: add support for incremental change
+        if let Some(new_text) = params.content_changes.into_iter().next() {
+            self.sync(uri, new_text.text.into_bytes()).await
+        }
+    }
 
     async fn diagnostic(
         &self,
@@ -83,17 +95,23 @@ impl LanguageServer for RequestHandler {
     ) -> tower_lsp::jsonrpc::Result<DocumentDiagnosticReportResult> {
         match self.documents.read().await.get(&params.text_document.uri) {
             Some(document) => {
+                self.client
+                    .log_message(MessageType::LOG, "Diagnostic Request Recieved.")
+                    .await;
                 let file_path = params.text_document.uri.to_file_path().unwrap();
-                let current_file_lexer = LexicalAnalyzer::new(document);
-                let current_file_parser = Parser::new(current_file_lexer);
-                match current_file_parser.classify() {
+                match classify_file(document) {
                     FileVariant::Domain => {
                         self.client
                             .log_message(
-                                MessageType::INFO,
-                                format!("{} is domain", file_path.display()),
+                                MessageType::LOG,
+                                format!(
+                                    "{} is a domain. Attempting to diagnose.",
+                                    params.text_document.uri.to_string()
+                                ),
                             )
                             .await;
+                        let diagnosis = diagnose_domain(document);
+                        return Ok(diagnosis);
                     }
                     FileVariant::Problem => {
                         let root_folder = file_path.parent().unwrap();
@@ -102,26 +120,52 @@ impl LanguageServer for RequestHandler {
                             match entry.path().extension() {
                                 Some(extension) if (extension == "hddl" || extension == "pddl") => {
                                     let content = tokio::fs::read(entry.path()).await.unwrap();
-                                    let lexer = LexicalAnalyzer::new(&content);
-                                    let parser = Parser::new(lexer);
-                                    match parser.classify() {
+                                    match classify_file(&content) {
                                         FileVariant::Domain => {
                                             self.client
                                                 .log_message(
-                                                    MessageType::INFO,
-                                                    format!("{} is domain", entry.path().display()),
-                                                )
-                                                .await;
-                                            break;
+                                                    MessageType::LOG,
+                                                    format!(
+                                                        "{} is the domain for {}. Attempting to diagnose.",
+                                                        root_folder.to_str().unwrap(),
+                                                        params.text_document.uri.to_string()
+                                                    ),
+                                                ).await;
+                                            return Ok(diagnose_problem(Some(&content), document));
                                         }
+                                        // File is not the domain
                                         _ => {}
                                     }
                                 }
+                                // File is not .PDDL or .HDDL
                                 _ => {}
                             }
                         }
-                    },
-                    FileVariant::MaybeNotHDDL => {}
+                        // could not find the domain
+                        self.client
+                            .log_message(
+                                MessageType::LOG,
+                                format!(
+                                    "Could not find the domain in {}",
+                                    root_folder.to_str().unwrap()
+                                ),
+                            )
+                            .await;
+                        return Ok(diagnose_problem(None, document));
+                    }
+                    FileVariant::MaybeNotHDDL => {
+                        // TODO: attempt to fix this
+                        self.client
+                            .log_message(
+                                MessageType::LOG,
+                                format!(
+                                    "{} does not have proper HDDL header. Ignoring diagnostic request.",
+                                    params.text_document.uri.to_string()
+                                ),
+                            )
+                            .await;
+                        Ok(generate_empty_report())
+                    }
                 }
             }
             None => {
@@ -131,35 +175,5 @@ impl LanguageServer for RequestHandler {
                 )));
             }
         }
-        return Ok(DocumentDiagnosticReportResult::Report(
-            DocumentDiagnosticReport::Full(RelatedFullDocumentDiagnosticReport {
-                related_documents: None,
-                full_document_diagnostic_report: FullDocumentDiagnosticReport {
-                    items: vec![Diagnostic {
-                        range: Range {
-                            start: Position {
-                                line: 0,
-                                character: 0,
-                            },
-                            end: Position {
-                                line: 10,
-                                character: 5,
-                            },
-                        },
-                        severity: Some(DiagnosticSeverity::ERROR),
-                        code: Some(tower_lsp::lsp_types::NumberOrString::String(
-                            "E001".to_string(),
-                        )),
-                        code_description: None,
-                        source: Some("HDDL Analyzer".to_string()),
-                        message: "This is a dummy error message".to_string(),
-                        related_information: None,
-                        tags: None,
-                        data: None,
-                    }],
-                    result_id: None,
-                },
-            }),
-        ));
     }
 }
