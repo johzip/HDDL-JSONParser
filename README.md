@@ -33,11 +33,15 @@ These commands must be executed from the top-level cloned project directory (i.e
     ```
 
 # Usage
-Once you have successfully built the project and obtained ```hddl_analyzer.exe```, you can execute the following commands. 
+The build process creates two binary files: The command line tool, ```hddl_analyzer.exe```, and the language server, ```language_server.exe```.
+## Command Line
+With ```hddl_analyzer.exe```, you can execute the following commands. 
 * To verify a domain, use ```/path/to/hddl_analyzer.exe verify /path/to/domain.hddl```
 * To verify a problem, use ```/path/to/hddl_analyzer.exe verify /path/to/domain.hddl -p /path/to/problem.hddl```
 * To get general information about the domain (e.g., hierarchy class), use ```/path/to/hddl_analyzer.exe metadata /path/to/domain.hddl```
-* For a complete list of commands, use ```/path/to/hddl_analyzer.exe verify --help```
+* For a complete list of commands, use ```/path/to/hddl_analyzer.exe --help```
+## Language Server
+Executing ```language_server.exe```, activates the language server on the current terminal. At the moment, we only support communication via the standard IO, specified by the Language Server Protocol (LSP).
 
 # Correctness
 This tool is validated against all 33 hierarchical domains in IPC 2023 (<a href="https://github.com/ipc2023-htn/ipc2023-domains">link</a>), and the Sleath-Bercher benchmark (<a href="https://github.com/ProfDrChaos/flawedPlanningModels/tree/main/HDDL">link</a>).
