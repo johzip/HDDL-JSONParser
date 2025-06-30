@@ -13,7 +13,7 @@ In what follows, we provide the currently supported list of errors (for further 
 * **Unrefinable Tasks**: Flags compound tasks that do not have a primitive refinement.
 
 # Build Instruction
-
+You can build this project either from source code using the Rust compiler or by using the provided Dockerfile. Choose the method that fits your setup.
 ## From Source:
 The following steps must be taken to compile the project. Wherever we mention "project_directory", we mean the root folder where the ```cargo.toml``` file is located.
 1. This project was written in the Rust programming language and requires its compiler (and cargo package manager) to be built.
@@ -22,7 +22,7 @@ If you do not have it installed, follow the official installation guide ([link](
 3. Open a terminal in the project_directory, and execute ```cargo build --release```.
 4. If all steps are done successfully, the executable file can be located in ```/project_directory/target/release/hddl_analyzer.exe```. Notice that in this step and subsequent ones where we refer to the ```hddl_analyzer.exe``` file, the ".exe" part might be something else based on your operating system.
 
-## Dockerfile:
+## From Dockerfile:
 These commands must be executed from the top-level cloned project directory (i.e. `HDDL-Parser/`):
 1. `docker build -t hddl-parser:latest -f Dockerfile .`
 2. The dockerfile defines the entrypoint as the `hddl_analyzer` binary. You can run the binary on from your current directory like so:
