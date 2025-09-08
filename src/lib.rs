@@ -4,6 +4,8 @@ mod semantic_analyzer;
 mod syntactic_analyzer;
 
 mod language_server;
+mod hddl_json_parser;
+
 pub use language_server::RequestHandler;
 
 use std::collections::HashMap;
@@ -15,6 +17,7 @@ pub use output::{LexicalErrorType, ParsingError, SemanticErrorType, SyntacticErr
 use semantic_analyzer::*;
 use syntactic_analyzer::AbstractSyntaxTree;
 use syntactic_analyzer::FileVariant;
+use crate::hddl_json_parser::HDDLJsonParser;
 
 pub struct HDDLAnalyzer {}
 
@@ -23,6 +26,7 @@ impl HDDLAnalyzer {
         domain: &Vec<u8>,
         problem: Option<&Vec<u8>>,
     ) -> Result<Vec<output::WarningType>, output::ParsingError> {
+        println!("verify");
         let lexer = LexicalAnalyzer::new(&domain);
         let domain_parser = syntactic_analyzer::Parser::new(lexer);
         let domain_ast = domain_parser.parse()?;
@@ -78,7 +82,8 @@ impl HDDLAnalyzer {
         }
     }
 
-    pub fn to_json(domain: &Vec<u8>, problem: Option<&Vec<u8>>) -> Result<String, ParsingError> {
+    pub fn to_json_notIR(domain: &Vec<u8>, problem: Option<&Vec<u8>>) -> Result<String, ParsingError> {
+        println!("NOTTTTTTT Converting to JSON");
         let lexer = LexicalAnalyzer::new(&domain);
         let domain_parser = syntactic_analyzer::Parser::new(lexer);
         let domain_ast = domain_parser.parse()?;
@@ -115,5 +120,10 @@ impl HDDLAnalyzer {
             },
             _ => panic!("expected domain, found problem"),
         }
+    }
+
+    pub fn to_json(domain: &Vec<u8>, problem: Option<&Vec<u8>>) -> Result<String, ParsingError> {
+        println!("Converting to JSON");
+        HDDLJsonParser::to_json(domain, problem)
     }
 }
