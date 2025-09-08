@@ -26,7 +26,6 @@ impl HDDLAnalyzer {
         domain: &Vec<u8>,
         problem: Option<&Vec<u8>>,
     ) -> Result<Vec<output::WarningType>, output::ParsingError> {
-        println!("verify");
         let lexer = LexicalAnalyzer::new(&domain);
         let domain_parser = syntactic_analyzer::Parser::new(lexer);
         let domain_ast = domain_parser.parse()?;
@@ -83,7 +82,6 @@ impl HDDLAnalyzer {
     }
 
     pub fn to_json_notIR(domain: &Vec<u8>, problem: Option<&Vec<u8>>) -> Result<String, ParsingError> {
-        println!("NOTTTTTTT Converting to JSON");
         let lexer = LexicalAnalyzer::new(&domain);
         let domain_parser = syntactic_analyzer::Parser::new(lexer);
         let domain_ast = domain_parser.parse()?;
@@ -123,7 +121,7 @@ impl HDDLAnalyzer {
     }
 
     pub fn to_json(domain: &Vec<u8>, problem: Option<&Vec<u8>>) -> Result<String, ParsingError> {
-        println!("Converting to JSON");
-        HDDLJsonParser::to_json(domain, problem)
+        let json_parser = HDDLJsonParser;
+        json_parser.to_json(domain, problem)
     }
 }
