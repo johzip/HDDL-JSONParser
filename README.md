@@ -1,3 +1,10 @@
+USAGE of the JSON parser:
+```cargo build --release```
+
+```target/release/hddl_analyzer.exe to_json path/to/domain.hddl -p path/to/Problem.hddl > path/to/domain_problem_json.json```
+```target/release/hddl_analyzer.exe to_json tests/ipc/AssemblyHierarchical/domain.hddl -p .\tests\ipc\AssemblyHierarchical\genericLinearProblem_depth01.hddl > .\src\AssemblyHierarchical_domain_problem_json.json```
+
+
 An open-source tool for validating planning models specified in the Hierarchical Domain Definition Language (HDDL)[^1] format based on the official HDDL syntax specification and concrete tests (including those pointing to *potential* issues) as proposed by Sleath and Bercher (2023)[^2]. HDDL Parser aims to help domain modelers catch bugs by providing strong type checking, error localization, and ensuring syntactic correctness.
 
 # Detected Errors
