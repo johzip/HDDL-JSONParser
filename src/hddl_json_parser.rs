@@ -111,17 +111,6 @@ impl HDDLJsonParser {
         }
     }
 
-    // Hauptfunktion: Wandelt das Goal-Formula-Feld in JSON um
-    fn goal_to_json<'a>(&self, goal: &Option<Formula<'a>>) -> String {
-        match goal {
-            Some(formula) => {
-                let result = self.tasks_call_to_json(formula);
-                serde_json::to_string_pretty(&result).unwrap()
-            }
-            None => "[]".to_string(),
-        }
-    }
-
 
 }
 
