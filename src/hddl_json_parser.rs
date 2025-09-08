@@ -2,11 +2,11 @@ pub use crate::language_server::RequestHandler;
 
 use std::collections::HashMap;
 
-use serde_json::json;
+use serde_json::{json, Value};
 use crate::lexical_analyzer::LexicalAnalyzer;
 pub use crate::output::{LexicalErrorType, ParsingError, SemanticErrorType, SyntacticError, WarningType};
 use crate::syntactic_analyzer;
-use crate::syntactic_analyzer::{AbstractSyntaxTree, Formula};
+use crate::syntactic_analyzer::{AbstractSyntaxTree, Formula, Predicate};
 
 pub struct HDDLJsonParser;
 
@@ -28,6 +28,7 @@ impl HDDLJsonParser {
                                 None => vec![],
                             };
 
+                            let init = self.init_to_json(p.init_state);
 
                             let json = serde_json::json!({
                             d.name.clone(): {
@@ -38,7 +39,7 @@ impl HDDLJsonParser {
                                     "goal": {
                                         "tasks": goal
                                     },
-                                    "init": p.init_state
+                                    "init": init
                                 },
                                 "domain": {
                                     "name": d.name,
@@ -77,19 +78,17 @@ impl HDDLJsonParser {
         }
     }
 
+    fn init_to_json<'a>(&self, init_state: Vec<Predicate<'a>>) -> Vec<Value> {
+        init_state
+            .iter()
+            .flat_map(|pred| Self::predicate_to_json(pred))
+            .collect()
+    }
+
     fn tasks_call_to_json<'a>(&self, formula: &Formula<'a>) -> Vec<serde_json::Value> {
         match formula {
             Formula::Empty => vec![],
-            Formula::Atom(pred) => {
-                let parameters_json: Vec<_> = pred.variables.iter()
-                    .map(|var| json!({"name": var.name, "type": var.symbol_type.unwrap_or("unknown")}))
-                    .collect();
-                vec![json!({
-                "name": pred.name,
-                "type": "predicate",
-                "parameters": parameters_json
-            })]
-            }
+            Formula::Atom(pred) => Self::predicate_to_json(pred),
             Formula::Not(term) => self.tasks_call_to_json(term.as_ref()),
             Formula::And(terms) | Formula::Or(terms) | Formula::Xor(terms) => {
                 terms.iter().flat_map(|term| self.tasks_call_to_json(term.as_ref())).collect()
@@ -111,12 +110,22 @@ impl HDDLJsonParser {
         }
     }
 
-
+    fn predicate_to_json(pred: &Predicate) -> Vec<Value> {
+        let parameters_json: Vec<_> = pred.variables.iter()
+            .map(|var| json!({"name": var.name, "type": var.symbol_type.unwrap_or("unknown")}))
+            .collect();
+        vec![json!({
+                "name": pred.name,
+                "type": "predicate",
+                "parameters": parameters_json
+            })]
+    }
 }
 
 //Problem:
 //TODO: Atom: replace with hpdl style
 //TODO: remove lineNumbers
+//TODO: parameter always has type unknown so maby just remove it
 //TODO: parameter instead of variable in goal - DONE
 
 //Domain:
