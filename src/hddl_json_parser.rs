@@ -81,9 +81,30 @@ impl HDDLJsonParser {
     fn init_to_json<'a>(&self, init_state: Vec<Predicate<'a>>) -> Vec<Value> {
         init_state
             .iter()
-            .flat_map(|pred| Self::predicate_to_json(pred))
+            .map(|pred| {
+                let parameters_json: Vec<_> = pred.variables.iter()
+                    .map(|var| json!(var.name))
+                    .collect();
+                json!({
+                "name": pred.name,
+                "type": "predicate",
+                "parameters": parameters_json
+            })
+            })
             .collect()
     }
+
+    fn predicate_to_json_for_init(pred: &Predicate) -> Vec<Value> {
+        let parameters_json: Vec<_> = pred.variables.iter()
+            .map(|var| json!(var.name))
+            .collect();
+        vec![json!({
+                "name": pred.name,
+                "type": "predicate",
+                "parameters": parameters_json
+            })]
+    }
+
 
     fn tasks_call_to_json<'a>(&self, formula: &Formula<'a>) -> Vec<serde_json::Value> {
         match formula {
@@ -110,9 +131,10 @@ impl HDDLJsonParser {
         }
     }
 
+
     fn predicate_to_json(pred: &Predicate) -> Vec<Value> {
         let parameters_json: Vec<_> = pred.variables.iter()
-            .map(|var| json!(var.name))
+            .map(|var| json!({"name": var.name, "type": var.symbol_type.unwrap_or("unknown")}))
             .collect();
         vec![json!({
                 "name": pred.name,
@@ -123,12 +145,13 @@ impl HDDLJsonParser {
 }
 
 //Problem:
-//TODO: Atom: replace with hpdl style
-//TODO: remove lineNumbers
-//TODO: parameter always has type unknown so maby just remove it
+//TODO: Atom: replace with hpdl style -Done
+//TODO: remove lineNumbers -Done
+//TODO: parameter always has type unknown so maby just remove it - Done
 //TODO: parameter instead of variable in goal - DONE
 
 //Domain:
+//TODO: remove lineNumbers
 //TODO: primitive_tasks name only string
 //TODO: primitive_tasks parameters instead of params
 //TODO: primitive_tasks parameters change symbol_type to type
