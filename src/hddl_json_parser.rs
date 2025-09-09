@@ -127,10 +127,34 @@ impl HDDLJsonParser {
         match formula {
             Formula::Empty => vec![],
             Formula::Atom(pred) => self.predicate_to_json(pred),
-            Formula::Not(term) => self.tasks_call_to_json(term.as_ref()),
-            Formula::And(terms) | Formula::Or(terms) | Formula::Xor(terms) => {
-                terms.iter().flat_map(|term| self.tasks_call_to_json(term.as_ref())).collect()
-            }
+            Formula::And(terms) => {
+                if terms.len() == 2 {
+                    vec!{json!({
+                        "type": "and",
+                        "left": self.tasks_call_to_json(&terms[0]),
+                        "right": self.tasks_call_to_json(&terms[1])
+                    })}
+                } else {
+                    vec![json!({
+                        "type": "and",
+                        "expression": terms.iter().flat_map(|t| self.tasks_call_to_json(t)).collect::<Vec<_>>()
+                    })]
+                }
+            },
+            Formula::Or(terms) =>  vec!{json!({
+                "type": "or",
+                "left": self.tasks_call_to_json(&terms[0]),
+                "right": self.tasks_call_to_json(&terms[1])
+            })},
+            Formula::Not(term) =>  vec!{json!({
+                "type": "not",
+                "expression": self.tasks_call_to_json(term.as_ref())
+            })},
+           Formula::Xor(terms) =>  vec!{json!({
+                "type": "Xor",
+                "left": self.tasks_call_to_json(&terms[0]),
+                "right": self.tasks_call_to_json(&terms[1])
+            })},
             Formula::Imply(lhs, rhs) => {
                 let mut result = Vec::new();
                 result.extend(lhs.iter().flat_map(|term| self.tasks_call_to_json(term.as_ref())));
@@ -139,52 +163,23 @@ impl HDDLJsonParser {
             }
             Formula::Exists(_, term) | Formula::ForAll(_, term) => self.tasks_call_to_json(term.as_ref()),
             Formula::Equals(left, right) => {
-                vec![json!({
+                vec!{json!({
                 "type": "equals",
                 "left": left,
                 "right": right
-            })]
+            })}
             }
-        }
-    }
-
-    // This Method is a placeholder for future use if more complex formulas are needed
-    fn formula_to_json<'a>(&self, formula: &Formula<'a>) -> Value {
-        match formula {
-            Formula::Atom(pred) => json!({
-            "type": "atomic",
-            "predicate": pred.name,
-            "parameters": pred.variables.iter().map(|var| json!({
-                "name": var.name,
-                "type": var.symbol_type.unwrap_or("unknown")
-            })).collect::<Vec<_>>()
-        }),
-            Formula::And(terms) => json!({
-            "type": "and",
-            "left": self.formula_to_json(&terms[0]),
-            "right": self.formula_to_json(&terms[1])
-        }),
-            Formula::Or(terms) => json!({
-            "type": "or",
-            "left": self.formula_to_json(&terms[0]),
-            "right": self.formula_to_json(&terms[1])
-        }),
-            Formula::Not(term) => json!({
-            "type": "not",
-            "term": self.formula_to_json(term.as_ref())
-        }),
-            _ => json!("unsupported")
         }
     }
 
 
     fn predicate_to_json(&self, pred: &Predicate) -> Vec<Value> {
         let parameters_json = self.parameters_to_json(&pred.variables);
-        vec![json!({
+        vec!{json!({
                 "name": pred.name,
                 "type": "predicate",
                 "parameters": parameters_json
-            })]
+            })}
     }
 
     fn parameters_to_json<'a>(&self, parameters: &Vec<Symbol<'a>>) -> Vec<Value> {
@@ -202,7 +197,8 @@ impl HDDLJsonParser {
 //TODO: parameter instead of variable in goal - DONE
 
 //Domain:
-//TODO: primitive_tasks in effects, the Not and Or are missing
+//TODO: primitive_tasks in effects, the Not and Or are missing - DONE
+//TODO: primitive_tasks effects can be add and del predicate or task call
 //TODO: primitive_tasks remove lineNumbers - DONE
 //TODO: primitive_tasks name only string - DONE
 //TODO: primitive_tasks parameters instead of params - DONE
