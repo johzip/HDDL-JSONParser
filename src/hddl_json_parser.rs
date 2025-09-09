@@ -112,7 +112,7 @@ impl HDDLJsonParser {
 
     fn predicate_to_json(pred: &Predicate) -> Vec<Value> {
         let parameters_json: Vec<_> = pred.variables.iter()
-            .map(|var| json!({"name": var.name, "type": var.symbol_type.unwrap_or("unknown")}))
+            .map(|var| json!(var.name))
             .collect();
         vec![json!({
                 "name": pred.name,
