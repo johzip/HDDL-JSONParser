@@ -1,12 +1,8 @@
-pub use crate::language_server::RequestHandler;
-
-use std::collections::HashMap;
-
 use serde_json::{json, Value};
 use crate::lexical_analyzer::LexicalAnalyzer;
-pub use crate::output::{LexicalErrorType, ParsingError, SemanticErrorType, SyntacticError, WarningType};
+pub use crate::output::{ ParsingError, SemanticErrorType, SyntacticError, WarningType};
 use crate::syntactic_analyzer;
-use crate::syntactic_analyzer::{AbstractSyntaxTree, Formula, Predicate};
+use crate::syntactic_analyzer::{AbstractSyntaxTree, Formula, Predicate, Action, Symbol};
 
 pub struct HDDLJsonParser;
 
@@ -30,6 +26,8 @@ impl HDDLJsonParser {
 
                             let init = self.init_to_json(p.init_state);
 
+                            let primitive = self.actions_to_json(d.actions);
+
                             let json = serde_json::json!({
                             d.name.clone(): {
                                 "requirements": [
@@ -43,8 +41,8 @@ impl HDDLJsonParser {
                                 },
                                 "domain": {
                                     "name": d.name,
-                                    "primitive_tasks": d.actions,
-                                    "compund_tasks": [
+                                    "primitive_tasks": primitive,
+                                    "compound_tasks": [
                                             d.compound_tasks,
                                             d.methods
                                         ]
@@ -67,7 +65,7 @@ impl HDDLJsonParser {
                         "domain": {
                             "name": d.name,
                             "primitive_tasks": d.methods,
-                            "compund_tasks": d.compound_tasks
+                            "compound_tasks": d.compound_tasks
                         }
                     }
                 });
@@ -76,6 +74,37 @@ impl HDDLJsonParser {
             },
             _ => panic!("expected domain, found problem"),
         }
+    }
+
+    fn actions_to_json<'a>(&self, actions: Vec<Action<'a>>) -> Vec<Value> {
+        actions
+            .iter()
+            .map(|action| {
+
+                let parameters_json: Vec<_> = action.parameters.iter()
+                    .map(|var| json!({
+                    "name": var.name,
+                    "type": var.symbol_type.unwrap_or("unknown")
+                }))
+                    .collect();
+
+                let precondition_json = match &action.preconditions {
+                    Some(formula) => self.tasks_call_to_json(formula),
+                    None => vec![],
+                };
+                let effect_json = match &action.effects {
+                    Some(formula) => self.tasks_call_to_json(formula),
+                    None => vec![],
+                };
+
+                json!({
+                "name": action.name,
+                "parameters": parameters_json,
+                "precondition": precondition_json,
+                "effect": effect_json
+            })
+            })
+            .collect()
     }
 
     fn init_to_json<'a>(&self, init_state: Vec<Predicate<'a>>) -> Vec<Value> {
@@ -94,22 +123,10 @@ impl HDDLJsonParser {
             .collect()
     }
 
-    fn predicate_to_json_for_init(pred: &Predicate) -> Vec<Value> {
-        let parameters_json: Vec<_> = pred.variables.iter()
-            .map(|var| json!(var.name))
-            .collect();
-        vec![json!({
-                "name": pred.name,
-                "type": "predicate",
-                "parameters": parameters_json
-            })]
-    }
-
-
     fn tasks_call_to_json<'a>(&self, formula: &Formula<'a>) -> Vec<serde_json::Value> {
         match formula {
             Formula::Empty => vec![],
-            Formula::Atom(pred) => Self::predicate_to_json(pred),
+            Formula::Atom(pred) => self.predicate_to_json(pred),
             Formula::Not(term) => self.tasks_call_to_json(term.as_ref()),
             Formula::And(terms) | Formula::Or(terms) | Formula::Xor(terms) => {
                 terms.iter().flat_map(|term| self.tasks_call_to_json(term.as_ref())).collect()
@@ -131,16 +148,50 @@ impl HDDLJsonParser {
         }
     }
 
+    // This Method is a placeholder for future use if more complex formulas are needed
+    fn formula_to_json<'a>(&self, formula: &Formula<'a>) -> Value {
+        match formula {
+            Formula::Atom(pred) => json!({
+            "type": "atomic",
+            "predicate": pred.name,
+            "parameters": pred.variables.iter().map(|var| json!({
+                "name": var.name,
+                "type": var.symbol_type.unwrap_or("unknown")
+            })).collect::<Vec<_>>()
+        }),
+            Formula::And(terms) => json!({
+            "type": "and",
+            "left": self.formula_to_json(&terms[0]),
+            "right": self.formula_to_json(&terms[1])
+        }),
+            Formula::Or(terms) => json!({
+            "type": "or",
+            "left": self.formula_to_json(&terms[0]),
+            "right": self.formula_to_json(&terms[1])
+        }),
+            Formula::Not(term) => json!({
+            "type": "not",
+            "term": self.formula_to_json(term.as_ref())
+        }),
+            _ => json!("unsupported")
+        }
+    }
 
-    fn predicate_to_json(pred: &Predicate) -> Vec<Value> {
-        let parameters_json: Vec<_> = pred.variables.iter()
-            .map(|var| json!({"name": var.name, "type": var.symbol_type.unwrap_or("unknown")}))
-            .collect();
+
+    fn predicate_to_json(&self, pred: &Predicate) -> Vec<Value> {
+        let parameters_json = self.parameters_to_json(&pred.variables);
         vec![json!({
                 "name": pred.name,
                 "type": "predicate",
                 "parameters": parameters_json
             })]
+    }
+
+    fn parameters_to_json<'a>(&self, parameters: &Vec<Symbol<'a>>) -> Vec<Value> {
+        parameters
+            .iter()
+            .map(|var| json!({"name": var.name, "type": var.symbol_type.unwrap_or("unknown")}))
+            .collect()
     }
 }
 
@@ -151,11 +202,13 @@ impl HDDLJsonParser {
 //TODO: parameter instead of variable in goal - DONE
 
 //Domain:
-//TODO: remove lineNumbers
-//TODO: primitive_tasks name only string
-//TODO: primitive_tasks parameters instead of params
-//TODO: primitive_tasks parameters change symbol_type to type
-//TODO: primitive_tasks check precondition (null might be bug)
+//TODO: primitive_tasks in effects, the Not and Or are missing
+//TODO: primitive_tasks remove lineNumbers - DONE
+//TODO: primitive_tasks name only string - DONE
+//TODO: primitive_tasks parameters instead of params - DONE
+//TODO: primitive_tasks parameters change symbol_type to type - DONE
+//TODO: primitive_tasks check precondition (null might be bug) - DONE
+
 //TODO: compundtask and primitive task might be switched up (methods are compund tasks
 //TODO: split up tn into ordering and subtasks
 //TODO: what is tn in method? and what are its contents
