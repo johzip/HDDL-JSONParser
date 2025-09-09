@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 use crate::lexical_analyzer::LexicalAnalyzer;
 pub use crate::output::{ ParsingError, SemanticErrorType, SyntacticError, WarningType};
 use crate::syntactic_analyzer;
-use crate::syntactic_analyzer::{AbstractSyntaxTree, Formula, Predicate, Action, Symbol};
+use crate::syntactic_analyzer::{Subtask, HTN, Method, Task, AbstractSyntaxTree, Formula, Predicate, Action, Symbol};
 
 pub struct HDDLJsonParser;
 
@@ -13,10 +13,12 @@ impl HDDLJsonParser {
         let domain_ast = domain_parser.parse()?;
         match domain_ast {
             AbstractSyntaxTree::Domain(d) => match problem {
+
                 Some(p) => {
                     let lexer = LexicalAnalyzer::new(p);
                     let problem_parser = syntactic_analyzer::Parser::new(lexer);
                     let problem_ast = problem_parser.parse()?;
+
                     match problem_ast {
                         AbstractSyntaxTree::Problem(p) => {
                             let goal = match &p.goal {
@@ -25,14 +27,12 @@ impl HDDLJsonParser {
                             };
 
                             let init = self.init_to_json(p.init_state);
-
                             let primitive = self.actions_to_json(d.actions);
+                            let compound = self.compound_tasks_to_json(d.compound_tasks, d.methods);
 
                             let json = serde_json::json!({
                             d.name.clone(): {
-                                "requirements": [
-                                    d.requirements
-                                ],
+                                "requirements": d.requirements,
                                 "problem": {
                                     "goal": {
                                         "tasks": goal
@@ -42,10 +42,7 @@ impl HDDLJsonParser {
                                 "domain": {
                                     "name": d.name,
                                     "primitive_tasks": primitive,
-                                    "compound_tasks": [
-                                            d.compound_tasks,
-                                            d.methods
-                                        ]
+                                    "compound_tasks": compound
                                 }
                             }
                         });
@@ -56,16 +53,15 @@ impl HDDLJsonParser {
                 }
                 None => {
                     // only Domain, Problem is missing
+                    let primitive = self.actions_to_json(d.actions);
+                    let compound = self.compound_tasks_to_json(d.compound_tasks, d.methods);
                     let json = serde_json::json!({
                     d.name.clone(): {
-                        "requirements": [
-                            "strips",
-                            "typing"
-                        ],
+                        "requirements": d.requirements,
                         "domain": {
                             "name": d.name,
-                            "primitive_tasks": d.methods,
-                            "compound_tasks": d.compound_tasks
+                            "primitive_tasks": primitive,
+                            "compound_tasks": compound
                         }
                     }
                 });
@@ -74,6 +70,53 @@ impl HDDLJsonParser {
             },
             _ => panic!("expected domain, found problem"),
         }
+    }
+
+    fn compound_tasks_to_json<'a>(
+        &self,
+        compound_tasks: Vec<Task<'a>>,
+        methods: Vec<Method<'a>>
+    ) -> Vec<Value> {
+        compound_tasks
+            .iter()
+            .map(|task| {
+                let related_methods: Vec<_> = methods
+                    .iter()
+                    .filter(|m| m.task.name == task.name)
+                    .map(|m| {
+                        json!({
+                            "name": m.name.name,
+                            "precondition": match &m.precondition {
+                                Some(formula) => self.tasks_call_to_json(formula),
+                                None => vec![],
+                            },
+                            "tasks":  self.subtasks_to_json(&m.tn.subtasks)
+                        }
+                    )
+                    })
+                    .collect();
+
+                json!({
+                    "name": task.name,
+                    "parameters": self.parameters_to_json(&task.parameters),
+                    "methods": related_methods
+                })
+            })
+            .collect()
+    }
+
+    fn subtasks_to_json<'a>(&self, subtasks: &Vec<Subtask<'a>>) -> Vec<Value> {
+        subtasks
+            .iter()
+            .map(|subtask| {
+                let parameters_json = self.parameters_to_json(&subtask.terms);
+                json!({
+                "name": subtask.task.name,
+                "type": "predicate",
+                "parameters": parameters_json
+            })
+            })
+            .collect()
     }
 
     fn actions_to_json<'a>(&self, actions: Vec<Action<'a>>) -> Vec<Value> {
@@ -190,27 +233,6 @@ impl HDDLJsonParser {
     }
 }
 
-//Problem:
-//TODO: Atom: replace with hpdl style -Done
-//TODO: remove lineNumbers -Done
-//TODO: parameter always has type unknown so maby just remove it - Done
-//TODO: parameter instead of variable in goal - DONE
-
-//Domain:
-//TODO: primitive_tasks in effects, the Not and Or are missing - DONE
-//TODO: primitive_tasks effects can be add and del predicate or task call
-//TODO: primitive_tasks remove lineNumbers - DONE
-//TODO: primitive_tasks name only string - DONE
-//TODO: primitive_tasks parameters instead of params - DONE
-//TODO: primitive_tasks parameters change symbol_type to type - DONE
-//TODO: primitive_tasks check precondition (null might be bug) - DONE
-
-//TODO: compundtask and primitive task might be switched up (methods are compund tasks
-//TODO: split up tn into ordering and subtasks
-//TODO: what is tn in method? and what are its contents
-//TODO: task and task term merge into taskcall (hpdl methods)
-
-//TODO: actions are missing intierly
+//TODO: ordering of subtasks
 //TODO: requirements -> Problem -> Domain
-//Questions:
-// what is de difference between task and subtasks inside a method?
+// one example of JSON output beeing unordered I think all are in the exactly wrong order
