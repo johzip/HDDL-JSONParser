@@ -32,7 +32,6 @@ impl HDDLJsonParser {
 
                             let json = serde_json::json!({
                             d.name.clone(): {
-                                "requirements": d.requirements,
                                 "problem": {
                                     "goal": {
                                         "tasks": goal
@@ -40,6 +39,7 @@ impl HDDLJsonParser {
                                     "init": init
                                 },
                                 "domain": {
+                                    "requirements": d.requirements,
                                     "name": d.name,
                                     "primitive_tasks": primitive,
                                     "compound_tasks": compound
@@ -57,8 +57,8 @@ impl HDDLJsonParser {
                     let compound = self.compound_tasks_to_json(d.compound_tasks, d.methods);
                     let json = serde_json::json!({
                     d.name.clone(): {
-                        "requirements": d.requirements,
                         "domain": {
+                            "requirements": d.requirements,
                             "name": d.name,
                             "primitive_tasks": primitive,
                             "compound_tasks": compound
@@ -154,9 +154,7 @@ impl HDDLJsonParser {
         init_state
             .iter()
             .map(|pred| {
-                let parameters_json: Vec<_> = pred.variables.iter()
-                    .map(|var| json!(var.name))
-                    .collect();
+                let parameters_json = self.parameters_to_json(&pred.variables);
                 json!({
                 "name": pred.name,
                 "type": "predicate",
