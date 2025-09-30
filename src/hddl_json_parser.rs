@@ -80,10 +80,12 @@ impl HDDLJsonParser {
         compound_tasks
             .iter()
             .map(|task| {
+                let mut method_params: Vec<Symbol<'a>> = vec![];
                 let related_methods: Vec<_> = methods
                     .iter()
                     .filter(|m| m.task.name == task.name)
                     .map(|m| {
+                        method_params.extend(m.params.iter().cloned());
                         json!({
                             "name": m.name.name,
                             "precondition": match &m.precondition {
@@ -95,10 +97,12 @@ impl HDDLJsonParser {
                     )
                     })
                     .collect();
-
+                method_params.extend(task.parameters.iter().cloned());
+                method_params.sort_by_key(|s| s.name);
+                method_params.dedup_by_key(|s| s.name);
                 json!({
                     "name": task.name,
-                    "parameters": self.parameters_to_json(&task.parameters),
+                    "parameters": self.parameters_to_json(&method_params),
                     "methods": related_methods
                 })
             })
