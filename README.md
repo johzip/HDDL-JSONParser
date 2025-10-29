@@ -1,7 +1,9 @@
 USAGE of the JSON parser:
 ```cargo build --release```
 
-```target/release/hddl_analyzer.exe to_json path/to/domain.hddl -p path/to/Problem.hddl > path/to/domain_problem_json.json```
+```target/release/hddl_analyzer.exe to_json path/to/domain.hddl -p path/to/Problem.hddl > path/to/domain_problem_json.json``` 
+
+Example:
 ```target/release/hddl_analyzer.exe to_json tests/ipc/AssemblyHierarchical/domain.hddl -p .\tests\ipc\AssemblyHierarchical\genericLinearProblem_depth01.hddl > .\src\AssemblyHierarchical_domain_problem_json.json```
 
 
