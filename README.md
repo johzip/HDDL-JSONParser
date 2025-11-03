@@ -11,10 +11,10 @@ Example:
 
 
 ## changed files:
-src/JSONParser.scala - contains the JSON parser implementation.
-src/lib.rs - tojson methode calls new Parser
-src/Blocks_domain_problem_json.json - example json IR
-src/AssemblyHierarchical_domain_problem_json.json - example json IR
+- src/JSONParser.scala - contains the JSON parser implementation.
+- src/lib.rs - tojson methode calls new Parser
+- src/Blocks_domain_problem_json.json - example json IR
+- src/AssemblyHierarchical_domain_problem_json.json - example json IR
 
 --------------------------------------------------------------------------
 
