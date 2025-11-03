@@ -1,0 +1,5487 @@
+{
+  "domain": {
+    "name": "verkabelung",
+    "types": [
+      {
+        "name": "Port",
+        "name_pos": {
+          "line": 4
+        },
+        "symbol_type": "Object",
+        "type_pos": {
+          "line": 4
+        }
+      },
+      {
+        "name": "AbstractDevice",
+        "name_pos": {
+          "line": 4
+        },
+        "symbol_type": "Object",
+        "type_pos": {
+          "line": 4
+        }
+      },
+      {
+        "name": "AbstractCable",
+        "name_pos": {
+          "line": 5
+        },
+        "symbol_type": "AbstractDevice",
+        "type_pos": {
+          "line": 5
+        }
+      },
+      {
+        "name": "Device",
+        "name_pos": {
+          "line": 5
+        },
+        "symbol_type": "AbstractDevice",
+        "type_pos": {
+          "line": 5
+        }
+      },
+      {
+        "name": "Cable",
+        "name_pos": {
+          "line": 6
+        },
+        "symbol_type": "AbstractCable",
+        "type_pos": {
+          "line": 6
+        }
+      },
+      {
+        "name": "Adapter",
+        "name_pos": {
+          "line": 6
+        },
+        "symbol_type": "AbstractCable",
+        "type_pos": {
+          "line": 6
+        }
+      },
+      {
+        "name": "PlugType",
+        "name_pos": {
+          "line": 7
+        },
+        "symbol_type": "Enum",
+        "type_pos": {
+          "line": 7
+        }
+      },
+      {
+        "name": "PlugFace",
+        "name_pos": {
+          "line": 7
+        },
+        "symbol_type": "Enum",
+        "type_pos": {
+          "line": 7
+        }
+      },
+      {
+        "name": "PlugDirection",
+        "name_pos": {
+          "line": 7
+        },
+        "symbol_type": "Enum",
+        "type_pos": {
+          "line": 7
+        }
+      },
+      {
+        "name": "SignalType",
+        "name_pos": {
+          "line": 7
+        },
+        "symbol_type": "Enum",
+        "type_pos": {
+          "line": 7
+        }
+      }
+    ],
+    "constants": [
+      {
+        "name": "male",
+        "name_pos": {
+          "line": 11
+        },
+        "symbol_type": "PlugFace",
+        "type_pos": {
+          "line": 11
+        }
+      },
+      {
+        "name": "female",
+        "name_pos": {
+          "line": 11
+        },
+        "symbol_type": "PlugFace",
+        "type_pos": {
+          "line": 11
+        }
+      },
+      {
+        "name": "in",
+        "name_pos": {
+          "line": 12
+        },
+        "symbol_type": "PlugDirection",
+        "type_pos": {
+          "line": 12
+        }
+      },
+      {
+        "name": "out",
+        "name_pos": {
+          "line": 12
+        },
+        "symbol_type": "PlugDirection",
+        "type_pos": {
+          "line": 12
+        }
+      },
+      {
+        "name": "both",
+        "name_pos": {
+          "line": 12
+        },
+        "symbol_type": "PlugDirection",
+        "type_pos": {
+          "line": 12
+        }
+      }
+    ],
+    "requirements": [
+      "NegativePreconditions",
+      "TypedObjects",
+      "Hierarchy",
+      "MethodPreconditions"
+    ],
+    "predicates": [
+      {
+        "name": "isPlugType",
+        "name_pos": {
+          "line": 16
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 16
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 16
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 16
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 16
+            }
+          }
+        ]
+      },
+      {
+        "name": "isPlugFace",
+        "name_pos": {
+          "line": 17
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 17
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 17
+            }
+          },
+          {
+            "name": "f",
+            "name_pos": {
+              "line": 17
+            },
+            "symbol_type": "PlugFace",
+            "type_pos": {
+              "line": 17
+            }
+          }
+        ]
+      },
+      {
+        "name": "isPlugDirection",
+        "name_pos": {
+          "line": 18
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 18
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 18
+            }
+          },
+          {
+            "name": "d",
+            "name_pos": {
+              "line": 18
+            },
+            "symbol_type": "PlugDirection",
+            "type_pos": {
+              "line": 18
+            }
+          }
+        ]
+      },
+      {
+        "name": "isSignalSource",
+        "name_pos": {
+          "line": 19
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 19
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 19
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 19
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 19
+            }
+          }
+        ]
+      },
+      {
+        "name": "isSignalDestination",
+        "name_pos": {
+          "line": 20
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 20
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 20
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 20
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 20
+            }
+          }
+        ]
+      },
+      {
+        "name": "isSignalRepeater",
+        "name_pos": {
+          "line": 21
+        },
+        "variables": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 21
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 21
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 21
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 21
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 21
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 21
+            }
+          }
+        ]
+      },
+      {
+        "name": "isPartOf",
+        "name_pos": {
+          "line": 22
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 22
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 22
+            }
+          },
+          {
+            "name": "d",
+            "name_pos": {
+              "line": 22
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 22
+            }
+          }
+        ]
+      },
+      {
+        "name": "isConnected",
+        "name_pos": {
+          "line": 23
+        },
+        "variables": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 23
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 23
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 23
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 23
+            }
+          }
+        ]
+      },
+      {
+        "name": "isOccupied",
+        "name_pos": {
+          "line": 24
+        },
+        "variables": [
+          {
+            "name": "p",
+            "name_pos": {
+              "line": 24
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 24
+            }
+          }
+        ]
+      },
+      {
+        "name": "pGuard",
+        "name_pos": {
+          "line": 25
+        },
+        "variables": []
+      },
+      {
+        "name": "pAim",
+        "name_pos": {
+          "line": 26
+        },
+        "variables": []
+      }
+    ],
+    "compound_tasks": [
+      {
+        "name": "ConnectDevices",
+        "name_pos": {
+          "line": 29
+        },
+        "parameters": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 30
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 30
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 30
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 30
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 30
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 30
+            }
+          }
+        ]
+      },
+      {
+        "name": "ValidateDeviceConnection",
+        "name_pos": {
+          "line": 33
+        },
+        "parameters": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 34
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 34
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 34
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 34
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 34
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 34
+            }
+          }
+        ]
+      },
+      {
+        "name": "ValidatePortConnection",
+        "name_pos": {
+          "line": 37
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 38
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 38
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 38
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 38
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 38
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 38
+            }
+          }
+        ]
+      },
+      {
+        "name": "connect",
+        "name_pos": {
+          "line": 42
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 43
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 43
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 43
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 43
+            }
+          }
+        ]
+      }
+    ],
+    "methods": [
+      {
+        "name": {
+          "name": "c1",
+          "name_pos": {
+            "line": 46
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 48
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 48
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 48
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 47
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 47
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 47
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 47
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 47
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 47
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_1",
+                "name_pos": {
+                  "line": 50
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 50
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 50
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 50
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c2",
+          "name_pos": {
+            "line": 53
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 55
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 55
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 55
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 54
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 54
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 54
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 54
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 54
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 54
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_2",
+                "name_pos": {
+                  "line": 57
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 57
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 57
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 57
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c3",
+          "name_pos": {
+            "line": 60
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 62
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 62
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 62
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 61
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 61
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 61
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 61
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 61
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 61
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_3",
+                "name_pos": {
+                  "line": 64
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 64
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 64
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 64
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c4",
+          "name_pos": {
+            "line": 67
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 69
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 69
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 69
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 68
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 68
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 68
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 68
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 68
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 68
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_4",
+                "name_pos": {
+                  "line": 71
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 71
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 71
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 71
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c5",
+          "name_pos": {
+            "line": 74
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 76
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 76
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 76
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 75
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 75
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 75
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 75
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 75
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 75
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_5",
+                "name_pos": {
+                  "line": 78
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 78
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 78
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 78
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c6",
+          "name_pos": {
+            "line": 81
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 83
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 83
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 83
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 82
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 82
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 82
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 82
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 82
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 82
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_6",
+                "name_pos": {
+                  "line": 85
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 85
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 85
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 85
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c7",
+          "name_pos": {
+            "line": 88
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 90
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 90
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 90
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 89
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 89
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 89
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 89
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 89
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 89
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_7",
+                "name_pos": {
+                  "line": 92
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 92
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 92
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 92
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "c8",
+          "name_pos": {
+            "line": 95
+          }
+        },
+        "task": {
+          "name": "connect",
+          "name_pos": {
+            "line": 97
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 97
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 97
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 96
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 96
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 96
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 96
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 96
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 96
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "connect_8",
+                "name_pos": {
+                  "line": 99
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 99
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 99
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 99
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "m1",
+          "name_pos": {
+            "line": 108
+          }
+        },
+        "task": {
+          "name": "ConnectDevices",
+          "name_pos": {
+            "line": 110
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 110
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 110
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 110
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 109
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 109
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 109
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 109
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 109
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 109
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 109
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 109
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 109
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 109
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": {
+                "name": "t1",
+                "name_pos": {
+                  "line": 112
+                }
+              },
+              "task": {
+                "name": "connect",
+                "name_pos": {
+                  "line": 112
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 112
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 112
+                  }
+                }
+              ]
+            },
+            {
+              "id": {
+                "name": "t2",
+                "name_pos": {
+                  "line": 113
+                }
+              },
+              "task": {
+                "name": "ConnectDevices",
+                "name_pos": {
+                  "line": 113
+                }
+              },
+              "terms": [
+                {
+                  "name": "d1",
+                  "name_pos": {
+                    "line": 113
+                  }
+                },
+                {
+                  "name": "d2",
+                  "name_pos": {
+                    "line": 113
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 113
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": {
+            "line": 115
+          },
+          "orderings": {
+            "Partial": [
+              [
+                "t1",
+                "t2"
+              ]
+            ]
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "m2",
+          "name_pos": {
+            "line": 120
+          }
+        },
+        "task": {
+          "name": "ConnectDevices",
+          "name_pos": {
+            "line": 122
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 122
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 122
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 122
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 121
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 121
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 121
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 121
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 121
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 121
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 121
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 121
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 121
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 121
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": {
+                "name": "t1",
+                "name_pos": {
+                  "line": 124
+                }
+              },
+              "task": {
+                "name": "disconnect",
+                "name_pos": {
+                  "line": 124
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 124
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 124
+                  }
+                }
+              ]
+            },
+            {
+              "id": {
+                "name": "t2",
+                "name_pos": {
+                  "line": 125
+                }
+              },
+              "task": {
+                "name": "ConnectDevices",
+                "name_pos": {
+                  "line": 125
+                }
+              },
+              "terms": [
+                {
+                  "name": "d1",
+                  "name_pos": {
+                    "line": 125
+                  }
+                },
+                {
+                  "name": "d2",
+                  "name_pos": {
+                    "line": 125
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 125
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": {
+            "line": 127
+          },
+          "orderings": {
+            "Partial": [
+              [
+                "t1",
+                "t2"
+              ]
+            ]
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "m3",
+          "name_pos": {
+            "line": 132
+          }
+        },
+        "task": {
+          "name": "ConnectDevices",
+          "name_pos": {
+            "line": 134
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 134
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 134
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 134
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 133
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 133
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 133
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 133
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 133
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 133
+            }
+          }
+        ],
+        "precondition": null,
+        "tn": {
+          "subtasks": [
+            {
+              "id": {
+                "name": "t1",
+                "name_pos": {
+                  "line": 136
+                }
+              },
+              "task": {
+                "name": "guard",
+                "name_pos": {
+                  "line": 136
+                }
+              },
+              "terms": []
+            },
+            {
+              "id": {
+                "name": "t2",
+                "name_pos": {
+                  "line": 137
+                }
+              },
+              "task": {
+                "name": "ValidateDeviceConnection",
+                "name_pos": {
+                  "line": 137
+                }
+              },
+              "terms": [
+                {
+                  "name": "d1",
+                  "name_pos": {
+                    "line": 137
+                  }
+                },
+                {
+                  "name": "d2",
+                  "name_pos": {
+                    "line": 137
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 137
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": {
+            "line": 139
+          },
+          "orderings": {
+            "Partial": [
+              [
+                "t1",
+                "t2"
+              ]
+            ]
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "vDC_to_vPC_1",
+          "name_pos": {
+            "line": 144
+          }
+        },
+        "task": {
+          "name": "ValidateDeviceConnection",
+          "name_pos": {
+            "line": 146
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 146
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 146
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 146
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 145
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 145
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 145
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 145
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 145
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 145
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 145
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 145
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 145
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 145
+            }
+          }
+        ],
+        "precondition": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 148
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 148
+                    }
+                  },
+                  {
+                    "name": "d1",
+                    "name_pos": {
+                      "line": 148
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 149
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 149
+                    }
+                  },
+                  {
+                    "name": "d2",
+                    "name_pos": {
+                      "line": 149
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 150
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 150
+                    }
+                  },
+                  {
+                    "name": "out",
+                    "name_pos": {
+                      "line": 150
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 151
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 151
+                    }
+                  },
+                  {
+                    "name": "in",
+                    "name_pos": {
+                      "line": 151
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalSource",
+                "name_pos": {
+                  "line": 152
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 152
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 152
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalDestination",
+                "name_pos": {
+                  "line": 153
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 153
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 153
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "ValidatePortConnection",
+                "name_pos": {
+                  "line": 156
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 156
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 156
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 156
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "vDC_to_vPC_2",
+          "name_pos": {
+            "line": 159
+          }
+        },
+        "task": {
+          "name": "ValidateDeviceConnection",
+          "name_pos": {
+            "line": 161
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 161
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 161
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 161
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 160
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 160
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 160
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 160
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 160
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 160
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 160
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 160
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 160
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 160
+            }
+          }
+        ],
+        "precondition": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 163
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 163
+                    }
+                  },
+                  {
+                    "name": "d1",
+                    "name_pos": {
+                      "line": 163
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 164
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 164
+                    }
+                  },
+                  {
+                    "name": "d2",
+                    "name_pos": {
+                      "line": 164
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 165
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 165
+                    }
+                  },
+                  {
+                    "name": "out",
+                    "name_pos": {
+                      "line": 165
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 166
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 166
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 166
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalSource",
+                "name_pos": {
+                  "line": 167
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 167
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 167
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalDestination",
+                "name_pos": {
+                  "line": 168
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 168
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 168
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "ValidatePortConnection",
+                "name_pos": {
+                  "line": 171
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 171
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 171
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 171
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "vDC_to_vPC_3",
+          "name_pos": {
+            "line": 174
+          }
+        },
+        "task": {
+          "name": "ValidateDeviceConnection",
+          "name_pos": {
+            "line": 176
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 176
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 176
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 176
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 175
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 175
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 175
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 175
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 175
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 175
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 175
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 175
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 175
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 175
+            }
+          }
+        ],
+        "precondition": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 178
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 178
+                    }
+                  },
+                  {
+                    "name": "d1",
+                    "name_pos": {
+                      "line": 178
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 179
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 179
+                    }
+                  },
+                  {
+                    "name": "d2",
+                    "name_pos": {
+                      "line": 179
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 180
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 180
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 180
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 181
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 181
+                    }
+                  },
+                  {
+                    "name": "in",
+                    "name_pos": {
+                      "line": 181
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalSource",
+                "name_pos": {
+                  "line": 182
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 182
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 182
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalDestination",
+                "name_pos": {
+                  "line": 183
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 183
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 183
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "ValidatePortConnection",
+                "name_pos": {
+                  "line": 186
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 186
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 186
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 186
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "vDC_to_vPC_4",
+          "name_pos": {
+            "line": 190
+          }
+        },
+        "task": {
+          "name": "ValidateDeviceConnection",
+          "name_pos": {
+            "line": 192
+          }
+        },
+        "task_terms": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 192
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 192
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 192
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "d1",
+            "name_pos": {
+              "line": 191
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 191
+            }
+          },
+          {
+            "name": "d2",
+            "name_pos": {
+              "line": 191
+            },
+            "symbol_type": "AbstractDevice",
+            "type_pos": {
+              "line": 191
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 191
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 191
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 191
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 191
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 191
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 191
+            }
+          }
+        ],
+        "precondition": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 194
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 194
+                    }
+                  },
+                  {
+                    "name": "d1",
+                    "name_pos": {
+                      "line": 194
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPartOf",
+                "name_pos": {
+                  "line": 195
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 195
+                    }
+                  },
+                  {
+                    "name": "d2",
+                    "name_pos": {
+                      "line": 195
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 196
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 196
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 196
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 197
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 197
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 197
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalSource",
+                "name_pos": {
+                  "line": 198
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 198
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 198
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalDestination",
+                "name_pos": {
+                  "line": 199
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 199
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 199
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "ValidatePortConnection",
+                "name_pos": {
+                  "line": 202
+                }
+              },
+              "terms": [
+                {
+                  "name": "p1",
+                  "name_pos": {
+                    "line": 202
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 202
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 202
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "vPC_to_vPC",
+          "name_pos": {
+            "line": 206
+          }
+        },
+        "task": {
+          "name": "ValidatePortConnection",
+          "name_pos": {
+            "line": 208
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 208
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 208
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 208
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 207
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 207
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 207
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 207
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 207
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 207
+            }
+          },
+          {
+            "name": "p3",
+            "name_pos": {
+              "line": 207
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 207
+            }
+          },
+          {
+            "name": "p4",
+            "name_pos": {
+              "line": 207
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 207
+            }
+          }
+        ],
+        "precondition": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 210
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 210
+                    }
+                  },
+                  {
+                    "name": "p3",
+                    "name_pos": {
+                      "line": 210
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isSignalRepeater",
+                "name_pos": {
+                  "line": 211
+                },
+                "variables": [
+                  {
+                    "name": "p3",
+                    "name_pos": {
+                      "line": 211
+                    }
+                  },
+                  {
+                    "name": "p4",
+                    "name_pos": {
+                      "line": 211
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 211
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "ValidatePortConnection",
+                "name_pos": {
+                  "line": 214
+                }
+              },
+              "terms": [
+                {
+                  "name": "p4",
+                  "name_pos": {
+                    "line": 214
+                  }
+                },
+                {
+                  "name": "p2",
+                  "name_pos": {
+                    "line": 214
+                  }
+                },
+                {
+                  "name": "t",
+                  "name_pos": {
+                    "line": 214
+                  }
+                }
+              ]
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      },
+      {
+        "name": {
+          "name": "finish",
+          "name_pos": {
+            "line": 218
+          }
+        },
+        "task": {
+          "name": "ValidatePortConnection",
+          "name_pos": {
+            "line": 220
+          }
+        },
+        "task_terms": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 220
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 220
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 220
+            }
+          }
+        ],
+        "params": [
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 219
+            },
+            "symbol_type": "SignalType",
+            "type_pos": {
+              "line": 219
+            }
+          },
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 219
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 219
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 219
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 219
+            }
+          }
+        ],
+        "precondition": {
+          "Atom": {
+            "name": "isConnected",
+            "name_pos": {
+              "line": 221
+            },
+            "variables": [
+              {
+                "name": "p1",
+                "name_pos": {
+                  "line": 221
+                }
+              },
+              {
+                "name": "p2",
+                "name_pos": {
+                  "line": 221
+                }
+              }
+            ]
+          }
+        },
+        "tn": {
+          "subtasks": [
+            {
+              "id": null,
+              "task": {
+                "name": "ok",
+                "name_pos": {
+                  "line": 223
+                }
+              },
+              "terms": []
+            }
+          ],
+          "ordering_pos": null,
+          "orderings": {
+            "Partial": []
+          },
+          "constraints": null
+        }
+      }
+    ],
+    "actions": [
+      {
+        "name": "connect_1",
+        "name_pos": {
+          "line": 227
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 228
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 228
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 228
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 228
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 228
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 228
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 230
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 231
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 231
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 232
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 232
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 233
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 233
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 233
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 234
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 234
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 234
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 235
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 235
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 235
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 236
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 236
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 236
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 237
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 237
+                    }
+                  },
+                  {
+                    "name": "out",
+                    "name_pos": {
+                      "line": 237
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 238
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 238
+                    }
+                  },
+                  {
+                    "name": "in",
+                    "name_pos": {
+                      "line": 238
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 241
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 241
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 241
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 242
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 242
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 243
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 243
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_2",
+        "name_pos": {
+          "line": 246
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 247
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 247
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 247
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 247
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 247
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 247
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 249
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 250
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 250
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 251
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 251
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 252
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 252
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 252
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 253
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 253
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 253
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 254
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 254
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 254
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 255
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 255
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 255
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 256
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 256
+                    }
+                  },
+                  {
+                    "name": "in",
+                    "name_pos": {
+                      "line": 256
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 257
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 257
+                    }
+                  },
+                  {
+                    "name": "out",
+                    "name_pos": {
+                      "line": 257
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 260
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 260
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 260
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 261
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 261
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 262
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 262
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_3",
+        "name_pos": {
+          "line": 265
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 266
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 266
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 266
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 266
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 266
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 266
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 268
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 269
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 269
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 270
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 270
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 271
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 271
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 271
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 272
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 272
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 272
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 273
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 273
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 273
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 274
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 274
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 274
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 275
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 275
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 275
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 278
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 278
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 278
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 279
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 279
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 280
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 280
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_4",
+        "name_pos": {
+          "line": 283
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 284
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 284
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 284
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 284
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 284
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 284
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 286
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 287
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 287
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 288
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 288
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 289
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 289
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 289
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 290
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 290
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 290
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 291
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 291
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 291
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 292
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 292
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 292
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 293
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 293
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 293
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 296
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 296
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 296
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 297
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 297
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 298
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 298
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_5",
+        "name_pos": {
+          "line": 301
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 302
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 302
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 302
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 302
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 302
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 302
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 304
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 305
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 305
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 306
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 306
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 307
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 307
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 307
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 308
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 308
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 308
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 309
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 309
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 309
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 310
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 310
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 310
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 311
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 311
+                    }
+                  },
+                  {
+                    "name": "out",
+                    "name_pos": {
+                      "line": 311
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 312
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 312
+                    }
+                  },
+                  {
+                    "name": "in",
+                    "name_pos": {
+                      "line": 312
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 315
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 315
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 315
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 316
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 316
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 317
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 317
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_6",
+        "name_pos": {
+          "line": 320
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 321
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 321
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 321
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 321
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 321
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 321
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 323
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 324
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 324
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 325
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 325
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 326
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 326
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 326
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 327
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 327
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 327
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 328
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 328
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 328
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 329
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 329
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 329
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 330
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 330
+                    }
+                  },
+                  {
+                    "name": "in",
+                    "name_pos": {
+                      "line": 330
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 331
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 331
+                    }
+                  },
+                  {
+                    "name": "out",
+                    "name_pos": {
+                      "line": 331
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 334
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 334
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 334
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 335
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 335
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 336
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 336
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_7",
+        "name_pos": {
+          "line": 339
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 340
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 340
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 340
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 340
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 340
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 340
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 342
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 343
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 343
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 344
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 344
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 345
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 345
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 345
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 346
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 346
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 346
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 347
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 347
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 347
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 348
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 348
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 348
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 349
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 349
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 349
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 352
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 352
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 352
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 353
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 353
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 354
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 354
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "connect_8",
+        "name_pos": {
+          "line": 357
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 358
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 358
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 358
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 358
+            }
+          },
+          {
+            "name": "t",
+            "name_pos": {
+              "line": 358
+            },
+            "symbol_type": "PlugType",
+            "type_pos": {
+              "line": 358
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 360
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 361
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 361
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 362
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 362
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 363
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 363
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 363
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugType",
+                "name_pos": {
+                  "line": 364
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 364
+                    }
+                  },
+                  {
+                    "name": "t",
+                    "name_pos": {
+                      "line": 364
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 365
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 365
+                    }
+                  },
+                  {
+                    "name": "female",
+                    "name_pos": {
+                      "line": 365
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugFace",
+                "name_pos": {
+                  "line": 366
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 366
+                    }
+                  },
+                  {
+                    "name": "male",
+                    "name_pos": {
+                      "line": 366
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isPlugDirection",
+                "name_pos": {
+                  "line": 367
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 367
+                    }
+                  },
+                  {
+                    "name": "both",
+                    "name_pos": {
+                      "line": 367
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 370
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 370
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 370
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 371
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 371
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Atom": {
+                "name": "isOccupied",
+                "name_pos": {
+                  "line": 372
+                },
+                "variables": [
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 372
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "disconnect",
+        "name_pos": {
+          "line": 376
+        },
+        "parameters": [
+          {
+            "name": "p1",
+            "name_pos": {
+              "line": 377
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 377
+            }
+          },
+          {
+            "name": "p2",
+            "name_pos": {
+              "line": 377
+            },
+            "symbol_type": "Port",
+            "type_pos": {
+              "line": 377
+            }
+          }
+        ],
+        "preconditions": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "pGuard",
+                  "name_pos": {
+                    "line": 379
+                  },
+                  "variables": []
+                }
+              }
+            },
+            {
+              "Atom": {
+                "name": "isConnected",
+                "name_pos": {
+                  "line": 380
+                },
+                "variables": [
+                  {
+                    "name": "p1",
+                    "name_pos": {
+                      "line": 380
+                    }
+                  },
+                  {
+                    "name": "p2",
+                    "name_pos": {
+                      "line": 380
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isConnected",
+                  "name_pos": {
+                    "line": 383
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 383
+                      }
+                    },
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 383
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 384
+                  },
+                  "variables": [
+                    {
+                      "name": "p1",
+                      "name_pos": {
+                        "line": 384
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Not": {
+                "Atom": {
+                  "name": "isOccupied",
+                  "name_pos": {
+                    "line": 385
+                  },
+                  "variables": [
+                    {
+                      "name": "p2",
+                      "name_pos": {
+                        "line": 385
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "guard",
+        "name_pos": {
+          "line": 389
+        },
+        "parameters": [],
+        "preconditions": "Empty",
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "pGuard",
+                "name_pos": {
+                  "line": 393
+                },
+                "variables": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ok",
+        "name_pos": {
+          "line": 397
+        },
+        "parameters": [],
+        "preconditions": {
+          "And": [
+            {
+              "Atom": {
+                "name": "pGuard",
+                "name_pos": {
+                  "line": 400
+                },
+                "variables": []
+              }
+            }
+          ]
+        },
+        "effects": {
+          "And": [
+            {
+              "Atom": {
+                "name": "pAim",
+                "name_pos": {
+                  "line": 403
+                },
+                "variables": []
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
