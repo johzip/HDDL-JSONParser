@@ -16,6 +16,8 @@ src/lib.rs - tojson methode calls new Parser
 src/Blocks_domain_problem_json.json - example json IR
 src/AssemblyHierarchical_domain_problem_json.json - example json IR
 
+--------------------------------------------------------------------------
+
 An open-source tool for validating planning models specified in the Hierarchical Domain Definition Language (HDDL)[^1] format based on the official HDDL syntax specification and concrete tests (including those pointing to *potential* issues) as proposed by Sleath and Bercher (2023)[^2]. HDDL Parser aims to help domain modelers catch bugs by providing strong type checking, error localization, and ensuring syntactic correctness.
 
 # Detected Errors
